@@ -17,7 +17,7 @@ export default function HomePage() {
     },
     {
       title: "審查專區",
-      description: "審查醫學會提交的填報文件與容額申請",
+      description: "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684\u586B\u5831\u6587\u4EF6\u8207\u5BB9\u984D\u7533\u8ACB",
       icon: ClipboardCheck,
       color: "bg-green-500",
       pages: [
