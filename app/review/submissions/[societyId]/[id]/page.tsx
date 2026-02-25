@@ -126,9 +126,9 @@ interface Edit {
 export default function SubmissionReviewDetailPage({
   params,
 }: {
-  params: { category: string; id: string }
+  params: { societyId: string; id: string }
 }) {
-  const { category, id } = params
+  const { societyId, id } = params
   const [stage, setStage] = useState("reviewing")
   const [comments, setComments] = useState<Comment[]>([])
   const [edits, setEdits] = useState<Edit[]>([])
@@ -152,7 +152,7 @@ export default function SubmissionReviewDetailPage({
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: number }>>([])
   const [announcementSummary, setAnnouncementSummary] = useState("")
 
-  const docInfo = documentTypeInfo[category]
+  const docInfo = documentTypeInfo[societyId]
   const society = mockSocieties.find((s) => s.id === id)
 
   if (!docInfo || !society) {
@@ -784,7 +784,7 @@ export default function SubmissionReviewDetailPage({
                       <div className="text-sm font-medium">醫策會分組會議</div>
                       <div className="text-xs text-gray-500 mt-1">2025-01-22 10:00</div>
                       <div className="text-sm text-gray-700 mt-2">
-                        經分組會議討論，委員一致認為訓練計畫符合標準，建議送交 RRC 大會審議。
+                        經分組會議討論，委員一致���為訓練計畫符合標準，建議送交 RRC 大會審議。
                       </div>
                     </div>
                   )}

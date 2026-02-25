@@ -1,76 +1,90 @@
+"use client"
+
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator } from "lucide-react"
 
-export default function HomePage() {
+const DynamicHomePage = dynamic(() => Promise.resolve(HomePage), {
+  ssr: false,
+})
+
+export default DynamicHomePage
+
+function HomePage() {
+  const reviewDescription = [
+    "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684",
+    "\u586B\u5831\u6587\u4EF6\u8207\u5BB9\u984D\u7533\u8ACB",
+  ].join("")
+
   const modules = [
     {
-      title: "帳號管理",
-      description: "管理使用者帳號、權限設定與個人資料",
+      title: "\u5E33\u865F\u7BA1\u7406",
+      description: "\u7BA1\u7406\u4F7F\u7528\u8005\u5E33\u865F\u3001\u6B0A\u9650\u8A2D\u5B9A\u8207\u500B\u4EBA\u8CC7\u6599",
       icon: Users,
       color: "bg-blue-500",
       pages: [
-        { name: "個人設定", href: "/account/personal", description: "管理個人資料、密碼與通知設定" },
-        { name: "使用者管理列表", href: "/account/users", description: "檢視與管理系統使用者" },
-        { name: "角色模板管理", href: "/account/role-templates", description: "管理權限角色模板" },
+        { name: "\u500B\u4EBA\u8A2D\u5B9A", href: "/account/personal", description: "\u7BA1\u7406\u500B\u4EBA\u8CC7\u6599\u3001\u5BC6\u78BC\u8207\u901A\u77E5\u8A2D\u5B9A" },
+        { name: "\u4F7F\u7528\u8005\u7BA1\u7406\u5217\u8868", href: "/account/users", description: "\u6AA2\u8996\u8207\u7BA1\u7406\u7CFB\u7D71\u4F7F\u7528\u8005" },
+        { name: "\u89D2\u8272\u6A21\u677F\u7BA1\u7406", href: "/account/role-templates", description: "\u7BA1\u7406\u6B0A\u9650\u89D2\u8272\u6A21\u677F" },
       ],
     },
     {
-      title: "審查專區",
-      description: "審查醫學會提交的填報文件與容額申請",
+      title: "\u5BE9\u67E5\u5C08\u5340",
+      description: reviewDescription,
       icon: ClipboardCheck,
       color: "bg-green-500",
       pages: [
-        { name: "填報審查", href: "/review/submissions", description: "審查醫學會提交的五份填報文件" },
-        { name: "醫院容額分配審查", href: "/review/hospital-quota", description: "審查醫院容額分配申請" },
-        { name: "外加容額審查", href: "/review/additional-quota", description: "審查外加容額申請" },
+        { name: "\u586B\u5831\u5BE9\u67E5", href: "/review/submissions", description: "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684\u4E94\u4EFD\u586B\u5831\u6587\u4EF6" },
+        { name: "\u91AB\u9662\u5BB9\u984D\u5206\u914D\u5BE9\u67E5", href: "/review/hospital-quota", description: "\u5BE9\u67E5\u91AB\u9662\u5BB9\u984D\u5206\u914D\u7533\u8ACB" },
+        { name: "\u5916\u52A0\u5BB9\u984D\u5BE9\u67E5", href: "/review/additional-quota", description: "\u5BE9\u67E5\u5916\u52A0\u5BB9\u984D\u7533\u8ACB" },
       ],
     },
     {
-      title: "統計專區",
-      description: "檢視系統統計數據與匯出報表",
+      title: "\u7D71\u8A08\u5C08\u5340",
+      description: "\u6AA2\u8996\u7CFB\u7D71\u7D71\u8A08\u6578\u64DA\u8207\u532F\u51FA\u5831\u8868",
       icon: BarChart3,
       color: "bg-indigo-500",
       pages: [
-        { name: "統計儀表板", href: "/statistics", description: "檢視整體統計數據與視覺化圖表" },
-        { name: "文件檢索", href: "/document-archive", description: "搜尋與管理系統中的所有文件" },
+        { name: "\u7D71\u8A08\u5100\u8868\u677F", href: "/statistics", description: "\u6AA2\u8996\u6574\u9AD4\u7D71\u8A08\u6578\u64DA\u8207\u8996\u89BA\u5316\u5716\u8868" },
+        { name: "\u6587\u4EF6\u6AA2\u7D22", href: "/document-archive", description: "\u641C\u5C0B\u8207\u7BA1\u7406\u7CFB\u7D71\u4E2D\u7684\u6240\u6709\u6587\u4EF6" },
       ],
     },
     {
-      title: "工具專區",
-      description: "提供審查作業所需的輔助工具",
+      title: "\u5DE5\u5177\u5C08\u5340",
+      description: "\u63D0\u4F9B\u5BE9\u67E5\u4F5C\u696D\u6240\u9700\u7684\u8F14\u52A9\u5DE5\u5177",
       icon: Calculator,
       color: "bg-teal-500",
       pages: [
         {
-          name: "容額分配試算",
+          name: "\u5BB9\u984D\u5206\u914D\u8A66\u7B97",
           href: "/tools/quota-calculator",
-          description: "協助分組審查與 RRC 大會進行容額分配討論",
+          description: "\u5354\u52A9\u5206\u7D44\u5BE9\u67E5\u8207 RRC \u5927\u6703\u9032\u884C\u5BB9\u984D\u5206\u914D\u8A0E\u8AD6",
         },
       ],
     },
     {
-      title: "公告管理",
-      description: "管理系統公告的新增、編輯、發布與下架",
+      title: "\u516C\u544A\u7BA1\u7406",
+      description: "\u7BA1\u7406\u7CFB\u7D71\u516C\u544A\u7684\u65B0\u589E\u3001\u7DE8\u8F2F\u3001\u767C\u5E03\u8207\u4E0B\u67B6",
       icon: Megaphone,
       color: "bg-orange-500",
-      pages: [{ name: "公告管理", href: "/announcement-management", description: "管理公告的新增、編輯、發布與下架" }],
+      pages: [{ name: "\u516C\u544A\u7BA1\u7406", href: "/announcement-management", description: "\u7BA1\u7406\u516C\u544A\u7684\u65B0\u589E\u3001\u7DE8\u8F2F\u3001\u767C\u5E03\u8207\u4E0B\u67B6" }],
     },
     {
-      title: "公告欄",
-      description: "檢視系統最新公告與重要消息",
+      title: "\u516C\u544A\u6B04",
+      description: "\u6AA2\u8996\u7CFB\u7D71\u6700\u65B0\u516C\u544A\u8207\u91CD\u8981\u6D88\u606F",
       icon: Globe,
       color: "bg-purple-500",
-      pages: [{ name: "公告列表", href: "/announcements", description: "瀏覽專科訓練認定、外加容額與甄審公告" }],
+      pages: [{ name: "\u516C\u544A\u5217\u8868", href: "/announcements", description: "\u700F\u89BD\u5C08\u79D1\u8A13\u7DF4\u8A8D\u5B9A\u3001\u5916\u52A0\u5BB9\u984D\u8207\u7504\u5BE9\u516C\u544A" }],
     },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">醫事司五科系統</h1>
-          <p className="text-gray-600">選擇功能模組開始使用</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{"\u91AB\u4E8B\u53F8\u4E94\u79D1\u7CFB\u7D71"}</h1>
+          <p className="text-gray-600">{"\u9078\u64C7\u529F\u80FD\u6A21\u7D44\u958B\u59CB\u4F7F\u7528"}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -111,7 +125,7 @@ export default function HomePage() {
 
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>提示：</strong>這是暫時性的導覽介面，正式版本將由其他團隊成員設計完整的導覽系統。
+            <strong>{"\u63D0\u793A\uFF1A"}</strong>{"\u9019\u662F\u66AB\u6642\u6027\u7684\u5C0E\u89BD\u4ECB\u9762\uFF0C\u6B63\u5F0F\u7248\u672C\u5C07\u7531\u5176\u4ED6\u5718\u968A\u6210\u54E1\u8A2D\u8A08\u5B8C\u6574\u7684\u5C0E\u89BD\u7CFB\u7D71\u3002"}
           </p>
         </div>
       </div>
