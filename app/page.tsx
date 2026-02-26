@@ -38,6 +38,7 @@ function HomePage() {
         { name: "\u586B\u5831\u5BE9\u67E5", href: "/review/submissions", description: "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684\u4E94\u4EFD\u586B\u5831\u6587\u4EF6" },
         { name: "\u91AB\u9662\u5BB9\u984D\u5206\u914D\u5BE9\u67E5", href: "/review/hospital-quota", description: "\u5BE9\u67E5\u91AB\u9662\u5BB9\u984D\u5206\u914D\u7533\u8ACB" },
         { name: "\u5916\u52A0\u5BB9\u984D\u5BE9\u67E5", href: "/review/additional-quota", description: "\u5BE9\u67E5\u5916\u52A0\u5BB9\u984D\u7533\u8ACB" },
+        { name: "\u586B\u5831\u6587\u4EF6\u5927\u7DB1", href: "/review/outline-management", description: "\u7BA1\u7406\u586B\u5831\u6587\u4EF6\u7684\u5927\u7DB1\u7D50\u69CB\u8207\u7248\u672C" },
       ],
     },
     {
