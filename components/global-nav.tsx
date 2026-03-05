@@ -90,6 +90,11 @@ export function GlobalNav() {
                       外加容額審查
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/outline-management" className="cursor-pointer">
+                      填報文件大綱
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
