@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 import { ArrowLeft, FileText, Download, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import {
@@ -113,7 +114,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
 
   const handleApprove = () => {
     setHasUnsavedChanges(false)
-    alert("審查通過")
+    toast.success("審查通過")
     setTimeout(() => {
       router.push("/review/additional-quota")
     }, 0)
@@ -121,11 +122,11 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
 
   const handleReject = () => {
     if (!reviewComment.trim()) {
-      alert("請填寫審查意見")
+      toast.error("請填寫審查意見")
       return
     }
     setHasUnsavedChanges(false)
-    alert("不通過結案")
+    toast.warning("不通過結案")
     setTimeout(() => {
       router.push("/review/additional-quota")
     }, 0)
@@ -133,11 +134,11 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
 
   const handleReturnForRevision = () => {
     if (!reviewComment.trim()) {
-      alert("請填寫退回原因")
+      toast.error("請填寫退回原因")
       return
     }
     setHasUnsavedChanges(false)
-    alert("已退回補件")
+    toast.info("已退回補件")
     setTimeout(() => {
       router.push("/review/additional-quota")
     }, 0)

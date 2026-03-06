@@ -5,36 +5,27 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 import { GlobalNav } from "@/components/global-nav"
+import { Toaster } from "sonner"
+import { Noto_Sans_TC, Geist_Mono } from "next/font/google"
 
-const inter = Inter({
+const notoSansTC = Noto_Sans_TC({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
 })
 
-import { Inter, Geist_Mono, Source_Serif_4, Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
-
-// Initialize fonts
-const _inter = V0_Font_Inter({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
-
 const geistMono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-mono",
 })
 
-const sourceSerif = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-serif",
-})
-
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
+  title: "專科醫師訓練管理系統",
+  description: "醫事人力管理效能提升及數位應用推動計畫",
   generator: "v0.app",
+  icons: {
+    icon: "/icon.svg",
+  },
 }
 
 export default function RootLayout({
@@ -43,10 +34,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased ${inter.className}`}>
+    <html lang="zh-TW">
+      <body className={`${notoSansTC.variable} font-sans antialiased`}>
         <GlobalNav />
         {children}
+        <Toaster />
         <Analytics />
       </body>
     </html>

@@ -47,7 +47,7 @@ export default function OutlineManagementPage() {
             <ArrowLeft className="w-4 h-4" />
             返回首頁
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">自定義大綱管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900">大綱規範管理</h1>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">

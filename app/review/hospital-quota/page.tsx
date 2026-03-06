@@ -7,63 +7,21 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-const mockSocieties = [
-  {
-    id: "1",
-    name: "台灣內科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-15",
-    stage: "pending" as const,
-    mohwReviewed: false, // 醫事司是否完成審查
-    mohwiReviewed: false, // 醫策會是否完成審查
-  },
-  {
-    id: "2",
-    name: "台灣外科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-18",
-    stage: "group-review" as const,
-    mohwReviewed: true,
-    mohwiReviewed: true,
-  },
-  {
-    id: "3",
-    name: "台灣小兒科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-20",
-    stage: "main-review" as const,
-    mohwReviewed: false,
-    mohwiReviewed: false,
-  },
-  {
-    id: "4",
-    name: "台灣婦產科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-10",
-    stage: "upload-pending" as const,
-    mohwReviewed: false,
-    mohwiReviewed: false,
-  },
-]
-
-const stageConfig = {
-  pending: { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "待審查" },
-  "group-review": { color: "bg-blue-100 text-blue-800 border-blue-200", label: "分組會議審核" },
-  "main-review": { color: "bg-purple-100 text-purple-800 border-purple-200", label: "RRC 大會審核" },
-  "upload-pending": { color: "bg-green-100 text-green-800 border-green-200", label: "待公告" },
-}
+import { getHospitalQuotaSocieties, getHospitalQuotaStageConfig } from "@/lib/mock/review-hospital-quota"
 
 export default function HospitalQuotaReviewPage() {
   const [searchExpanded, setSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [stageFilter, setStageFilter] = useState<string>("all")
 
-  const filteredSocieties = mockSocieties.filter((society) => {
+  const societies = getHospitalQuotaSocieties()
+  const stageConfig = getHospitalQuotaStageConfig()
+
+  const filteredSocieties = societies.filter((society) => {
     const matchesSearch = society.name.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStage = stageFilter === "all" || society.stage === stageFilter
     return matchesSearch && matchesStage
@@ -74,7 +32,7 @@ export default function HospitalQuotaReviewPage() {
   const mainReviewSocieties = filteredSocieties.filter((s) => s.stage === "main-review")
   const uploadPendingSocieties = filteredSocieties.filter((s) => s.stage === "upload-pending")
 
-  const renderSocietyTable = (societies: typeof mockSocieties) => (
+  const renderSocietyTable = (rows: typeof societies) => (
     <Card>
       <CardContent className="p-0">
         <Table>
@@ -89,8 +47,8 @@ export default function HospitalQuotaReviewPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {societies.length > 0 ? (
-              societies.map((society) => (
+            {rows.length > 0 ? (
+              rows.map((society) => (
                 <TableRow key={society.id}>
                   <TableCell className="font-medium">{society.name}</TableCell>
                   <TableCell>

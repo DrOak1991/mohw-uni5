@@ -2,7 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Home, Users, Megaphone, ClipboardCheck } from "lucide-react"
+import {
+  ChevronDown,
+  Home,
+  Users,
+  ClipboardCheck,
+  FileText,
+  Bell,
+  Settings,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -17,10 +25,10 @@ export function GlobalNav() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">醫</span>
+              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">醫</span>
               </div>
-              <span>醫事司五科</span>
+              <span className="hidden sm:inline">專科醫師訓練管理系統</span>
             </Link>
 
             <div className="flex items-center gap-2">
@@ -31,36 +39,27 @@ export function GlobalNav() {
                 </Link>
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={isActive("/account") ? "default" : "ghost"}
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <Users className="w-4 h-4" />
-                    帳號管理
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/personal" className="cursor-pointer">
-                      個人設定
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/users" className="cursor-pointer">
-                      使用者管理列表
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/role-templates" className="cursor-pointer">
-                      角色模板管理
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant={isActive("/announcements") ? "default" : "ghost"}
+                size="sm"
+                asChild
+              >
+                <Link href="/announcements" className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  公告欄
+                </Link>
+              </Button>
+
+              <Button
+                variant={isActive("/filing") ? "default" : "ghost"}
+                size="sm"
+                asChild
+              >
+                <Link href="/filing" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  填報專區
+                </Link>
+              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -75,6 +74,11 @@ export function GlobalNav() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/review" className="cursor-pointer">
+                      審查總覽
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/review/submissions" className="cursor-pointer">
                       填報審查
@@ -92,7 +96,7 @@ export function GlobalNav() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/review/outline-management" className="cursor-pointer">
-                      填報文件大綱
+                      大綱規範管理
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -101,24 +105,39 @@ export function GlobalNav() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={isActive("/admin") ? "default" : "ghost"}
+                    variant={isActive("/admin") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
                     size="sm"
                     className="flex items-center gap-1"
                   >
-                    <Megaphone className="w-4 h-4" />
-                    後台機能
+                    <Settings className="w-4 h-4" />
+                    管理專區
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/admin/pending" className="cursor-pointer">
-                      待發佈管理
+                    <Link href="/admin" className="cursor-pointer">
+                      管理總覽
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/admin/published" className="cursor-pointer">
-                      已發佈管理
+                    <Link href="/account/users" className="cursor-pointer">
+                      使用者管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/role-templates" className="cursor-pointer">
+                      角色模板管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/announcement-management" className="cursor-pointer">
+                      公告管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/personal" className="cursor-pointer">
+                      個人設定
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -126,7 +145,7 @@ export function GlobalNav() {
             </div>
           </div>
 
-          <div className="text-sm text-gray-500">暫時性導覽</div>
+          <div className="text-sm text-gray-500 hidden sm:block">衛生福利部醫事司 · 專科醫師訓練管理</div>
         </div>
       </div>
     </nav>

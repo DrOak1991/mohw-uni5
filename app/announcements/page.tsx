@@ -7,113 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Search, FileText, Calendar, Pin } from "lucide-react"
 import Link from "next/link"
-
-const mockAnnouncements = [
-  {
-    id: "1",
-    title: "115年度專科醫師訓練計畫認定基準修訂公告",
-    category: "training",
-    subcategory: "selection-criteria",
-    publishDate: "2025-03-15",
-    publisher: "醫事司",
-    isNew: true,
-    isPinned: true,
-    hasAttachments: true,
-    attachmentCount: 2,
-    excerpt: "依據專科醫師分科及甄審辦法第五條規定，公告115年度各專科醫師訓練計畫認定基準修訂內容...",
-  },
-  {
-    id: "2",
-    title: "訓練醫院認定基準更新通知",
-    category: "training",
-    subcategory: "hospital-criteria",
-    publishDate: "2025-03-10",
-    publisher: "醫事司",
-    isNew: true,
-    isPinned: false,
-    hasAttachments: true,
-    attachmentCount: 1,
-    excerpt: "為提升專科醫師訓練品質，更新訓練醫院認定基準相關規範...",
-  },
-  {
-    id: "3",
-    title: "114年度外加容額申請審查結果公告",
-    category: "additional-quota",
-    subcategory: "review-result",
-    publishDate: "2025-03-05",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: true,
-    hasAttachments: true,
-    attachmentCount: 3,
-    excerpt: "公告114年度各醫院申請外加容額審查結果，核定名單詳如附件...",
-  },
-  {
-    id: "4",
-    title: "115年度外加容額申請開放公告",
-    category: "additional-quota",
-    subcategory: "application",
-    publishDate: "2025-02-28",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: false,
-    hasAttachments: true,
-    attachmentCount: 1,
-    excerpt: "115年度外加容額申請即日起開放受理，申請期限至115年4月30日止...",
-  },
-  {
-    id: "5",
-    title: "115年度專科醫師甄審原則修訂說明",
-    category: "review",
-    subcategory: "principles",
-    publishDate: "2025-02-20",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: true,
-    hasAttachments: true,
-    attachmentCount: 2,
-    excerpt: "配合醫療環境變遷，修訂115年度專科醫師甄審原則相關內容...",
-  },
-  {
-    id: "6",
-    title: "114年度醫院容額分配審查結果",
-    category: "review",
-    subcategory: "quota-result",
-    publishDate: "2025-02-15",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: false,
-    hasAttachments: true,
-    attachmentCount: 4,
-    excerpt: "公告114年度各醫學會醫院容額分配審查結果，核定名單及容額數詳如附件...",
-  },
-  {
-    id: "7",
-    title: "訓練課程基準修正案說明會通知",
-    category: "training",
-    subcategory: "course-criteria",
-    publishDate: "2025-02-10",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: false,
-    hasAttachments: true,
-    attachmentCount: 1,
-    excerpt: "將於115年3月20日舉辦訓練課程基準修正案說明會，歡迎各醫學會代表參加...",
-  },
-  {
-    id: "8",
-    title: "公告評核標準更新通知",
-    category: "training",
-    subcategory: "evaluation-criteria",
-    publishDate: "2025-02-05",
-    publisher: "醫事司",
-    isNew: false,
-    isPinned: false,
-    hasAttachments: true,
-    attachmentCount: 2,
-    excerpt: "更新專科醫師訓練公告評核標準，新增評核項目與配分調整說明...",
-  },
-]
+import { getAnnouncements } from "@/lib/mock/announcements"
 
 const categoryConfig = {
   all: { label: "全部公告", color: "default" },
@@ -126,7 +20,9 @@ export default function AnnouncementsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
 
-  const filteredAnnouncements = mockAnnouncements
+  const announcements = getAnnouncements()
+
+  const filteredAnnouncements = announcements
     .filter((announcement) => {
       const matchesCategory = activeTab === "all" || announcement.category === activeTab
       const matchesSearch =

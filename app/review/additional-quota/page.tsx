@@ -10,67 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-const mockApplications = [
-  {
-    id: "1",
-    hospitalName: "台大醫院",
-    year: "115 年度",
-    submittedDate: "2025-01-15",
-    requestedQuota: 5,
-    status: "待審查" as const,
-  },
-  {
-    id: "2",
-    hospitalName: "台北榮總",
-    year: "115 年度",
-    submittedDate: "2025-01-18",
-    requestedQuota: 3,
-    status: "待審查" as const,
-  },
-  {
-    id: "3",
-    hospitalName: "長庚醫院",
-    year: "115 年度",
-    submittedDate: "2025-01-20",
-    requestedQuota: 4,
-    status: "待公告" as const,
-    reviewedDate: "2025-01-25 14:30",
-  },
-  {
-    id: "4",
-    hospitalName: "馬偕醫院",
-    year: "115 年度",
-    submittedDate: "2025-01-10",
-    requestedQuota: 2,
-    status: "已公告" as const,
-    reviewedDate: "2025-01-22 10:15",
-    announcedDate: "2025-01-28",
-  },
-  {
-    id: "5",
-    hospitalName: "中國醫藥大學附設醫院",
-    year: "115 年度",
-    submittedDate: "2025-01-12",
-    requestedQuota: 3,
-    status: "已公告" as const,
-    reviewedDate: "2025-01-23 16:45",
-    announcedDate: "2025-01-29",
-  },
-]
-
-const statusConfig = {
-  待審查: { color: "bg-blue-100 text-blue-800 border-blue-200", label: "待審查" },
-  待公告: { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "待公告" },
-  已公告: { color: "bg-green-100 text-green-800 border-green-200", label: "已公告" },
-}
+import {
+  getAdditionalQuotaApplications,
+  getAdditionalQuotaStatusConfig,
+} from "@/lib/mock/review-additional-quota"
 
 export default function AdditionalQuotaReviewPage() {
   const [searchExpanded, setSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
-  const filteredApplications = mockApplications.filter((app) => {
+  const applications = getAdditionalQuotaApplications()
+  const statusConfig = getAdditionalQuotaStatusConfig()
+
+  const filteredApplications = applications.filter((app) => {
     const matchesSearch = app.hospitalName.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || app.status === statusFilter
     return matchesSearch && matchesStatus
@@ -80,7 +33,7 @@ export default function AdditionalQuotaReviewPage() {
   const pendingAnnouncementApplications = filteredApplications.filter((a) => a.status === "待公告")
   const announcedApplications = filteredApplications.filter((a) => a.status === "已公告")
 
-  const renderApplicationCard = (app: (typeof mockApplications)[0]) => (
+  const renderApplicationCard = (app: (typeof applications)[0]) => (
     <Card key={app.id} className="hover:shadow-md transition-shadow">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">

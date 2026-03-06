@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,6 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { ArrowLeft, Upload, X, FileText } from 'lucide-react'
 
 const categories = [
@@ -56,16 +68,14 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
 
   const handleSave = () => {
     console.log("[v0] Saving changes:", { title, category, content, isPinned, publishDate, expiryDate, files })
-    alert("變更已儲存")
+    toast.success("變更已儲存")
     router.push("/announcement-management")
   }
 
   const handleArchive = () => {
-    if (confirm("確定要下架此公告嗎？")) {
-      console.log("[v0] Archiving announcement:", params.id)
-      alert("公告已下架")
-      router.push("/announcement-management")
-    }
+    console.log("[v0] Archiving announcement:", params.id)
+    toast.success("公告已下架")
+    router.push("/announcement-management")
   }
 
   return (
@@ -230,9 +240,30 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
 
           {/* 操作按鈕 */}
           <div className="flex items-center justify-between">
-            <Button variant="outline" onClick={handleArchive} className="text-red-600 hover:text-red-700">
-              下架公告
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="text-red-600 hover:text-red-700">
+                  下架公告
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>確定要下架此公告嗎？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    下架後公告將不再顯示於前台，您可以在後台重新發布。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>取消</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleArchive}
+                    className="bg-destructive text-destructive-foreground"
+                  >
+                    確認下架
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <div className="flex items-center gap-3">
               <Link href="/announcement-management">
                 <Button variant="outline">取消</Button>

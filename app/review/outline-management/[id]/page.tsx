@@ -27,112 +27,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { ReviewSimpleNav } from "@/components/review/simple-nav"
-
-// --------------- types ---------------
-
-interface OutlineItem {
-  id: string
-  number: string
-  title: string
-  description: string
-  children?: OutlineItem[]
-}
-
-interface VersionRecord {
-  version: string
-  date: string
-  operator: string
-  isCurrent?: boolean
-}
-
-interface TemplateRecord {
-  year: string
-  label: string
-}
-
-// --------------- mock data ---------------
-
-const outlineMeta: Record<string, { name: string }> = {
-  "screening-principle": { name: "\u7504\u5BE9\u539F\u5247" },
-  "hospital-accreditation": { name: "\u8A13\u7DF4\u91AB\u9662\u8A8D\u5B9A\u57FA\u6E96" },
-  "training-curriculum": { name: "\u8A13\u7DF4\u8AB2\u7A0B\u57FA\u6E96" },
-  "evaluation-standards": { name: "\u8A55\u6838\u6A19\u6E96\u8207\u8A55\u6838\u8868" },
-  "quota-allocation": { name: "\u5BB9\u984D\u5206\u914D\u539F\u5247" },
-}
-
-function getInitialOutline(): OutlineItem[] {
-  return [
-    {
-      id: "1",
-      number: "1",
-      title: "\u57FA\u672C\u8CC7\u8A0A",
-      description: "\u5305\u542B\u5C08\u79D1\u540D\u7A31\u3001\u8A13\u7DF4\u5E74\u9650\u7B49\u57FA\u672C\u8A2D\u5B9A",
-      children: [
-        {
-          id: "1-1",
-          number: "1.1",
-          title: "\u5C08\u79D1\u540D\u7A31",
-          description: "\u8ACB\u586B\u660E\u78BA\u6A19\u793A\u5C08\u79D1\u5168\u540D",
-        },
-        {
-          id: "1-2",
-          number: "1.2",
-          title: "\u8A13\u7DF4\u5E74\u9650",
-          description: "\u8ACB\u586B\u660E\u5B8C\u6574\u8A13\u7DF4\u5E74\u9650(\u5E74/\u6708)",
-        },
-        {
-          id: "1-3",
-          number: "1.3",
-          title: "\u6CD5\u898F\u4F9D\u64DA",
-          description: "\u76F8\u95DC\u6CD5\u898F\u8207\u8FA6\u6CD5\u5F15\u7528",
-        },
-      ],
-    },
-    {
-      id: "2",
-      number: "2",
-      title: "\u8A13\u7DF4\u76EE\u6A19",
-      description: "\u660E\u78BA\u8AAA\u660E\u8A13\u7DF4\u8A08\u756B\u4E4B\u6574\u9AD4\u76EE\u6A19",
-      children: [
-        {
-          id: "2-1",
-          number: "2.1",
-          title: "\u6838\u5FC3\u80FD\u529B",
-          description: "\u8ACB\u5217\u8209\u81F3\u5C11\u4E94\u9805\u6838\u5FC3\u80FD\u529B",
-        },
-      ],
-    },
-    {
-      id: "3",
-      number: "3",
-      title: "\u8A13\u7DF4\u5167\u5BB9",
-      description: "\u8A73\u7D30\u5217\u51FA\u8A13\u7DF4\u5167\u5BB9\u8207\u8AB2\u7A0B\u898F\u5283",
-      children: [],
-    },
-    {
-      id: "4",
-      number: "4",
-      title: "\u8A55\u4F30\u65B9\u5F0F",
-      description: "\u8AAA\u660E\u8A13\u7DF4\u6210\u6548\u7684\u8A55\u4F30\u6A19\u6E96\u8207\u65B9\u6CD5",
-      children: [],
-    },
-  ]
-}
-
-const mockVersions: VersionRecord[] = [
-  { version: "\u7576\u524D\u7248\u672C", date: "", operator: "\u738B\u5C0F\u660E", isCurrent: true },
-  { version: "v2.1", date: "2024/10/01", operator: "\u9673\u5927\u83EF" },
-  { version: "v2.0", date: "2024/08/15", operator: "\u6797\u7F8E\u73B2" },
-  { version: "v1.0", date: "2024/01/10", operator: "\u5F35\u5FD7\u8C6A" },
-]
-
-const mockTemplates: TemplateRecord[] = [
-  { year: "2024", label: "\u7504\u5BE9\u539F\u5247" },
-  { year: "2023", label: "\u7504\u5BE9\u539F\u5247" },
-  { year: "2022", label: "\u7504\u5BE9\u539F\u5247" },
-  { year: "2021", label: "\u7504\u5BE9\u539F\u5247" },
-  { year: "2020", label: "\u7504\u5BE9\u539F\u5247" },
-]
+import {
+  OutlineItem,
+  outlineMeta,
+  getInitialOutline,
+  mockTemplates,
+  mockVersions,
+} from "@/lib/mock/review-outline"
 
 // --------------- helpers ---------------
 
@@ -240,7 +141,7 @@ export default function OutlineEditorPage({
           className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          返回自定義大綱管理
+          返回大綱規範管理
         </Link>
 
         {/* header */}

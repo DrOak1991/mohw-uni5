@@ -3,6 +3,12 @@
 import { useState } from "react"
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowLeft, Upload, X, FileText } from "lucide-react"
+
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,7 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Upload, X, FileText } from 'lucide-react'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
 const categories = [
   { value: "training", label: "專科訓練認定" },
@@ -24,20 +37,37 @@ const categories = [
   { value: "review", label: "甄審" },
 ]
 
+const announcementSchema = z.object({
+  title: z.string().min(1, "請輸入公告標題"),
+  category: z.string().min(1, "請選擇公告類別"),
+  content: z.string().min(1, "請輸入公告內容"),
+  isPinned: z.boolean().default(false),
+  publishDate: z.string().optional(),
+  expiryDate: z.string().optional(),
+})
+
+type AnnouncementFormValues = z.infer<typeof announcementSchema>
+
 export default function CreateAnnouncementPage() {
   const router = useRouter()
-  const [title, setTitle] = useState("")
-  const [category, setCategory] = useState("")
-  const [content, setContent] = useState("")
-  const [isPinned, setIsPinned] = useState(false)
-  const [publishDate, setPublishDate] = useState("")
-  const [expiryDate, setExpiryDate] = useState("")
   const [files, setFiles] = useState<{ name: string; size: number }[]>([])
+
+  const form = useForm<AnnouncementFormValues>({
+    resolver: zodResolver(announcementSchema),
+    defaultValues: {
+      title: "",
+      category: "",
+      content: "",
+      isPinned: false,
+      publishDate: "",
+      expiryDate: "",
+    },
+  })
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(e.target.files || [])
-    setFiles([
-      ...files,
+    setFiles((prev) => [
+      ...prev,
       ...uploadedFiles.map((file) => ({
         name: file.name,
         size: file.size,
@@ -46,19 +76,21 @@ export default function CreateAnnouncementPage() {
   }
 
   const removeFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index))
+    setFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleSaveDraft = () => {
-    // 儲存草稿邏輯
-    console.log("[v0] Saving draft:", { title, category, content, isPinned, files })
-    alert("草稿已儲存")
+  const handleSaveDraft = (values: AnnouncementFormValues) => {
+    console.log("[v0] Saving draft:", { ...values, files })
+    toast.success("草稿已儲存", {
+      description: "您可以稍後再回來編輯並發布此公告。",
+    })
   }
 
-  const handlePublish = () => {
-    // 發布邏輯
-    console.log("[v0] Publishing:", { title, category, content, isPinned, publishDate, expiryDate, files })
-    alert("公告已發布")
+  const handlePublish = (values: AnnouncementFormValues) => {
+    console.log("[v0] Publishing:", { ...values, files })
+    toast.success("公告已送出", {
+      description: "公告已儲存並標記為已發布。",
+    })
     router.push("/announcement-management")
   }
 
@@ -77,97 +109,164 @@ export default function CreateAnnouncementPage() {
           <p className="text-sm text-gray-600">填寫公告資訊並上傳相關附件</p>
         </div>
 
-        <div className="space-y-6">
-          {/* 基本資訊 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>基本資訊</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">公告標題 *</Label>
-                <Input
-                  id="title"
-                  placeholder="請輸入公告標題"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+        <Form {...form}>
+          <form
+            className="space-y-6"
+            onSubmit={form.handleSubmit((values) => handlePublish(values))}
+          >
+            {/* 基本資訊 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>基本資訊</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>公告標題 *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="請輸入公告標題"
+                          {...field}
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        建議使用清楚說明年份與主題的標題，例如「115 年度專科醫師訓練計畫甄審原則修訂公告」。
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <Label htmlFor="category">公告類別 *</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="選擇公告類別" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="content">公告內容 *</Label>
-                <Textarea
-                  id="content"
-                  placeholder="請輸入公告內容"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={10}
-                  className="resize-none"
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>公告類別 *</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger id="category">
+                            <SelectValue placeholder="選擇公告類別" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.value} value={cat.value}>
+                                {cat.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  已輸入 {content.length} 字元
-                </p>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="pinned"
-                  checked={isPinned}
-                  onCheckedChange={(checked) => setIsPinned(checked as boolean)}
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => {
+                    const length = field.value?.length ?? 0
+                    return (
+                      <FormItem>
+                        <FormLabel>公告內容 *</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="請輸入公告內容，例如適用對象、適用期間、聯絡窗口與附件說明等。"
+                            rows={10}
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <p className="mt-1 text-sm text-gray-500">
+                          已輸入 {length} 字元
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
                 />
-                <Label htmlFor="pinned" className="cursor-pointer">
-                  設為置頂公告
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* 發布設定 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>發布設定</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="publishDate">發布日期</Label>
-                  <Input
-                    id="publishDate"
-                    type="date"
-                    value={publishDate}
-                    onChange={(e) => setPublishDate(e.target.value)}
+                <FormField
+                  control={form.control}
+                  name="isPinned"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center space-x-2">
+                        <FormControl>
+                          <Checkbox
+                            id="pinned"
+                            checked={field.value}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
+                          />
+                        </FormControl>
+                        <FormLabel
+                          htmlFor="pinned"
+                          className="cursor-pointer"
+                        >
+                          設為置頂公告
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* 發布設定 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>發布設定</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="publishDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>發布日期</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                          />
+                        </FormControl>
+                        <p className="mt-1 text-sm text-gray-500">
+                          留空則儲存後立即於前台顯示。
+                        </p>
+                      </FormItem>
+                    )}
                   />
-                  <p className="text-sm text-gray-500 mt-1">留空則立即發布</p>
-                </div>
-                <div>
-                  <Label htmlFor="expiryDate">有效期限</Label>
-                  <Input
-                    id="expiryDate"
-                    type="date"
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
+                  <FormField
+                    control={form.control}
+                    name="expiryDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>有效期限</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                          />
+                        </FormControl>
+                        <p className="mt-1 text-sm text-gray-500">
+                          留空則不自動下架，需由管理者手動下架。
+                        </p>
+                      </FormItem>
+                    )}
                   />
-                  <p className="text-sm text-gray-500 mt-1">留空則永久有效</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
           {/* 附件上傳 */}
           <Card>
@@ -225,14 +324,23 @@ export default function CreateAnnouncementPage() {
           {/* 操作按鈕 */}
           <div className="flex items-center justify-end gap-3">
             <Link href="/announcement-management">
-              <Button variant="outline">取消</Button>
+              <Button type="button" variant="outline">
+                取消
+              </Button>
             </Link>
-            <Button variant="outline" onClick={handleSaveDraft}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={form.handleSubmit((values) => handleSaveDraft(values))}
+            >
               儲存草稿
             </Button>
-            <Button onClick={handlePublish}>發布公告</Button>
+            <Button type="submit">
+              發布公告
+            </Button>
           </div>
-        </div>
+        </form>
+        </Form>
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 import { ArrowLeft, Edit3, Printer, MessageSquare, Upload, ChevronDown, ChevronUp, X, FileText } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -202,12 +203,12 @@ export default function HospitalQuotaReviewDetailPage({ params }: { params: { so
   }
 
   const handleMarkAsNeedRevision = () => {
-    alert("已標記為待更改，案件將返還給醫學會")
+    toast.info("已標記為待更改，案件將返還給醫學會")
     router.back()
   }
 
   const handleMarkAsRRCReview = () => {
-    alert("已標記為待 RRC 審查")
+    toast.success("已標記為待 RRC 審查")
     router.back()
   }
 
@@ -248,7 +249,7 @@ export default function HospitalQuotaReviewDetailPage({ params }: { params: { so
   }
 
   const handleCompleteAllReviews = () => {
-    alert("已儲存審查結果")
+    toast.success("已儲存審查結果")
     router.back()
   }
 
@@ -273,10 +274,10 @@ export default function HospitalQuotaReviewDetailPage({ params }: { params: { so
 
   const handleUploadResult = () => {
     if (!finalResult) {
-      alert("請選擇最終審查結果")
+      toast.error("請選擇最終審查結果")
       return
     }
-    alert(`已上傳最終審查結果：${finalResult === "approved" ? "審核通過" : "不通過"}`)
+    toast.success(`已上傳最終審查結果：${finalResult === "approved" ? "審核通過" : "不通過"}`)
     setUploadDialogOpen(false)
     router.back()
   }
