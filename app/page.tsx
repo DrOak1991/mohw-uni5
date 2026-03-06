@@ -35,7 +35,6 @@ function HomePage() {
       icon: FileEdit,
       color: "bg-amber-500",
       pages: [
-        { name: "填報專區", href: "/filing", description: "填報文件與容額分配" },
         { name: "文件填報", href: "/filing", description: "管理年度文件填報作業" },
         { name: "容額填報", href: "/filing?tab=quota", description: "管理訓練醫院名單與容額分配" },
         { name: "新增醫院容額", href: "/filing/quota/new", description: "新增醫院容額分配申請" },
