@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator } from "lucide-react"
+import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator, FileEdit } from "lucide-react"
 
 const DynamicHomePage = dynamic(() => Promise.resolve(HomePage), {
   ssr: false,
@@ -30,15 +30,27 @@ function HomePage() {
       ],
     },
     {
-      title: "\u5BE9\u67E5\u5C08\u5340",
+      title: "填報專區",
+      description: "醫學會填報文件與容額分配申請",
+      icon: FileEdit,
+      color: "bg-amber-500",
+      pages: [
+        { name: "填報專區", href: "/filing", description: "填報文件與容額分配" },
+        { name: "文件填報", href: "/filing", description: "管理年度文件填報作業" },
+        { name: "容額填報", href: "/filing?tab=quota", description: "管理訓練醫院名單與容額分配" },
+        { name: "新增醫院容額", href: "/filing/quota/new", description: "新增醫院容額分配申請" },
+      ],
+    },
+    {
+      title: "審查專區",
       description: reviewDescription,
       icon: ClipboardCheck,
       color: "bg-green-500",
       pages: [
-        { name: "\u586B\u5831\u5BE9\u67E5", href: "/review/submissions", description: "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684\u4E94\u4EFD\u586B\u5831\u6587\u4EF6" },
-        { name: "\u91AB\u9662\u5BB9\u984D\u5206\u914D\u5BE9\u67E5", href: "/review/hospital-quota", description: "\u5BE9\u67E5\u91AB\u9662\u5BB9\u984D\u5206\u914D\u7533\u8ACB" },
-        { name: "\u5916\u52A0\u5BB9\u984D\u5BE9\u67E5", href: "/review/additional-quota", description: "\u5BE9\u67E5\u5916\u52A0\u5BB9\u984D\u7533\u8ACB" },
-        { name: "\u586B\u5831\u6587\u4EF6\u5927\u7DB1", href: "/review/outline-management", description: "\u7BA1\u7406\u586B\u5831\u6587\u4EF6\u7684\u5927\u7DB1\u7D50\u69CB\u8207\u7248\u672C" },
+        { name: "填報審查", href: "/review/submissions", description: "審查醫學會提交的五份填報文件" },
+        { name: "醫院容額分配審查", href: "/review/hospital-quota", description: "審查醫院容額分配申請" },
+        { name: "外加容額審查", href: "/review/additional-quota", description: "審查外加容額申請" },
+        { name: "填報文件大綱", href: "/review/outline-management", description: "管理填報文件的大綱結構與版本" },
       ],
     },
     {
