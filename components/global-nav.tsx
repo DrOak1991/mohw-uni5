@@ -2,11 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
 import {
   ChevronDown,
   Home,
-  Users,
   ClipboardCheck,
   FileText,
   Bell,
@@ -17,11 +15,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export function GlobalNav() {
   const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const isActive = (path: string) => pathname.startsWith(path)
 
@@ -67,117 +60,87 @@ export function GlobalNav() {
                 </Link>
               </Button>
 
-              {mounted ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={isActive("/review") ? "default" : "ghost"}
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      <ClipboardCheck className="w-4 h-4" />
-                      審查專區
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem asChild>
-                      <Link href="/review" className="cursor-pointer">
-                        審查總覽
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/review/submissions" className="cursor-pointer">
-                        填報審查
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/review/hospital-quota" className="cursor-pointer">
-                        醫院容額分配審查
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/review/additional-quota" className="cursor-pointer">
-                        外加容額審查
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/review/outline-management" className="cursor-pointer">
-                        大綱規範管理
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  variant={isActive("/review") ? "default" : "ghost"}
-                  size="sm"
-                  className="flex items-center gap-1"
-                  asChild
-                >
-                  <Link href="/review">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={isActive("/review") ? "default" : "ghost"}
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
                     <ClipboardCheck className="w-4 h-4" />
                     審查專區
                     <ChevronDown className="w-4 h-4" />
-                  </Link>
-                </Button>
-              )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/review" className="cursor-pointer">
+                      審查總覽
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/submissions" className="cursor-pointer">
+                      填報審查
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/hospital-quota" className="cursor-pointer">
+                      醫院容額分配審查
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/additional-quota" className="cursor-pointer">
+                      外加容額審查
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/outline-management" className="cursor-pointer">
+                      大綱規範管理
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {mounted ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={isActive("/admin") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      <Settings className="w-4 h-4" />
-                      管理專區
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="cursor-pointer">
-                        管理總覽
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/account/users" className="cursor-pointer">
-                        使用者管理
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/account/role-templates" className="cursor-pointer">
-                        角色模板管理
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/announcement-management" className="cursor-pointer">
-                        公告管理
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/account/personal" className="cursor-pointer">
-                        個人設定
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  variant={isActive("/admin") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
-                  size="sm"
-                  className="flex items-center gap-1"
-                  asChild
-                >
-                  <Link href="/admin">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={isActive("/admin") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
                     <Settings className="w-4 h-4" />
                     管理專區
                     <ChevronDown className="w-4 h-4" />
-                  </Link>
-                </Button>
-              )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin" className="cursor-pointer">
+                      管理總覽
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/users" className="cursor-pointer">
+                      使用者管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/role-templates" className="cursor-pointer">
+                      角色模板管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/announcement-management" className="cursor-pointer">
+                      公告管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/personal" className="cursor-pointer">
+                      個人設定
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

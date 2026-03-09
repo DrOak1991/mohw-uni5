@@ -1,10 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
+import dynamic from "next/dynamic"
 
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { GlobalNav } from "@/components/global-nav"
+const GlobalNav = dynamic(() => import("@/components/global-nav").then(mod => mod.GlobalNav), {
+  ssr: false,
+})
 import { Toaster } from "sonner"
 import { Noto_Sans_TC, Geist_Mono } from "next/font/google"
 
