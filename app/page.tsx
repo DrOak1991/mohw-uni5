@@ -1,17 +1,8 @@
-"use client"
-
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator, FileEdit } from "lucide-react"
 
-const DynamicHomePage = dynamic(() => Promise.resolve(HomePage), {
-  ssr: false,
-})
-
-export default DynamicHomePage
-
-function HomePage() {
+export default function HomePage() {
   const reviewDescription = [
     "\u5BE9\u67E5\u91AB\u5B78\u6703\u63D0\u4EA4\u7684",
     "\u586B\u5831\u6587\u4EF6\u8207\u5BB9\u984D\u7533\u8ACB",
@@ -92,7 +83,7 @@ function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{"\u91AB\u4E8B\u53F8\u4E94\u79D1\u7CFB\u7D71"}</h1>

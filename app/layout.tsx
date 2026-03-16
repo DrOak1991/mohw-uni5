@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { GlobalNavWrapper } from "@/components/global-nav-wrapper"
+import { GlobalNav } from "@/components/global-nav"
 import { Toaster } from "sonner"
 import { Noto_Sans_TC, Geist_Mono } from "next/font/google"
 
@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className={`${notoSansTC.variable} font-sans antialiased`}>
-        <GlobalNavWrapper />
+        <GlobalNav />
         {children}
         <Toaster />
         <Analytics />
