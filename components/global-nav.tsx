@@ -89,11 +89,6 @@ export function GlobalNav() {
                       外加容額審查
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/review/outline-management" className="cursor-pointer">
-                      大綱規範管理
-                    </Link>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -113,6 +108,11 @@ export function GlobalNav() {
                   <DropdownMenuItem asChild>
                     <Link href="/admin" className="cursor-pointer">
                       管理總覽
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/outline-management" className="cursor-pointer">
+                      大綱規範管理
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
