@@ -187,7 +187,7 @@ export default function SubmissionsReviewPage() {
                                       {submission.uploaded ? (
                                         <Button asChild size="sm">
                                           <Link
-                                            href={`/review/submissions/${doc.id}/${submission.societyId}`}
+                                            href={`/review/${submission.societyId}`}
                                             className="flex items-center gap-2"
                                           >
                                             檢視審查
