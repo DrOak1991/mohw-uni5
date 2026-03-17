@@ -286,13 +286,16 @@ export default function FilingDetailPage({
         </div>
       </div>
 
-      <div className="container mx-auto px-6 pb-8">
-        {/* Review Feedback Banner */}
-        {hasReviewComments && (
-          <div className="mb-6">
+      {/* Review Feedback Banner - Sticky */}
+      {hasReviewComments && (
+        <div className="sticky top-0 z-40 bg-[#f5f7fa] pt-2 pb-4">
+          <div className="container mx-auto px-6">
             <ReviewFeedbackBanner feedback={mockReviewFeedback} />
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="container mx-auto px-6 pb-8">
 
         <div className="space-y-6">
           {isReadOnly && (
@@ -395,7 +398,7 @@ export default function FilingDetailPage({
                     htmlFor="apply-unified"
                     className="text-sm font-medium text-blue-800 cursor-pointer"
                   >
-                    套用統一修訂說明到所有修訂處
+                    套用統��修訂說明到所有修訂處
                   </label>
                   <p className="text-xs text-blue-600 mt-0.5">
                     勾選後，下方所有修訂項目將使用相同的說明文字

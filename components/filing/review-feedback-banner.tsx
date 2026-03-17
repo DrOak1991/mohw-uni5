@@ -28,7 +28,7 @@ export function ReviewFeedbackBanner({
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="sticky top-0 z-40 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
+    <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-600" />
