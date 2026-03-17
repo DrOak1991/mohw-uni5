@@ -3,19 +3,19 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { AlertTriangle, FileText } from "lucide-react"
 
 export interface ReviewFeedback {
   reviewDate: string
   meetingTitle?: string
   comments: string[]
-  fullContent?: string // For large meeting minutes
+  fullContent?: string
 }
 
 interface ReviewFeedbackBannerProps {
@@ -28,7 +28,7 @@ export function ReviewFeedbackBanner({
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+    <div className="sticky top-0 z-40 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -37,8 +37,8 @@ export function ReviewFeedbackBanner({
             審查日期：{feedback.reviewDate}
           </span>
         </div>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
             <Button
               variant="outline"
               size="sm"
@@ -47,15 +47,15 @@ export function ReviewFeedbackBanner({
               <FileText className="h-4 w-4 mr-1" />
               查看審查意見
             </Button>
-          </SheetTrigger>
-          <SheetContent className="w-[500px] sm:w-[600px] sm:max-w-[600px] overflow-y-auto">
-            <SheetHeader className="mb-6">
-              <SheetTitle className="flex items-center gap-2 text-amber-800">
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-800">
                 <AlertTriangle className="h-5 w-5 text-amber-600" />
                 審查意見
-              </SheetTitle>
-            </SheetHeader>
-            <div className="space-y-4">
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
               <div className="bg-amber-50 rounded-lg p-4 border border-amber-100">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -74,7 +74,7 @@ export function ReviewFeedbackBanner({
               <div>
                 <h4 className="font-medium text-foreground mb-3">審查意見內容</h4>
                 {feedback.fullContent ? (
-                  <div className="prose prose-sm max-w-none bg-white rounded-lg border p-4">
+                  <div className="bg-white rounded-lg border p-4">
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                       {feedback.fullContent}
                     </div>
@@ -90,8 +90,8 @@ export function ReviewFeedbackBanner({
                 )}
               </div>
             </div>
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
