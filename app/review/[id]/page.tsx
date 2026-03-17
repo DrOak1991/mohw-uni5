@@ -21,6 +21,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -33,7 +39,7 @@ import {
   Upload,
   FileText,
   Trash2,
-  X,
+  FileIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -110,21 +116,40 @@ const currentYearData = [
   },
 ]
 
-const reviewStages = [
+// Documents with two-stage review process
+const twoStageDocuments = ["計畫認定基準", "訓練課程基準", "評核標準", "容額分配原則"]
+
+// Review stages for two-stage documents
+const twoStageReviewStages = [
   { value: "pending", label: "待審查" },
   { value: "reviewing", label: "承辦審查中" },
   { value: "group-review", label: "分組會議審查" },
+  { value: "group-approved", label: "分組會議通過" },
   { value: "rrc-review", label: "RRC 大會審查" },
   { value: "returned", label: "退回補件" },
   { value: "approved", label: "審查通過" },
 ]
 
+// Review stages for simple documents (甄審原則, 精進指南)
+const simpleReviewStages = [
+  { value: "pending", label: "待審查" },
+  { value: "reviewing", label: "承辦審查中" },
+  { value: "returned", label: "退回補件" },
+  { value: "approved", label: "審查通過" },
+]
+
+// Mock group review files (from previous stage)
+const mockGroupReviewFiles = [
+  { name: "分組會議紀錄_114-02-20.pdf", size: 2048000, date: "2025-02-20" },
+  { name: "分組審查意見彙整.docx", size: 512000, date: "2025-02-20" },
+]
+
 const documentInfo = {
   society: "內科醫學會",
-  documentType: "甄審原則",
+  documentType: "計畫認定基準", // Change this to test different document types
   year: "114",
   submittedDate: "2025-03-01",
-  currentStage: "reviewing",
+  currentStage: "rrc-review", // Change this to test different stages
 }
 
 export default function ReviewDetailPage({
@@ -133,6 +158,12 @@ export default function ReviewDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+
+  // Determine if this document has two-stage review
+  const hasTwoStageReview = twoStageDocuments.includes(documentInfo.documentType)
+  const reviewStages = hasTwoStageReview ? twoStageReviewStages : simpleReviewStages
+  const isRRCReviewStage = documentInfo.currentStage === "rrc-review"
+  const showGroupReviewFiles = hasTwoStageReview && isRRCReviewStage
 
   const [expandedSections, setExpandedSections] = useState<string[]>(
     currentYearData.map((s) => s.id)
@@ -146,9 +177,7 @@ export default function ReviewDetailPage({
   const [pendingStage, setPendingStage] = useState("")
   
   // Uploaded files
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: number; date: string }>>([
-    { name: "分組會議紀錄_114-03-05.pdf", size: 1024000, date: "2025-03-05" },
-  ])
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: number; date: string }>>([])
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -203,6 +232,8 @@ export default function ReviewDetailPage({
         return "bg-blue-100 text-blue-700"
       case "group-review":
         return "bg-purple-100 text-purple-700"
+      case "group-approved":
+        return "bg-purple-100 text-purple-700"
       case "rrc-review":
         return "bg-indigo-100 text-indigo-700"
       case "returned":
@@ -212,6 +243,10 @@ export default function ReviewDetailPage({
       default:
         return "bg-gray-100 text-gray-700"
     }
+  }
+
+  const handleDownload = (format: "word" | "pdf") => {
+    toast.success(`正在下載 ${format.toUpperCase()} 檔案...`)
   }
 
   return (
@@ -241,12 +276,48 @@ export default function ReviewDetailPage({
               <Badge className={getStageColor(currentStage)}>
                 {reviewStages.find((s) => s.value === currentStage)?.label}
               </Badge>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Download className="h-4 w-4" />
-                匯出 PDF
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Download className="h-4 w-4" />
+                    下載檔案
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleDownload("word")}>
+                    <FileIcon className="h-4 w-4 mr-2" />
+                    Word 格式 (.docx)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDownload("pdf")}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    PDF 格式 (.pdf)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sticky Tabs */}
+      <div className="sticky top-16 z-40 bg-white border-b shadow-sm">
+        <div className="container mx-auto px-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="h-12 bg-transparent border-0 p-0">
+              <TabsTrigger 
+                value="current" 
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                114 年度 (本次送審)
+              </TabsTrigger>
+              <TabsTrigger 
+                value="previous" 
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                113 年度 (參考)
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
@@ -254,18 +325,8 @@ export default function ReviewDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Tabs for current/previous year */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full justify-start bg-white border">
-                <TabsTrigger value="current" className="flex-1 max-w-[200px]">
-                  114 年度 (本次送審)
-                </TabsTrigger>
-                <TabsTrigger value="previous" className="flex-1 max-w-[200px]">
-                  113 年度 (參考)
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="current" className="mt-4 space-y-4">
+              <TabsContent value="current" className="mt-0 space-y-4">
                 {currentYearData.map((section) => {
                   const prevSection = previousYearData.find(
                     (p) => p.id === section.id
@@ -346,7 +407,7 @@ export default function ReviewDetailPage({
                 })}
               </TabsContent>
 
-              <TabsContent value="previous" className="mt-4 space-y-4">
+              <TabsContent value="previous" className="mt-0 space-y-4">
                 {previousYearData.map((section) => (
                   <Collapsible
                     key={section.id}
@@ -401,6 +462,35 @@ export default function ReviewDetailPage({
               </Select>
             </div>
 
+            {/* Group Review Files (only shown in RRC review stage for two-stage documents) */}
+            {showGroupReviewFiles && (
+              <div className="bg-white rounded-lg border shadow-sm p-4">
+                <Label className="text-sm font-medium">分組會議審查資料</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                  以下為分組會議審查階段通過時上傳之相關文件
+                </p>
+                <div className="space-y-2">
+                  {mockGroupReviewFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg border border-purple-100"
+                    >
+                      <FileText className="h-4 w-4 text-purple-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(file.size)} | {file.date}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Review Comment */}
             <div className="bg-white rounded-lg border shadow-sm p-4">
               <Label htmlFor="review-comment" className="text-sm font-medium">
@@ -427,7 +517,9 @@ export default function ReviewDetailPage({
 
             {/* Meeting Minutes Upload */}
             <div className="bg-white rounded-lg border shadow-sm p-4">
-              <Label className="text-sm font-medium">會議記錄檔案</Label>
+              <Label className="text-sm font-medium">
+                {isRRCReviewStage ? "RRC 大會會議記錄" : "會議記錄檔案"}
+              </Label>
               
               {/* Uploaded Files List */}
               {uploadedFiles.length > 0 && (
@@ -511,6 +603,11 @@ export default function ReviewDetailPage({
             {pendingStage === "approved" && (
               <p className="mt-2 text-sm text-green-600">
                 審查通過後，此文件將進入公告流程。
+              </p>
+            )}
+            {pendingStage === "group-approved" && (
+              <p className="mt-2 text-sm text-purple-600">
+                分組會議通過後，此文件將進入 RRC 大會審查階段。
               </p>
             )}
           </div>
