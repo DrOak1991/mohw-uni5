@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, use } from "react"
+import { useState, use, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -30,15 +30,33 @@ import {
   Download,
   Plus,
   FileText,
+  History,
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 
+import {
+  RevisionReasonPanel,
+  type RevisionReason,
+  type RevisionItem,
+} from "@/components/filing/revision-reason-panel"
+import {
+  PreviousYearDrawer,
+  type PreviousYearSection,
+} from "@/components/filing/previous-year-drawer"
+import {
+  ReviewFeedbackBanner,
+  type ReviewFeedback,
+} from "@/components/filing/review-feedback-banner"
+
+// Mock data for document outline
 const documentOutline = [
   {
     id: "1",
     title: "一、甄審原則",
-    content: "衛生福利部（以下簡稱本部）為辦理內科專科醫師甄審（以下簡稱專科醫師甄審），特訂定本原則。",
+    content:
+      "衛生福利部（以下簡稱本部）為辦理內科專科醫師甄審（以下簡稱專科醫師甄審），特訂定本原則。",
   },
   {
     id: "2",
@@ -50,33 +68,41 @@ const documentOutline = [
   {
     id: "3",
     title: "三、訓練醫院資格",
-    content: "",
+    content: "訓練醫院應符合本部公告之訓練醫院認定基準。",
   },
 ]
 
-const reviewComments = [
+// Mock data for previous year content
+const previousYearContent: PreviousYearSection[] = [
   {
     id: "1",
-    sectionId: "1",
-    sectionTitle: "一、訓練目標",
-    comment: "第二章第三節請再說明教學設備標準",
-    hasComment: true,
+    title: "一、甄審原則",
+    content:
+      "衛生福利部（以下簡稱本部）為辦理內科專科醫師甄審（以下簡稱專科醫師甄審），特訂定本原則。",
   },
   {
     id: "2",
-    sectionId: "2",
-    sectionTitle: "二、訓練期限",
-    comment: "訓練期限需明確標示起訖日期",
-    hasComment: true,
+    title: "二、醫師資格",
+    content: `醫師符合下列資格之一者，得參加專科醫師甄審：
+
+（一）依本部一百零一年六月三十日以前公告該年度所定訓練期間，接受畢業後一般醫學（以下簡稱PGY）訓練：於內科專科醫師訓練醫院接受三年以上之內科臨床訓練，且至少連續九個月以上於同一家醫院接受訓練，並取得該院內科專科醫師訓練期滿之證明文件。`,
   },
   {
     id: "3",
-    sectionId: "3",
-    sectionTitle: "三、訓練醫院資格",
-    comment: "",
-    hasComment: false,
+    title: "三、訓練醫院資格",
+    content: "訓練醫院應符合本部公告之訓練醫院認定基準。",
   },
 ]
+
+// Mock review feedback
+const mockReviewFeedback: ReviewFeedback = {
+  reviewDate: "114/03/10",
+  comments: [
+    "第 2.1 條專任醫師人數建議調整為 5 位，以符合新法規要求",
+    "第 3.2 條訓練時數說明過於簡略，請補充具體課程安排",
+    "建議新增第 4.3 條關於緊急應變的說明",
+  ],
+}
 
 const historicalVersions = [
   { year: "2024", title: "內科醫學會 訓練醫院認定基準" },
@@ -95,6 +121,7 @@ export default function FilingDetailPage({
 
   const [documentMethod, setDocumentMethod] = useState<string>("change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
+  const [showPreviousYearDrawer, setShowPreviousYearDrawer] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1"])
   const [activeSection, setActiveSection] = useState("1")
   const [sectionContents, setSectionContents] = useState<Record<string, string>>({
@@ -102,6 +129,33 @@ export default function FilingDetailPage({
     "2": documentOutline[1].content,
     "3": documentOutline[2].content,
   })
+
+  // Revision reason state
+  const [revisionReasons, setRevisionReasons] = useState<RevisionReason[]>([
+    { id: "1", label: "因應衛福部法規修正", color: "blue" },
+    { id: "2", label: "內部流程優化", color: "green" },
+  ])
+
+  const [revisions, setRevisions] = useState<RevisionItem[]>([
+    {
+      id: "r1",
+      sectionId: "2",
+      sectionTitle: "二、醫師資格",
+      oldText: "三年以上",
+      newText: "五年以上",
+      reasonId: "1",
+    },
+    {
+      id: "r2",
+      sectionId: "3",
+      sectionTitle: "三、訓練醫院資格",
+      oldText: "",
+      newText: "新增內容",
+      reasonId: null,
+    },
+  ])
+
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null)
 
   const hasReviewComments = status === "需補件"
   const isReadOnly = status === "通過"
@@ -121,7 +175,9 @@ export default function FilingDetailPage({
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
-      prev.includes(sectionId) ? prev.filter((s) => s !== sectionId) : [...prev, sectionId],
+      prev.includes(sectionId)
+        ? prev.filter((s) => s !== sectionId)
+        : [...prev, sectionId]
     )
   }
 
@@ -132,10 +188,61 @@ export default function FilingDetailPage({
     }))
   }
 
+  const handleAddReason = useCallback((label: string) => {
+    const newReason: RevisionReason = {
+      id: `reason-${Date.now()}`,
+      label,
+      color: "blue",
+    }
+    setRevisionReasons((prev) => [...prev, newReason])
+    toast.success("已新增修訂原因")
+  }, [])
+
+  const handleRemoveReason = useCallback((reasonId: string) => {
+    setRevisionReasons((prev) => prev.filter((r) => r.id !== reasonId))
+    setRevisions((prev) =>
+      prev.map((r) => (r.reasonId === reasonId ? { ...r, reasonId: null } : r))
+    )
+    toast.success("已移除修訂原因")
+  }, [])
+
+  const handleAssignReason = useCallback(
+    (revisionId: string, reasonId: string | null) => {
+      setRevisions((prev) =>
+        prev.map((r) => (r.id === revisionId ? { ...r, reasonId } : r))
+      )
+    },
+    []
+  )
+
+  const handleSelectRevision = useCallback((revisionId: string) => {
+    setSelectedRevisionId(revisionId)
+    const revision = revisions.find((r) => r.id === revisionId)
+    if (revision) {
+      setActiveSection(revision.sectionId)
+      if (!expandedSections.includes(revision.sectionId)) {
+        setExpandedSections((prev) => [...prev, revision.sectionId])
+      }
+    }
+  }, [revisions, expandedSections])
+
+  const handleCopyPreviousYearContent = useCallback(
+    (sectionId: string, content: string) => {
+      setSectionContents((prev) => ({
+        ...prev,
+        [sectionId]: content,
+      }))
+      toast.success("已複製到編輯區域")
+    },
+    []
+  )
+
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
       <div className="bg-[#1e2a5e] text-white/70 text-sm py-2">
-        <div className="container mx-auto px-6">規範文件管理 / 專科醫師訓練管理系統</div>
+        <div className="container mx-auto px-6">
+          規範文件管理 / 專科醫師訓練管理系統
+        </div>
       </div>
 
       <div className="container mx-auto px-6 pt-6">
@@ -151,87 +258,79 @@ export default function FilingDetailPage({
           <h1 className="text-2xl font-bold text-foreground">
             內科專科醫師{getDocumentTitle()} - 年度文件設定
           </h1>
-          <Button
-            variant="outline"
-            onClick={() => setShowVersionDialog(true)}
-            className="text-primary border-primary hover:bg-primary/5"
-          >
-            其他年度版本
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowPreviousYearDrawer(true)}
+              className="gap-1"
+            >
+              <History className="h-4 w-4" />
+              查看 113 年度內容
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowVersionDialog(true)}
+              className="text-primary border-primary hover:bg-primary/5"
+            >
+              其他年度版本
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 pb-8">
+        {/* Review Feedback Banner */}
+        {hasReviewComments && (
+          <div className="mb-6">
+            <ReviewFeedbackBanner feedback={mockReviewFeedback} />
+          </div>
+        )}
+
         <div className="flex gap-6">
-          <div className="w-72 shrink-0">
-            <div className="bg-card rounded-lg p-4">
-              {hasReviewComments ? (
-                <>
-                  <div className="text-sm font-medium text-muted-foreground mb-4">
-                    大綱 / 審查評語
-                  </div>
-                  <nav className="space-y-1">
-                    {reviewComments.map((item) => (
-                      <div key={item.id}>
-                        <button
-                          onClick={() => setActiveSection(item.sectionId)}
-                          className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors ${
-                            activeSection === item.sectionId
-                              ? "bg-[#e8edf7] text-primary font-medium"
-                              : "hover:bg-muted"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.sectionTitle}
-                            {item.hasComment && (
-                              <span className="h-2 w-2 rounded-full bg-orange-400" />
-                            )}
-                          </div>
-                        </button>
-                        {item.hasComment && (
-                          <div className="ml-4 mt-1 mb-2 px-3 py-2 bg-yellow-50 border-l-2 border-yellow-400 text-xs text-yellow-800 rounded-r">
-                            {item.comment}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </nav>
-                </>
-              ) : (
-                <nav className="space-y-1">
-                  {documentOutline.map((section) => (
-                    <button
-                      key={section.id}
-                      onClick={() => setActiveSection(section.id)}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors ${
-                        activeSection === section.id
-                          ? "bg-[#e8edf7] text-primary font-medium"
-                          : "hover:bg-muted"
-                      }`}
-                    >
-                      {section.title}
-                    </button>
-                  ))}
-                </nav>
-              )}
+          {/* Left Sidebar - Outline Navigation */}
+          <div className="w-56 shrink-0">
+            <div className="bg-card rounded-lg p-4 sticky top-4">
+              <div className="text-sm font-medium text-muted-foreground mb-4">
+                大綱導覽
+              </div>
+              <nav className="space-y-1">
+                {documentOutline.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      activeSection === section.id
+                        ? "bg-[#e8edf7] text-primary font-medium"
+                        : "hover:bg-muted"
+                    }`}
+                  >
+                    {section.title}
+                  </button>
+                ))}
+              </nav>
             </div>
           </div>
 
+          {/* Main Content Area */}
           <div className="flex-1 space-y-6">
             {isReadOnly && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-green-700">
                   <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
                     V
                   </span>
-                  <span className="font-medium">此文件已通過審查，僅供查看及匯出</span>
+                  <span className="font-medium">
+                    此文件已通過審查，僅供查看及匯出
+                  </span>
                 </div>
               </div>
             )}
 
             {showDocumentMethodChoice && (
               <div className="bg-card rounded-lg p-6">
-                <h3 className="font-medium text-foreground mb-4">本年度文件處理方式</h3>
+                <h3 className="font-medium text-foreground mb-4">
+                  本年度文件處理方式
+                </h3>
                 <RadioGroup value={documentMethod} onValueChange={setDocumentMethod}>
                   <div
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 mb-3 ${
@@ -320,14 +419,18 @@ export default function FilingDetailPage({
                             )}
                             <span className="font-medium">{section.title}</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">展開</span>
+                          <span className="text-sm text-muted-foreground">
+                            展開
+                          </span>
                         </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="px-4 pb-4">
                           <Textarea
                             value={sectionContents[section.id] || ""}
-                            onChange={(e) => updateContent(section.id, e.target.value)}
+                            onChange={(e) =>
+                              updateContent(section.id, e.target.value)
+                            }
                             className={`min-h-32 border-2 ${
                               isReadOnly
                                 ? "bg-muted/50 border-border"
@@ -335,7 +438,9 @@ export default function FilingDetailPage({
                             }`}
                             placeholder="請輸入內容..."
                             disabled={
-                              isReadOnly || (showDocumentMethodChoice && documentMethod === "no-change")
+                              isReadOnly ||
+                              (showDocumentMethodChoice &&
+                                documentMethod === "no-change")
                             }
                             readOnly={isReadOnly}
                           />
@@ -381,9 +486,33 @@ export default function FilingDetailPage({
               )}
             </div>
           </div>
+
+          {/* Right Sidebar - Revision Reason Panel */}
+          {!isReadOnly && documentMethod === "change" && (
+            <RevisionReasonPanel
+              reasons={revisionReasons}
+              revisions={revisions}
+              onAddReason={handleAddReason}
+              onRemoveReason={handleRemoveReason}
+              onAssignReason={handleAssignReason}
+              onSelectRevision={handleSelectRevision}
+              selectedRevisionId={selectedRevisionId}
+            />
+          )}
         </div>
       </div>
 
+      {/* Previous Year Content Drawer */}
+      <PreviousYearDrawer
+        open={showPreviousYearDrawer}
+        onOpenChange={setShowPreviousYearDrawer}
+        year="113"
+        sections={previousYearContent}
+        onCopyContent={handleCopyPreviousYearContent}
+        currentSectionId={activeSection}
+      />
+
+      {/* Historical Versions Dialog */}
       <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -397,7 +526,9 @@ export default function FilingDetailPage({
               >
                 <div>
                   <div className="font-medium">{version.year}年度</div>
-                  <div className="text-sm text-muted-foreground">{version.title}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {version.title}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
@@ -438,4 +569,3 @@ export default function FilingDetailPage({
     </div>
   )
 }
-
