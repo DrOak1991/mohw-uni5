@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, use, useCallback } from "react"
+import { useState, use, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -28,30 +29,24 @@ import {
   ChevronRight,
   Eye,
   Download,
-  Plus,
   FileText,
-  History,
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
+import { TextDiffDisplay } from "@/components/filing/text-diff-display"
 import {
-  RevisionReasonPanel,
-  type RevisionReason,
-  type RevisionItem,
-} from "@/components/filing/revision-reason-panel"
-import {
-  PreviousYearDrawer,
-  type PreviousYearSection,
-} from "@/components/filing/previous-year-drawer"
+  RevisionNotesPanel,
+  type SectionRevisionNote,
+} from "@/components/filing/revision-notes-panel"
 import {
   ReviewFeedbackBanner,
   type ReviewFeedback,
 } from "@/components/filing/review-feedback-banner"
 
-// Mock data for document outline
-const documentOutline = [
+// Mock data - Previous year content (read-only reference)
+const previousYearData = [
   {
     id: "1",
     title: "一、甄審原則",
@@ -69,11 +64,22 @@ const documentOutline = [
     id: "3",
     title: "三、訓練醫院資格",
     content: "訓練醫院應符合本部公告之訓練醫院認定基準。",
+  },
+  {
+    id: "2-2",
+    title: "2.2 訓練計畫執行架構",
+    content: `2.2.1精神科專科醫師訓練計畫由「衛生福利部專科醫師訓練計畫認定會」(Residency Review Committee，以下簡稱RRC)認可之訓練醫院執行，依據核給名額收訓。訓練醫院應有能力提供各樣資源以達到完整的訓練目標。
+
+2.2.2各訓練醫院應有完整之住院醫師訓練計畫書，詳細載明訓練目標、核心課程、師資、教學資源、訓練課程與訓練方式、考評機制等重點，落實執行且持續檢討改進。
+
+2.2.3教育相關人員應均清楚知道訓練計畫的建構精神與施行策略。
+
+2.2.4為達到本計畫訓練之完整目標。`,
   },
 ]
 
-// Mock data for previous year content
-const previousYearContent: PreviousYearSection[] = [
+// Mock data - Current year content (editable, pre-filled with last year data)
+const currentYearInitialData = [
   {
     id: "1",
     title: "一、甄審原則",
@@ -85,12 +91,23 @@ const previousYearContent: PreviousYearSection[] = [
     title: "二、醫師資格",
     content: `醫師符合下列資格之一者，得參加專科醫師甄審：
 
-（一）依本部一百零一年六月三十日以前公告該年度所定訓練期間，接受畢業後一般醫學（以下簡稱PGY）訓練：於內科專科醫師訓練醫院接受三年以上之內科臨床訓練，且至少連續九個月以上於同一家醫院接受訓練，並取得該院內科專科醫師訓練期滿之證明文件。`,
+（一）依本部一百零一年六月三十日以前公告該年度所定訓練期間，接受畢業後一般醫學（以下簡稱PGY）訓練：於內科專科醫師訓練醫院接受五年以上之內科臨床訓練，且至少連續九個月以上於同一家醫院接受訓練，並取得該院內科專科醫師訓練期滿之證明文件。`,
   },
   {
     id: "3",
     title: "三、訓練醫院資格",
-    content: "訓練醫院應符合本部公告之訓練醫院認定基準。",
+    content: "訓練醫院必須符合本部公告之訓練醫院認定基準。",
+  },
+  {
+    id: "2-2",
+    title: "2.2 訓練計畫執行架構",
+    content: `2.2.1精神科專科醫師訓練計畫委由「衛生福利部專科醫師訓練計畫認定會」(Residency Review Committee，以下簡稱RRC)認可之訓練醫院執行，依據核給名額收訓。訓練醫院必須有能力提供各樣資源以達到完整的訓練目標。
+
+2.2.2各訓練醫院應有完整之住院醫師訓練計畫書，詳細載明訓練目標、核心課程、師資、教學資源、訓練課程與訓練方式、考評機制等重點，落實執行且持續檢討改進。訓練課程須符合「精神科專科醫師訓練課程基準」(依照衛生福利部最新公告)。
+
+2.2.3教育相關人員應均清楚知道訓練計畫的建構精神與施行策略。
+
+2.2.4為達到本計畫所載訓練之完整目標，不限同一家機構訓練，允許與合作醫院聯合訓練。`,
   },
 ]
 
@@ -121,41 +138,26 @@ export default function FilingDetailPage({
 
   const [documentMethod, setDocumentMethod] = useState<string>("change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
-  const [showPreviousYearDrawer, setShowPreviousYearDrawer] = useState(false)
-  const [expandedSections, setExpandedSections] = useState<string[]>(["1"])
+  const [expandedSections, setExpandedSections] = useState<string[]>(["1", "2", "3", "2-2"])
   const [activeSection, setActiveSection] = useState("1")
-  const [sectionContents, setSectionContents] = useState<Record<string, string>>({
-    "1": documentOutline[0].content,
-    "2": documentOutline[1].content,
-    "3": documentOutline[2].content,
+  const [activeTab, setActiveTab] = useState<string>("current")
+  
+  // Current year editable content
+  const [currentYearContent, setCurrentYearContent] = useState<Record<string, string>>(
+    currentYearInitialData.reduce((acc, section) => {
+      acc[section.id] = section.content
+      return acc
+    }, {} as Record<string, string>)
+  )
+
+  // Revision notes per section
+  const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({})
+  
+  // Apply to all toggle
+  const [applyToAll, setApplyToAll] = useState({
+    enabled: false,
+    note: "",
   })
-
-  // Revision reason state
-  const [revisionReasons, setRevisionReasons] = useState<RevisionReason[]>([
-    { id: "1", label: "因應衛福部法規修正", color: "blue" },
-    { id: "2", label: "內部流程優化", color: "green" },
-  ])
-
-  const [revisions, setRevisions] = useState<RevisionItem[]>([
-    {
-      id: "r1",
-      sectionId: "2",
-      sectionTitle: "二、醫師資格",
-      oldText: "三年以上",
-      newText: "五年以上",
-      reasonId: "1",
-    },
-    {
-      id: "r2",
-      sectionId: "3",
-      sectionTitle: "三、訓練醫院資格",
-      oldText: "",
-      newText: "新增內容",
-      reasonId: null,
-    },
-  ])
-
-  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null)
 
   const hasReviewComments = status === "需補件"
   const isReadOnly = status === "通過"
@@ -182,60 +184,53 @@ export default function FilingDetailPage({
   }
 
   const updateContent = (sectionId: string, content: string) => {
-    setSectionContents((prev) => ({
+    setCurrentYearContent((prev) => ({
       ...prev,
       [sectionId]: content,
     }))
   }
 
-  const handleAddReason = useCallback((label: string) => {
-    const newReason: RevisionReason = {
-      id: `reason-${Date.now()}`,
-      label,
-      color: "blue",
+  const handleNoteChange = useCallback((sectionId: string, note: string) => {
+    setRevisionNotes((prev) => ({
+      ...prev,
+      [sectionId]: note,
+    }))
+  }, [])
+
+  const handleApplyToAllChange = useCallback((enabled: boolean, note: string) => {
+    setApplyToAll({ enabled, note })
+  }, [])
+
+  const handleSectionClick = useCallback((sectionId: string) => {
+    setActiveSection(sectionId)
+    setActiveTab("current")
+    if (!expandedSections.includes(sectionId)) {
+      setExpandedSections((prev) => [...prev, sectionId])
     }
-    setRevisionReasons((prev) => [...prev, newReason])
-    toast.success("已新增修訂原因")
-  }, [])
+  }, [expandedSections])
 
-  const handleRemoveReason = useCallback((reasonId: string) => {
-    setRevisionReasons((prev) => prev.filter((r) => r.id !== reasonId))
-    setRevisions((prev) =>
-      prev.map((r) => (r.reasonId === reasonId ? { ...r, reasonId: null } : r))
-    )
-    toast.success("已移除修訂原因")
-  }, [])
+  // Compute which sections have changes
+  const sectionRevisionNotes: SectionRevisionNote[] = useMemo(() => {
+    return currentYearInitialData.map((section) => {
+      const prevSection = previousYearData.find((p) => p.id === section.id)
+      const oldContent = prevSection?.content || ""
+      const newContent = currentYearContent[section.id] || ""
+      const hasChanges = oldContent !== newContent
 
-  const handleAssignReason = useCallback(
-    (revisionId: string, reasonId: string | null) => {
-      setRevisions((prev) =>
-        prev.map((r) => (r.id === revisionId ? { ...r, reasonId } : r))
-      )
-    },
-    []
-  )
-
-  const handleSelectRevision = useCallback((revisionId: string) => {
-    setSelectedRevisionId(revisionId)
-    const revision = revisions.find((r) => r.id === revisionId)
-    if (revision) {
-      setActiveSection(revision.sectionId)
-      if (!expandedSections.includes(revision.sectionId)) {
-        setExpandedSections((prev) => [...prev, revision.sectionId])
+      return {
+        sectionId: section.id,
+        sectionTitle: section.title,
+        hasChanges,
+        note: applyToAll.enabled ? applyToAll.note : (revisionNotes[section.id] || ""),
       }
-    }
-  }, [revisions, expandedSections])
+    })
+  }, [currentYearContent, revisionNotes, applyToAll])
 
-  const handleCopyPreviousYearContent = useCallback(
-    (sectionId: string, content: string) => {
-      setSectionContents((prev) => ({
-        ...prev,
-        [sectionId]: content,
-      }))
-      toast.success("已複製到編輯區域")
-    },
-    []
-  )
+  // Get previous year content for a section
+  const getPreviousYearContent = (sectionId: string) => {
+    const section = previousYearData.find((s) => s.id === sectionId)
+    return section?.content || ""
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -256,17 +251,9 @@ export default function FilingDetailPage({
 
         <div className="flex items-center justify-between mt-4 mb-6">
           <h1 className="text-2xl font-bold text-foreground">
-            內科專科醫師{getDocumentTitle()} - 年度文件設定
+            內科專科醫師{getDocumentTitle()} - 114年度文件填報
           </h1>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowPreviousYearDrawer(true)}
-              className="gap-1"
-            >
-              <History className="h-4 w-4" />
-              查看 113 年度內容
-            </Button>
             <Button
               variant="outline"
               onClick={() => setShowVersionDialog(true)}
@@ -287,30 +274,6 @@ export default function FilingDetailPage({
         )}
 
         <div className="flex gap-6">
-          {/* Left Sidebar - Outline Navigation */}
-          <div className="w-56 shrink-0">
-            <div className="bg-card rounded-lg p-4 sticky top-4">
-              <div className="text-sm font-medium text-muted-foreground mb-4">
-                大綱導覽
-              </div>
-              <nav className="space-y-1">
-                {documentOutline.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      activeSection === section.id
-                        ? "bg-[#e8edf7] text-primary font-medium"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    {section.title}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
-
           {/* Main Content Area */}
           <div className="flex-1 space-y-6">
             {isReadOnly && (
@@ -398,65 +361,160 @@ export default function FilingDetailPage({
               </div>
             )}
 
-            <div className="bg-card rounded-lg p-6">
-              <h3 className="font-medium text-foreground mb-4">大綱</h3>
+            {/* Tab Switching: Previous Year (Read-only) vs Current Year (Editable) */}
+            <div className="bg-card rounded-lg">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <div className="border-b px-4">
+                  <TabsList className="h-12 bg-transparent p-0 gap-4">
+                    <TabsTrigger
+                      value="current"
+                      className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
+                    >
+                      114 年度 (編輯中)
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="previous"
+                      className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
+                    >
+                      113 年度 (參考)
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <div className="space-y-4">
-                {documentOutline.map((section) => (
-                  <Collapsible
-                    key={section.id}
-                    open={expandedSections.includes(section.id)}
-                    onOpenChange={() => toggleSection(section.id)}
-                  >
-                    <div className="border rounded-lg">
-                      <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between px-4 py-3 hover:bg-muted/50">
-                          <div className="flex items-center gap-2">
-                            {expandedSections.includes(section.id) ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                            <span className="font-medium">{section.title}</span>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            展開
-                          </span>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-4 pb-4">
-                          <Textarea
-                            value={sectionContents[section.id] || ""}
-                            onChange={(e) =>
-                              updateContent(section.id, e.target.value)
-                            }
-                            className={`min-h-32 border-2 ${
-                              isReadOnly
-                                ? "bg-muted/50 border-border"
-                                : "border-primary/30 focus:border-primary"
+                {/* Current Year Tab - Editable with Diff Display */}
+                <TabsContent value="current" className="p-6 mt-0">
+                  <div className="space-y-4">
+                    {currentYearInitialData.map((section) => {
+                      const prevContent = getPreviousYearContent(section.id)
+                      const currContent = currentYearContent[section.id] || ""
+                      const hasChanges = prevContent !== currContent
+
+                      return (
+                        <Collapsible
+                          key={section.id}
+                          open={expandedSections.includes(section.id)}
+                          onOpenChange={() => toggleSection(section.id)}
+                        >
+                          <div
+                            className={`border rounded-lg ${
+                              activeSection === section.id
+                                ? "border-primary ring-1 ring-primary"
+                                : "border-border"
                             }`}
-                            placeholder="請輸入內容..."
-                            disabled={
-                              isReadOnly ||
-                              (showDocumentMethodChoice &&
-                                documentMethod === "no-change")
-                            }
-                            readOnly={isReadOnly}
-                          />
-                        </div>
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
-                ))}
-              </div>
+                          >
+                            <CollapsibleTrigger className="w-full">
+                              <div
+                                className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
+                                onClick={() => setActiveSection(section.id)}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {expandedSections.includes(section.id) ? (
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                  )}
+                                  <span className="font-medium">{section.title}</span>
+                                  {hasChanges && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
+                                      已修訂
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="px-4 pb-4 space-y-4">
+                                {/* Diff Display */}
+                                {hasChanges && (
+                                  <div className="p-4 bg-muted/30 rounded-lg border">
+                                    <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                      <span>變更預覽：</span>
+                                      <span className="flex items-center gap-1">
+                                        <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
+                                        刪除
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <span className="inline-block w-3 h-3 bg-green-100 border border-green-200 rounded-sm" />
+                                        新增
+                                      </span>
+                                    </div>
+                                    <TextDiffDisplay
+                                      oldText={prevContent}
+                                      newText={currContent}
+                                    />
+                                  </div>
+                                )}
 
-              {!isReadOnly && (
-                <button className="mt-4 flex items-center gap-1 text-primary text-sm hover:underline">
-                  <Plus className="h-4 w-4" />
-                  新增章節
-                </button>
-              )}
+                                {/* Editable Textarea */}
+                                <Textarea
+                                  value={currContent}
+                                  onChange={(e) =>
+                                    updateContent(section.id, e.target.value)
+                                  }
+                                  className={`min-h-32 border-2 ${
+                                    isReadOnly
+                                      ? "bg-muted/50 border-border"
+                                      : "border-primary/30 focus:border-primary"
+                                  }`}
+                                  placeholder="請輸入內容..."
+                                  disabled={
+                                    isReadOnly ||
+                                    (showDocumentMethodChoice &&
+                                      documentMethod === "no-change")
+                                  }
+                                  readOnly={isReadOnly}
+                                />
+                              </div>
+                            </CollapsibleContent>
+                          </div>
+                        </Collapsible>
+                      )
+                    })}
+                  </div>
+                </TabsContent>
+
+                {/* Previous Year Tab - Read-only */}
+                <TabsContent value="previous" className="p-6 mt-0">
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <p className="text-sm text-blue-800">
+                      此為 113 年度已核定內容，僅供參考，無法編輯。
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {previousYearData.map((section) => (
+                      <Collapsible
+                        key={section.id}
+                        open={expandedSections.includes(section.id)}
+                        onOpenChange={() => toggleSection(section.id)}
+                      >
+                        <div className="border rounded-lg border-border bg-muted/20">
+                          <CollapsibleTrigger className="w-full">
+                            <div className="flex items-center justify-between px-4 py-3 hover:bg-muted/50">
+                              <div className="flex items-center gap-2">
+                                {expandedSections.includes(section.id) ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="font-medium text-muted-foreground">
+                                  {section.title}
+                                </span>
+                              </div>
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="px-4 pb-4">
+                              <div className="p-4 bg-muted/30 rounded-lg text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
+                                {section.content}
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-4">
@@ -487,30 +545,19 @@ export default function FilingDetailPage({
             </div>
           </div>
 
-          {/* Right Sidebar - Revision Reason Panel */}
+          {/* Right Sidebar - Revision Notes Panel */}
           {!isReadOnly && documentMethod === "change" && (
-            <RevisionReasonPanel
-              reasons={revisionReasons}
-              revisions={revisions}
-              onAddReason={handleAddReason}
-              onRemoveReason={handleRemoveReason}
-              onAssignReason={handleAssignReason}
-              onSelectRevision={handleSelectRevision}
-              selectedRevisionId={selectedRevisionId}
+            <RevisionNotesPanel
+              notes={sectionRevisionNotes}
+              onNoteChange={handleNoteChange}
+              activeSectionId={activeSection}
+              onSectionClick={handleSectionClick}
+              applyToAll={applyToAll}
+              onApplyToAllChange={handleApplyToAllChange}
             />
           )}
         </div>
       </div>
-
-      {/* Previous Year Content Drawer */}
-      <PreviousYearDrawer
-        open={showPreviousYearDrawer}
-        onOpenChange={setShowPreviousYearDrawer}
-        year="113"
-        sections={previousYearContent}
-        onCopyContent={handleCopyPreviousYearContent}
-        currentSectionId={activeSection}
-      />
 
       {/* Historical Versions Dialog */}
       <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
