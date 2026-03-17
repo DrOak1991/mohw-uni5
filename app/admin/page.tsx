@@ -485,10 +485,10 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm text-muted-foreground mb-4">
-                    最後更新：{template.lastUpdated}
+                    最後��新：{template.lastUpdated}
                   </div>
                   <div className="flex gap-2">
-                    <Link href={`/review/outline-management/${template.id}`} className="flex-1">
+                    <Link href={`/admin/outline-management/${template.id}`} className="flex-1">
                       <Button variant="outline" className="w-full gap-2">
                         <Edit className="h-4 w-4" />
                         編輯

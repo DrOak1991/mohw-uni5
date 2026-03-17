@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { ArrowLeft, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ReviewSimpleNav } from "@/components/review/simple-nav"
+
 
 const outlineItems = [
   {
@@ -36,16 +36,14 @@ const outlineItems = [
 export default function OutlineManagementPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <ReviewSimpleNav />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link
-            href="/"
+            href="/admin"
             className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回首頁
+            返回管理專區
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">大綱規範管理</h1>
         </div>
@@ -67,7 +65,7 @@ export default function OutlineManagementPage() {
                   <p className="text-sm text-gray-500 mt-0.5">{item.description}</p>
                 </div>
                 <Button asChild size="sm" variant="outline">
-                  <Link href={`/review/outline-management/${item.id}`} className="flex items-center gap-2">
+                  <Link href={`/admin/outline-management/${item.id}`} className="flex items-center gap-2">
                     <Pencil className="w-4 h-4" />
                     編輯
                   </Link>
