@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, use } from "react"
 import { ReviewSimpleNav } from "@/components/review/simple-nav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -53,9 +53,9 @@ interface Edit {
 export default function SubmissionReviewDetailPage({
   params,
 }: {
-  params: { societyId: string; id: string }
+  params: Promise<{ societyId: string; id: string }>
 }) {
-  const { societyId, id } = params
+  const { societyId, id } = use(params)
   const [stage, setStage] = useState("reviewing")
   const [comments, setComments] = useState<Comment[]>([])
   const [edits, setEdits] = useState<Edit[]>([])
