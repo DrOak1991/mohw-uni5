@@ -138,7 +138,7 @@ const mockReviewFeedback: ReviewFeedback = {
     1. 建議新增第 4.3 條關於緊急應變的說明，包含但不限於：
        - 重大傳染病疫情之應變措施
        - 大量傷患事件之處置流程
-       - 緊急醫療救護系統之整合運作
+       - 緊急醫療救護��統之整合運作
     
     2. 第 5.1 條師資培育計畫宜更具體，建議增列：
        - 師資培訓課程之規劃
@@ -286,9 +286,9 @@ export default function FilingDetailPage({
         </div>
       </div>
 
-      {/* Review Feedback Banner - Sticky */}
+      {/* Review Feedback Banner - Sticky below nav */}
       {hasReviewComments && (
-        <div className="sticky top-0 z-40 bg-[#f5f7fa] pt-2 pb-4">
+        <div className="sticky top-16 z-40 bg-[#f5f7fa] pt-2 pb-4 shadow-sm">
           <div className="container mx-auto px-6">
             <ReviewFeedbackBanner feedback={mockReviewFeedback} />
           </div>
