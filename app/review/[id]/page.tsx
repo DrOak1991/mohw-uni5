@@ -1,518 +1,529 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
-  ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  MessageSquare,
-  FileText,
+  ChevronLeft,
+  ChevronDown,
+  ChevronRight,
   Download,
   Upload,
-  History,
-  Eye,
-  GitCompare,
-  Plus,
-  Minus,
-  ChevronDown,
-  ChevronUp,
-  Paperclip,
+  FileText,
+  Trash2,
+  X,
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
-const documentSections = [
+import { TextDiffDisplay } from "@/components/filing/text-diff-display"
+
+// Mock data - this would come from the filing submission
+const previousYearData = [
   {
     id: "1",
-    title: "一、依據",
-    currentContent: "依據專科醫師分科及甄審辦法第四條規定辦理。",
-    previousContent: "依據專科醫師分科及甄審辦法第四條規定辦理。",
-    hasChange: false,
-    comments: [] as any[],
-    isExpanded: true,
+    title: "一、甄審原則",
+    content:
+      "衛生福利部（以下簡稱本部）為辦理內科專科醫師甄審（以下簡稱專科醫師甄審），特訂定本原則。",
   },
   {
     id: "2",
-    title: "二、目的",
-    currentContent:
-      "為確保內科專科醫師訓練品質，建立完善之訓練制度，培育具備專業知能與人文關懷之內科專科醫師。",
-    previousContent:
-      "為確保內科專科醫師訓練品質，建立完善之訓練制度，培育具備專業知能之內科專科醫師。",
-    hasChange: true,
-    changeType: "modified",
-    comments: [] as any[],
-    isExpanded: true,
+    title: "二、醫師資格",
+    content: `醫師符合下列資格之一者，得參加專科醫師甄審：
+
+（一）依本部一百零一年六月三十日以前公告該年度所定訓練期間，接受畢業後一般醫學（以下簡稱PGY）訓練：於內科專科醫師訓練醫院接受三年以上之內科臨床訓練，且至少連續九個月以上於同一家醫院接受訓練，並取得該院內科專科醫師訓練期滿之證明文件。`,
   },
   {
     id: "3",
-    title: "三、訓練目標",
-    currentContent: `內科專科醫師完成訓練後應具備以下核心能力：
-1. 內科常見疾病之診斷與治療能力
-2. 急重症病患之初步處置能力
-3. 跨團隊溝通與協調能力
-4. 終身學習與自我成長能力
-5. 醫學倫理與專業素養
-6. 醫病溝通與共享決策能力`,
-    previousContent: `內科專科醫師完成訓練後應具備以下核心能力：
-1. 內科常見疾病之診斷與治療能力
-2. 急重症病患之初步處置能力
-3. 跨團隊溝通與協調能力
-4. 終身學習與自我成長能力
-5. 醫學倫理與專業素養`,
-    hasChange: true,
-    changeType: "added",
-    comments: [
-      {
-        id: 1,
-        author: "分組審查委員",
-        date: "2025-03-02",
-        content: "建議說明第6點「醫病溝通與共享決策能力」的具體評量方式",
-        status: "pending",
-      },
-    ],
-    isExpanded: true,
+    title: "三、訓練醫院資格",
+    content: "訓練醫院應符合本部公告之訓練醫院認定基準。",
   },
   {
-    id: "4",
-    title: "四、訓練期程",
-    currentContent: `（一）訓練年限：三年
-（二）訓練階段：
-    第一年：基礎臨床訓練
-    第二年：專科核心訓練
-    第三年：進階專科訓練與研究`,
-    previousContent: `（一）訓練年限：三年
-（二）訓練階段：
-    第一年：基礎臨床訓練
-    第二年：專科核心訓練
-    第三年：進階專科訓練與研究`,
-    hasChange: false,
-    comments: [] as any[],
-    isExpanded: true,
+    id: "2-2",
+    title: "2.2 訓練計畫執行架構",
+    content: `2.2.1精神科專科醫師訓練計畫由「衛生福利部專科醫師訓練計畫認定會」(Residency Review Committee，以下簡稱RRC)認可之訓練醫院執行，依據核給名額收訓。訓練醫院應有能力提供各樣資源以達到完整的訓練目標。
+
+2.2.2各訓練醫院應有完整之住院醫師訓練計畫書，詳細載明訓練目標、核心課程、師資、教學資源、訓練課程與訓練方式、考評機制等重點，落實執行且持續檢討改進。
+
+2.2.3教育相關人員應均清楚知道訓練計畫的建構精神與施行策略。
+
+2.2.4為達到本計畫訓練之完整目標。`,
   },
 ]
 
-const attachments = [
+// Current year submitted content (from filing)
+const currentYearData = [
   {
-    id: 1,
-    name: "分組會議紀錄_20250302.pdf",
-    size: "1.2 MB",
-    uploadedBy: "系統管理員",
-    date: "2025-03-02",
+    id: "1",
+    title: "一、甄審原則",
+    content:
+      "衛生福利部（以下簡稱本部）為辦理內科專科醫師甄審（以下簡稱專科醫師甄審），特訂定本原則。",
+    revisionNote: "",
   },
   {
-    id: 2,
-    name: "審查意見彙整表.xlsx",
-    size: "256 KB",
-    uploadedBy: "系統管理員",
-    date: "2025-03-02",
+    id: "2",
+    title: "二、醫師資格",
+    content: `醫師符合下列資格之一者，得參加專科醫師甄審：
+
+（一）依本部一百零一年六月三十日以前公告該年度所定訓練期間，接受畢業後一般醫學（以下簡稱PGY）訓練：於內科專科醫師訓練醫院接受五年以上之內科臨床訓練，且至少連續九個月以上於同一家醫院接受訓練，並取得該院內科專科醫師訓練期滿之證明文件。`,
+    revisionNote: "因應衛福部 114 年法規修正，將訓練年限由三年調整為五年。",
+  },
+  {
+    id: "3",
+    title: "三、訓練醫院資格",
+    content: "訓練醫院必須符合本部公告之訓練醫院認定基準。",
+    revisionNote: "將「應」改為「必須」以符合新規定用語。",
+  },
+  {
+    id: "2-2",
+    title: "2.2 訓練計畫執行架構",
+    content: `2.2.1精神科專科醫師訓練計畫委由「衛生福利部專科醫師訓練計畫認定會」(Residency Review Committee，以下簡稱RRC)認可之訓練醫院執行，依據核給名額收訓。訓練醫院必須有能力提供各樣資源以達到完整的訓練目標。
+
+2.2.2各訓練醫院應有完整之住院醫師訓練計畫書，詳細載明訓練目標、核心課程、師資、教學資源、訓練課程與訓練方式、考評機制等重點，落實執行且持續檢討改進。訓練課程須符合「精神科專科醫師訓練課程基準」(依照衛生福利部最新公告)。
+
+2.2.3教育相關人員應均清楚知道訓練計畫的建構精神與施行策略。
+
+2.2.4為達到本計畫所載訓練之完整目標，不限同一家機構訓練，允許與合作醫院聯合訓練。`,
+    revisionNote: "1. 2.2.1 將「由」改為「委由」，「應」改為「必須」\n2. 2.2.2 新增訓練課程基準參照說明\n3. 2.2.4 新增允許聯合訓練之說明",
   },
 ]
 
-export default function ReviewDetailPage() {
-  const [sections, setSections] = useState(documentSections)
-  const [showComparison, setShowComparison] = useState(true)
-  const [newComment, setNewComment] = useState("")
-  const [selectedSection, setSelectedSection] = useState<string | null>(null)
+const reviewStages = [
+  { value: "pending", label: "待審查" },
+  { value: "reviewing", label: "承辦審查中" },
+  { value: "group-review", label: "分組會議審查" },
+  { value: "rrc-review", label: "RRC 大會審查" },
+  { value: "returned", label: "退回補件" },
+  { value: "approved", label: "審查通過" },
+]
 
-  const toggleSection = (id: string) => {
-    setSections((prev) =>
-      prev.map((section) =>
-        section.id === id ? { ...section, isExpanded: !section.isExpanded } : section,
-      ),
+const documentInfo = {
+  society: "內科醫學會",
+  documentType: "甄審原則",
+  year: "114",
+  submittedDate: "2025-03-01",
+  currentStage: "reviewing",
+}
+
+export default function ReviewDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = use(params)
+
+  const [expandedSections, setExpandedSections] = useState<string[]>(
+    currentYearData.map((s) => s.id)
+  )
+  const [activeTab, setActiveTab] = useState<string>("current")
+  
+  // Review state
+  const [reviewComment, setReviewComment] = useState("")
+  const [currentStage, setCurrentStage] = useState(documentInfo.currentStage)
+  const [showStageDialog, setShowStageDialog] = useState(false)
+  const [pendingStage, setPendingStage] = useState("")
+  
+  // Uploaded files
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: number; date: string }>>([
+    { name: "分組會議紀錄_114-03-05.pdf", size: 1024000, date: "2025-03-05" },
+  ])
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) =>
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
+        : [...prev, sectionId]
     )
   }
 
-  const addComment = (sectionId: string) => {
-    if (!newComment.trim()) return
-    setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              comments: [
-                ...section.comments,
-                {
-                  id: Date.now(),
-                  author: "審查委員",
-                  date: new Date().toISOString().split("T")[0],
-                  content: newComment,
-                  status: "pending",
-                },
-              ],
-            }
-          : section,
-      ),
-    )
-    setNewComment("")
-    setSelectedSection(null)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      const newFiles = Array.from(files).map((file) => ({
+        name: file.name,
+        size: file.size,
+        date: new Date().toLocaleDateString("zh-TW"),
+      }))
+      setUploadedFiles([...uploadedFiles, ...newFiles])
+      toast.success(`已上傳 ${newFiles.length} 個檔案`)
+    }
+    e.target.value = ""
+  }
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
+    toast.success("已移除檔案")
+  }
+
+  const handleStageChange = (newStage: string) => {
+    setPendingStage(newStage)
+    setShowStageDialog(true)
+  }
+
+  const confirmStageChange = () => {
+    setCurrentStage(pendingStage)
+    setShowStageDialog(false)
+    const stageLabel = reviewStages.find((s) => s.value === pendingStage)?.label
+    toast.success(`審查階段已變更為「${stageLabel}」`)
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B"
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+  }
+
+  const getStageColor = (stage: string) => {
+    switch (stage) {
+      case "pending":
+        return "bg-gray-100 text-gray-700"
+      case "reviewing":
+        return "bg-blue-100 text-blue-700"
+      case "group-review":
+        return "bg-purple-100 text-purple-700"
+      case "rrc-review":
+        return "bg-indigo-100 text-indigo-700"
+      case "returned":
+        return "bg-red-100 text-red-700"
+      case "approved":
+        return "bg-green-100 text-green-700"
+      default:
+        return "bg-gray-100 text-gray-700"
+    }
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/review">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl md:text-2xl font-bold">訓練計畫基準審查</h1>
-              <Badge variant="outline">114年度</Badge>
-              <Badge variant="default">分組審查中</Badge>
+    <div className="min-h-screen bg-[#f5f7fa]">
+      {/* Header */}
+      <div className="bg-white border-b px-6 py-4">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/review/submissions">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  返回列表
+                </Button>
+              </Link>
+              <div className="h-6 w-px bg-gray-200" />
+              <div>
+                <h1 className="text-lg font-semibold">
+                  {documentInfo.society} - {documentInfo.documentType}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {documentInfo.year} 年度 | 提交日期：{documentInfo.submittedDate}
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              內科醫學會 | 提交日期：2025-03-01
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 mr-4">
-            <Switch
-              id="comparison-mode"
-              checked={showComparison}
-              onCheckedChange={setShowComparison}
-            />
-            <Label htmlFor="comparison-mode" className="text-sm">
-              版本比對
-            </Label>
-          </div>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            匯出
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="gap-2 text-destructive border-destructive hover:bg-destructive/10"
-              >
-                <XCircle className="h-4 w-4" />
-                退回補正
+            <div className="flex items-center gap-3">
+              <Badge className={getStageColor(currentStage)}>
+                {reviewStages.find((s) => s.value === currentStage)?.label}
+              </Badge>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Download className="h-4 w-4" />
+                匯出 PDF
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>確認退回補正？</AlertDialogTitle>
-                <AlertDialogDescription>
-                  文件將退回醫學會進行補正，請確認已填寫完整的審查意見。
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>取消</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive text-destructive-foreground">
-                  確認退回
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                審查通過
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>確認審查通過？</AlertDialogTitle>
-                <AlertDialogDescription>
-                  文件將進入下一審查階段（RRC大會審核）。
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>取消</AlertDialogCancel>
-                <AlertDialogAction>確認通過</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">文件資訊</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">專科</span>
-                <span className="font-medium">內科</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">文件類型</span>
-                <span className="font-medium">訓練計畫基準</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">提交日期</span>
-                <span className="font-medium">2025-03-01</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">版本</span>
-                <span className="font-medium">v3</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">異動狀態</span>
-                <Badge variant="default" className="bg-accent">
-                  有變更
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="container mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Tabs for current/previous year */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full justify-start bg-white border">
+                <TabsTrigger value="current" className="flex-1 max-w-[200px]">
+                  114 年度 (本次送審)
+                </TabsTrigger>
+                <TabsTrigger value="previous" className="flex-1 max-w-[200px]">
+                  113 年度 (參考)
+                </TabsTrigger>
+              </TabsList>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">文件大綱</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {sections.map((section) => (
-                  <a
-                    key={section.id}
-                    href={`#section-${section.id}`}
-                    className="block px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      {section.hasChange && (
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            section.changeType === "added" ? "bg-accent" : "bg-chart-4"
-                          }`}
-                        />
-                      )}
-                      <span className="truncate">{section.title}</span>
-                      {section.comments.length > 0 && (
-                        <Badge variant="secondary" className="ml-auto text-xs">
-                          {section.comments.length}
-                        </Badge>
-                      )}
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              <TabsContent value="current" className="mt-4 space-y-4">
+                {currentYearData.map((section) => {
+                  const prevSection = previousYearData.find(
+                    (p) => p.id === section.id
+                  )
+                  const prevContent = prevSection?.content || ""
+                  const hasChanges = prevContent !== section.content
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Paperclip className="h-4 w-4" />
-                審查附件
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {attachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    className="flex items-center gap-2 p-2 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{attachment.name}</p>
-                      <p className="text-xs text-muted-foreground">{attachment.size}</p>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-3 gap-2">
-                <Upload className="h-4 w-4" />
-                上傳附件
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-3 space-y-4">
-          {showComparison && (
-            <Card className="p-4">
-              <div className="flex items-center gap-6 text-sm">
-                <span className="font-medium">版本比對說明：</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-accent/20 border border-accent" />
-                  <span>新增內容</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-destructive/20 border border-destructive" />
-                  <span>刪除內容</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-chart-4/20 border border-chart-4" />
-                  <span>修改內容</span>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {sections.map((section) => (
-            <Card key={section.id} id={`section-${section.id}`}>
-              <CardHeader
-                className="cursor-pointer"
-                onClick={() => toggleSection(section.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-base">{section.title}</CardTitle>
-                    {section.hasChange && (
-                      <Badge
-                        variant={section.changeType === "added" ? "default" : "outline"}
-                        className={
-                          section.changeType === "added"
-                            ? "bg-accent"
-                            : "border-chart-4 text-chart-4"
-                        }
-                      >
-                        {section.changeType === "added" ? "新增" : "修改"}
-                      </Badge>
-                    )}
-                    {section.comments.length > 0 && (
-                      <Badge variant="secondary" className="gap-1">
-                        <MessageSquare className="h-3 w-3" />
-                        {section.comments.length}
-                      </Badge>
-                    )}
-                  </div>
-                  {section.isExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-              </CardHeader>
-              {section.isExpanded && (
-                <CardContent>
-                  {showComparison && section.hasChange ? (
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-2">
-                          前一年度版本
-                        </p>
-                        <div className="p-4 rounded-lg bg-muted/50 text-sm whitespace-pre-wrap">
-                          {section.previousContent}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-2">
-                          本年度版本
-                        </p>
-                        <div
-                          className={`p-4 rounded-lg text-sm whitespace-pre-wrap ${
-                            section.changeType === "added"
-                              ? "bg-accent/10 border border-accent/30"
-                              : "bg-chart-4/10 border border-chart-4/30"
-                          }`}
-                        >
-                          {section.currentContent}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded-lg bg-muted/50 text-sm whitespace-pre-wrap mb-4">
-                      {section.currentContent}
-                    </div>
-                  )}
-
-                  {section.comments.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      <p className="text-sm font-medium">審查意見</p>
-                      {section.comments.map((comment: any) => (
-                        <div
-                          key={comment.id}
-                          className="p-3 rounded-lg border bg-muted/30"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-medium">{comment.author}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {comment.date}
-                            </span>
-                            <Badge
-                              variant={
-                                comment.status === "pending" ? "secondary" : "default"
-                              }
-                              className="ml-auto text-xs"
-                            >
-                              {comment.status === "pending" ? "待回覆" : "已回覆"}
-                            </Badge>
+                  return (
+                    <Collapsible
+                      key={section.id}
+                      open={expandedSections.includes(section.id)}
+                      onOpenChange={() => toggleSection(section.id)}
+                    >
+                      <div className="bg-white rounded-lg border shadow-sm">
+                        <CollapsibleTrigger asChild>
+                          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50">
+                            <div className="flex items-center gap-3">
+                              {expandedSections.includes(section.id) ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="font-medium">{section.title}</span>
+                              {hasChanges && (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                  已修訂
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm">{comment.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 pb-4 space-y-4">
+                            {/* Content Display */}
+                            <div className="p-4 bg-gray-50 rounded-lg border">
+                              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                {section.content}
+                              </p>
+                            </div>
 
-                  {selectedSection === section.id ? (
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="輸入審查意見..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="min-h-24"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => addComment(section.id)}>
-                          送出意見
+                            {/* Diff Display */}
+                            {hasChanges && (
+                              <div className="p-4 bg-muted/30 rounded-lg border">
+                                <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                  <span>變更比對：</span>
+                                  <span className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
+                                    刪除
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-green-100 border border-green-200 rounded-sm" />
+                                    新增
+                                  </span>
+                                </div>
+                                <TextDiffDisplay
+                                  oldText={prevContent}
+                                  newText={section.content}
+                                />
+                              </div>
+                            )}
+
+                            {/* Revision Note (from filing) */}
+                            {section.revisionNote && (
+                              <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                <p className="text-xs font-medium text-blue-700 mb-1">
+                                  醫學會修訂說明
+                                </p>
+                                <p className="text-sm text-blue-900 whitespace-pre-wrap">
+                                  {section.revisionNote}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  )
+                })}
+              </TabsContent>
+
+              <TabsContent value="previous" className="mt-4 space-y-4">
+                {previousYearData.map((section) => (
+                  <Collapsible
+                    key={section.id}
+                    open={expandedSections.includes(section.id)}
+                    onOpenChange={() => toggleSection(section.id)}
+                  >
+                    <div className="bg-white rounded-lg border shadow-sm">
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            {expandedSections.includes(section.id) ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="font-medium">{section.title}</span>
+                          </div>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4">
+                          <div className="p-4 bg-gray-50 rounded-lg border">
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                              {section.content}
+                            </p>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </div>
+                  </Collapsible>
+                ))}
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right Sidebar - Review Actions */}
+          <div className="space-y-4">
+            {/* Stage Control */}
+            <div className="bg-white rounded-lg border shadow-sm p-4">
+              <Label className="text-sm font-medium">審查階段</Label>
+              <Select value={currentStage} onValueChange={handleStageChange}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {reviewStages.map((stage) => (
+                    <SelectItem key={stage.value} value={stage.value}>
+                      {stage.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Review Comment */}
+            <div className="bg-white rounded-lg border shadow-sm p-4">
+              <Label htmlFor="review-comment" className="text-sm font-medium">
+                審查評語
+              </Label>
+              <Textarea
+                id="review-comment"
+                placeholder="請輸入審查評語或會議決議內容..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="mt-2 min-h-[200px]"
+              />
+              <Button 
+                className="w-full mt-3"
+                onClick={() => {
+                  if (reviewComment.trim()) {
+                    toast.success("審查評語已儲存")
+                  }
+                }}
+              >
+                儲存評語
+              </Button>
+            </div>
+
+            {/* Meeting Minutes Upload */}
+            <div className="bg-white rounded-lg border shadow-sm p-4">
+              <Label className="text-sm font-medium">會議記錄檔案</Label>
+              
+              {/* Uploaded Files List */}
+              {uploadedFiles.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border"
+                    >
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(file.size)} | {file.date}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Download className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedSection(null)
-                            setNewComment("")
-                          }}
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          onClick={() => removeFile(index)}
                         >
-                          取消
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => setSelectedSection(section.id)}
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                      新增審查意見
-                    </Button>
-                  )}
-                </CardContent>
+                  ))}
+                </div>
               )}
-            </Card>
-          ))}
+
+              {/* Upload Button */}
+              <div className="mt-3">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  multiple
+                  accept=".pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleFileUpload}
+                />
+                <label htmlFor="file-upload">
+                  <Button variant="outline" className="w-full gap-2" asChild>
+                    <span>
+                      <Upload className="h-4 w-4" />
+                      上傳會議記錄
+                    </span>
+                  </Button>
+                </label>
+                <p className="text-xs text-muted-foreground mt-2">
+                  支援 PDF、Word、Excel 格式
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Stage Change Confirmation Dialog */}
+      <Dialog open={showStageDialog} onOpenChange={setShowStageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>確認變更審查階段</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              確定要將審查階段變更為「
+              <span className="font-medium text-foreground">
+                {reviewStages.find((s) => s.value === pendingStage)?.label}
+              </span>
+              」嗎？
+            </p>
+            {pendingStage === "returned" && (
+              <p className="mt-2 text-sm text-amber-600">
+                退回補件後，醫學會將收到通知並可重新修改內容。
+              </p>
+            )}
+            {pendingStage === "approved" && (
+              <p className="mt-2 text-sm text-green-600">
+                審查通過後，此文件將進入公告流程。
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStageDialog(false)}>
+              取消
+            </Button>
+            <Button onClick={confirmStageChange}>
+              確認變更
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
-

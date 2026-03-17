@@ -75,11 +75,6 @@ export function GlobalNav() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/review" className="cursor-pointer">
-                      審查總覽
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
                     <Link href="/review/submissions" className="cursor-pointer">
                       填報審查
                     </Link>
