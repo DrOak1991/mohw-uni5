@@ -498,6 +498,26 @@ export default function FilingDetailPage({
                               <div className={`grid gap-4 ${hasChanges && !isReadOnly && documentMethod === "change" ? "grid-cols-[1fr,280px]" : "grid-cols-1"}`}>
                                 {/* Left: Content Area */}
                                 <div className="space-y-4">
+                                  {/* Editable Textarea */}
+                                  <Textarea
+                                    value={currContent}
+                                    onChange={(e) =>
+                                      updateContent(section.id, e.target.value)
+                                    }
+                                    className={`min-h-32 border-2 ${
+                                      isReadOnly
+                                        ? "bg-muted/50 border-border"
+                                        : "border-primary/30 focus:border-primary"
+                                    }`}
+                                    placeholder="請輸入內容..."
+                                    disabled={
+                                      isReadOnly ||
+                                      (showDocumentMethodChoice &&
+                                        documentMethod === "no-change")
+                                    }
+                                    readOnly={isReadOnly}
+                                  />
+
                                   {/* Diff Display */}
                                   {hasChanges && (
                                     <div className="p-4 bg-muted/30 rounded-lg border">
@@ -518,26 +538,6 @@ export default function FilingDetailPage({
                                       />
                                     </div>
                                   )}
-
-                                  {/* Editable Textarea */}
-                                  <Textarea
-                                    value={currContent}
-                                    onChange={(e) =>
-                                      updateContent(section.id, e.target.value)
-                                    }
-                                    className={`min-h-32 border-2 ${
-                                      isReadOnly
-                                        ? "bg-muted/50 border-border"
-                                        : "border-primary/30 focus:border-primary"
-                                    }`}
-                                    placeholder="請輸入內容..."
-                                    disabled={
-                                      isReadOnly ||
-                                      (showDocumentMethodChoice &&
-                                        documentMethod === "no-change")
-                                    }
-                                    readOnly={isReadOnly}
-                                  />
                                 </div>
 
                                 {/* Right: Revision Note (inline, scrolls with content) */}
