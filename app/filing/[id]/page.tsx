@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, use, useCallback, useMemo } from "react"
+import { useState, use, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -30,16 +31,13 @@ import {
   Eye,
   Download,
   FileText,
+  AlertCircle,
+  CheckCircle2,
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { toast } from "sonner"
 
 import { TextDiffDisplay } from "@/components/filing/text-diff-display"
-import {
-  RevisionNotesPanel,
-  type SectionRevisionNote,
-} from "@/components/filing/revision-notes-panel"
 import {
   ReviewFeedbackBanner,
   type ReviewFeedback,
@@ -111,14 +109,48 @@ const currentYearInitialData = [
   },
 ]
 
-// Mock review feedback
+// Mock review feedback - larger content for testing
 const mockReviewFeedback: ReviewFeedback = {
   reviewDate: "114/03/10",
+  meetingTitle: "114年度第一次專科醫師訓練計畫審查會議",
   comments: [
     "第 2.1 條專任醫師人數建議調整為 5 位，以符合新法規要求",
     "第 3.2 條訓練時數說明過於簡略，請補充具體課程安排",
     "建議新增第 4.3 條關於緊急應變的說明",
   ],
+  fullContent: `一、會議時間：114年3月10日（星期一）上午10時
+
+二、會議地點：衛生福利部第一會議室
+
+三、主席：○○○部長
+    紀錄：○○○
+
+四、出席人員：（略）
+
+五、審查意見：
+
+（一）關於訓練計畫認定基準部分：
+    1. 第 2.1 條專任醫師人數建議調整為 5 位，以符合新法規要求。依據衛生福利部最新公告之「專科醫師訓練醫院認定基準」第三條規定，訓練醫院應有五位以上之專任主治醫師，方符合訓練醫院之基本條件。
+    
+    2. 第 3.2 條訓練時數說明過於簡略，請補充具體課程安排。建議明列各項核心課程之訓練時數、訓練方式及評核標準，以利受訓學員及訓練醫院有所依循。
+
+（二）關於訓練課程規劃部分：
+    1. 建議新增第 4.3 條關於緊急應變的說明，包含但不限於：
+       - 重大傳染病疫情之應變措施
+       - 大量傷患事件之處置流程
+       - 緊急醫療救護系統之整合運作
+    
+    2. 第 5.1 條師資培育計畫宜更具體，建議增列：
+       - 師資培訓課程之規劃
+       - 教學品質評估機制
+       - 師資持續進修之規定
+
+（三）其他建議事項：
+    1. 請確認各條文之用語是否與現行法規一致。
+    2. 建議增列名詞解釋章節，以利閱讀理解。
+    3. 請於修正後一個月內重新送審。
+
+六、散會：上午12時30分`,
 }
 
 const historicalVersions = [
@@ -139,7 +171,6 @@ export default function FilingDetailPage({
   const [documentMethod, setDocumentMethod] = useState<string>("change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1", "2", "3", "2-2"])
-  const [activeSection, setActiveSection] = useState("1")
   const [activeTab, setActiveTab] = useState<string>("current")
   
   // Current year editable content
@@ -153,11 +184,9 @@ export default function FilingDetailPage({
   // Revision notes per section
   const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({})
   
-  // Apply to all toggle
-  const [applyToAll, setApplyToAll] = useState({
-    enabled: false,
-    note: "",
-  })
+  // Apply unified note to all
+  const [applyUnifiedNote, setApplyUnifiedNote] = useState(false)
+  const [unifiedNote, setUnifiedNote] = useState("")
 
   const hasReviewComments = status === "需補件"
   const isReadOnly = status === "通過"
@@ -190,47 +219,39 @@ export default function FilingDetailPage({
     }))
   }
 
-  const handleNoteChange = useCallback((sectionId: string, note: string) => {
+  const updateRevisionNote = (sectionId: string, note: string) => {
     setRevisionNotes((prev) => ({
       ...prev,
       [sectionId]: note,
     }))
-  }, [])
-
-  const handleApplyToAllChange = useCallback((enabled: boolean, note: string) => {
-    setApplyToAll({ enabled, note })
-  }, [])
-
-  const handleSectionClick = useCallback((sectionId: string) => {
-    setActiveSection(sectionId)
-    setActiveTab("current")
-    if (!expandedSections.includes(sectionId)) {
-      setExpandedSections((prev) => [...prev, sectionId])
-    }
-  }, [expandedSections])
-
-  // Compute which sections have changes
-  const sectionRevisionNotes: SectionRevisionNote[] = useMemo(() => {
-    return currentYearInitialData.map((section) => {
-      const prevSection = previousYearData.find((p) => p.id === section.id)
-      const oldContent = prevSection?.content || ""
-      const newContent = currentYearContent[section.id] || ""
-      const hasChanges = oldContent !== newContent
-
-      return {
-        sectionId: section.id,
-        sectionTitle: section.title,
-        hasChanges,
-        note: applyToAll.enabled ? applyToAll.note : (revisionNotes[section.id] || ""),
-      }
-    })
-  }, [currentYearContent, revisionNotes, applyToAll])
+  }
 
   // Get previous year content for a section
   const getPreviousYearContent = (sectionId: string) => {
     const section = previousYearData.find((s) => s.id === sectionId)
     return section?.content || ""
   }
+
+  // Check if a section has changes
+  const sectionHasChanges = (sectionId: string) => {
+    const prevContent = getPreviousYearContent(sectionId)
+    const currContent = currentYearContent[sectionId] || ""
+    return prevContent !== currContent
+  }
+
+  // Compute stats
+  const stats = useMemo(() => {
+    const sectionsWithChanges = currentYearInitialData.filter((s) => sectionHasChanges(s.id))
+    const notesFilledCount = sectionsWithChanges.filter((s) => {
+      const note = applyUnifiedNote ? unifiedNote : revisionNotes[s.id]
+      return note && note.trim() !== ""
+    }).length
+    return {
+      totalChanges: sectionsWithChanges.length,
+      notesFilled: notesFilledCount,
+      pending: sectionsWithChanges.length - notesFilledCount,
+    }
+  }, [currentYearContent, revisionNotes, applyUnifiedNote, unifiedNote])
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -273,221 +294,184 @@ export default function FilingDetailPage({
           </div>
         )}
 
-        <div className="flex gap-6">
-          {/* Main Content Area */}
-          <div className="flex-1 space-y-6">
-            {isReadOnly && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 text-green-700">
-                  <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
-                    V
+        <div className="space-y-6">
+          {isReadOnly && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
+                  V
+                </span>
+                <span className="font-medium">
+                  此文件已通過審查，僅供查看及匯出
+                </span>
+              </div>
+            </div>
+          )}
+
+          {showDocumentMethodChoice && (
+            <div className="bg-card rounded-lg p-6">
+              <h3 className="font-medium text-foreground mb-4">
+                本年度文件處理方式
+              </h3>
+              <RadioGroup value={documentMethod} onValueChange={setDocumentMethod}>
+                <div
+                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 mb-3 ${
+                    documentMethod === "change"
+                      ? "border-primary bg-primary/5"
+                      : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="change" id="change" />
+                  <Label htmlFor="change" className="cursor-pointer">
+                    變更文件
+                  </Label>
+                </div>
+                <div
+                  className={`flex items-center space-x-3 p-4 rounded-lg border-2 ${
+                    documentMethod === "no-change"
+                      ? "border-primary bg-primary/5"
+                      : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="no-change" id="no-change" />
+                  <Label htmlFor="no-change" className="cursor-pointer">
+                    不變更
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
+
+          {hasReviewComments && (
+            <div className="bg-card rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="h-5 w-5 rounded-full border-2 border-current flex items-center justify-center text-xs">
+                    i
                   </span>
-                  <span className="font-medium">
-                    此文件已通過審查，僅供查看及匯出
-                  </span>
+                  前次提交檔案
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Eye className="h-4 w-4" />
+                    檢視
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-1">
+                        <Download className="h-4 w-4" />
+                        下載
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <FileText className="h-4 w-4 mr-2" />
+                        下載 Word 檔
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <FileText className="h-4 w-4 mr-2" />
+                        下載 PDF 檔
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {showDocumentMethodChoice && (
-              <div className="bg-card rounded-lg p-6">
-                <h3 className="font-medium text-foreground mb-4">
-                  本年度文件處理方式
-                </h3>
-                <RadioGroup value={documentMethod} onValueChange={setDocumentMethod}>
-                  <div
-                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 mb-3 ${
-                      documentMethod === "change"
-                        ? "border-primary bg-primary/5"
-                        : "border-border"
-                    }`}
+          {/* Unified Note Option - Only show when editing */}
+          {!isReadOnly && documentMethod === "change" && stats.totalChanges > 1 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="apply-unified"
+                  checked={applyUnifiedNote}
+                  onCheckedChange={(checked) => setApplyUnifiedNote(!!checked)}
+                  className="mt-0.5"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor="apply-unified"
+                    className="text-sm font-medium text-blue-800 cursor-pointer"
                   >
-                    <RadioGroupItem value="change" id="change" />
-                    <Label htmlFor="change" className="cursor-pointer">
-                      變更文件
-                    </Label>
-                  </div>
-                  <div
-                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 ${
-                      documentMethod === "no-change"
-                        ? "border-primary bg-primary/5"
-                        : "border-border"
-                    }`}
+                    套用統一修訂說明到所有修訂處
+                  </label>
+                  <p className="text-xs text-blue-600 mt-0.5">
+                    勾選後，下方所有修訂項目將使用相同的說明文字
+                  </p>
+                  {applyUnifiedNote && (
+                    <Textarea
+                      value={unifiedNote}
+                      onChange={(e) => setUnifiedNote(e.target.value)}
+                      placeholder="例如：因應衛福部 114 年法規修正公告..."
+                      className="mt-3 bg-white min-h-20"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stats Bar - Only show when editing */}
+          {!isReadOnly && documentMethod === "change" && stats.totalChanges > 0 && (
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-muted-foreground">
+                修訂狀態：
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                共 <span className="font-medium">{stats.totalChanges}</span> 處修訂
+              </span>
+              <span className="flex items-center gap-1.5 text-green-600">
+                <CheckCircle2 className="h-4 w-4" />
+                已填說明 {stats.notesFilled}
+              </span>
+              {stats.pending > 0 && (
+                <span className="flex items-center gap-1.5 text-amber-600">
+                  <AlertCircle className="h-4 w-4" />
+                  待填說明 {stats.pending}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Tab Switching: Previous Year (Read-only) vs Current Year (Editable) */}
+          <div className="bg-card rounded-lg">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <div className="border-b px-4">
+                <TabsList className="h-12 bg-transparent p-0 gap-4">
+                  <TabsTrigger
+                    value="current"
+                    className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
                   >
-                    <RadioGroupItem value="no-change" id="no-change" />
-                    <Label htmlFor="no-change" className="cursor-pointer">
-                      不變更
-                    </Label>
-                  </div>
-                </RadioGroup>
+                    114 年度 (編輯中)
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="previous"
+                    className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
+                  >
+                    113 年度 (參考)
+                  </TabsTrigger>
+                </TabsList>
               </div>
-            )}
 
-            {hasReviewComments && (
-              <div className="bg-card rounded-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="h-5 w-5 rounded-full border-2 border-current flex items-center justify-center text-xs">
-                      i
-                    </span>
-                    前次提交檔案
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="gap-1">
-                      <Eye className="h-4 w-4" />
-                      檢視
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <Download className="h-4 w-4" />
-                          下載
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <FileText className="h-4 w-4 mr-2" />
-                          下載 Word 檔
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <FileText className="h-4 w-4 mr-2" />
-                          下載 PDF 檔
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </div>
-            )}
+              {/* Current Year Tab - Editable with Diff Display and Inline Notes */}
+              <TabsContent value="current" className="p-6 mt-0">
+                <div className="space-y-6">
+                  {currentYearInitialData.map((section) => {
+                    const prevContent = getPreviousYearContent(section.id)
+                    const currContent = currentYearContent[section.id] || ""
+                    const hasChanges = prevContent !== currContent
+                    const currentNote = applyUnifiedNote ? unifiedNote : (revisionNotes[section.id] || "")
+                    const noteIsFilled = currentNote.trim() !== ""
 
-            {/* Tab Switching: Previous Year (Read-only) vs Current Year (Editable) */}
-            <div className="bg-card rounded-lg">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <div className="border-b px-4">
-                  <TabsList className="h-12 bg-transparent p-0 gap-4">
-                    <TabsTrigger
-                      value="current"
-                      className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
-                    >
-                      114 年度 (編輯中)
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="previous"
-                      className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
-                    >
-                      113 年度 (參考)
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                {/* Current Year Tab - Editable with Diff Display */}
-                <TabsContent value="current" className="p-6 mt-0">
-                  <div className="space-y-4">
-                    {currentYearInitialData.map((section) => {
-                      const prevContent = getPreviousYearContent(section.id)
-                      const currContent = currentYearContent[section.id] || ""
-                      const hasChanges = prevContent !== currContent
-
-                      return (
-                        <Collapsible
-                          key={section.id}
-                          open={expandedSections.includes(section.id)}
-                          onOpenChange={() => toggleSection(section.id)}
-                        >
-                          <div
-                            className={`border rounded-lg ${
-                              activeSection === section.id
-                                ? "border-primary ring-1 ring-primary"
-                                : "border-border"
-                            }`}
-                          >
-                            <CollapsibleTrigger className="w-full">
-                              <div
-                                className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
-                                onClick={() => setActiveSection(section.id)}
-                              >
-                                <div className="flex items-center gap-2">
-                                  {expandedSections.includes(section.id) ? (
-                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                  ) : (
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                  )}
-                                  <span className="font-medium">{section.title}</span>
-                                  {hasChanges && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
-                                      已修訂
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <div className="px-4 pb-4 space-y-4">
-                                {/* Diff Display */}
-                                {hasChanges && (
-                                  <div className="p-4 bg-muted/30 rounded-lg border">
-                                    <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
-                                      <span>變更預覽：</span>
-                                      <span className="flex items-center gap-1">
-                                        <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
-                                        刪除
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        <span className="inline-block w-3 h-3 bg-green-100 border border-green-200 rounded-sm" />
-                                        新增
-                                      </span>
-                                    </div>
-                                    <TextDiffDisplay
-                                      oldText={prevContent}
-                                      newText={currContent}
-                                    />
-                                  </div>
-                                )}
-
-                                {/* Editable Textarea */}
-                                <Textarea
-                                  value={currContent}
-                                  onChange={(e) =>
-                                    updateContent(section.id, e.target.value)
-                                  }
-                                  className={`min-h-32 border-2 ${
-                                    isReadOnly
-                                      ? "bg-muted/50 border-border"
-                                      : "border-primary/30 focus:border-primary"
-                                  }`}
-                                  placeholder="請輸入內容..."
-                                  disabled={
-                                    isReadOnly ||
-                                    (showDocumentMethodChoice &&
-                                      documentMethod === "no-change")
-                                  }
-                                  readOnly={isReadOnly}
-                                />
-                              </div>
-                            </CollapsibleContent>
-                          </div>
-                        </Collapsible>
-                      )
-                    })}
-                  </div>
-                </TabsContent>
-
-                {/* Previous Year Tab - Read-only */}
-                <TabsContent value="previous" className="p-6 mt-0">
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <p className="text-sm text-blue-800">
-                      此為 113 年度已核定內容，僅供參考，無法編輯。
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    {previousYearData.map((section) => (
+                    return (
                       <Collapsible
                         key={section.id}
                         open={expandedSections.includes(section.id)}
                         onOpenChange={() => toggleSection(section.id)}
                       >
-                        <div className="border rounded-lg border-border bg-muted/20">
+                        <div className="border rounded-lg border-border">
                           <CollapsibleTrigger className="w-full">
                             <div className="flex items-center justify-between px-4 py-3 hover:bg-muted/50">
                               <div className="flex items-center gap-2">
@@ -496,66 +480,181 @@ export default function FilingDetailPage({
                                 ) : (
                                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                 )}
-                                <span className="font-medium text-muted-foreground">
-                                  {section.title}
-                                </span>
+                                <span className="font-medium">{section.title}</span>
+                                {hasChanges && (
+                                  <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
+                                    已修訂
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <div className="px-4 pb-4">
-                              <div className="p-4 bg-muted/30 rounded-lg text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
-                                {section.content}
+                              {/* Two-column layout: Content + Revision Note */}
+                              <div className={`grid gap-4 ${hasChanges && !isReadOnly && documentMethod === "change" ? "grid-cols-[1fr,280px]" : "grid-cols-1"}`}>
+                                {/* Left: Content Area */}
+                                <div className="space-y-4">
+                                  {/* Diff Display */}
+                                  {hasChanges && (
+                                    <div className="p-4 bg-muted/30 rounded-lg border">
+                                      <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                        <span>變更預覽：</span>
+                                        <span className="flex items-center gap-1">
+                                          <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
+                                          刪除
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                          <span className="inline-block w-3 h-3 bg-green-100 border border-green-200 rounded-sm" />
+                                          新增
+                                        </span>
+                                      </div>
+                                      <TextDiffDisplay
+                                        oldText={prevContent}
+                                        newText={currContent}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Editable Textarea */}
+                                  <Textarea
+                                    value={currContent}
+                                    onChange={(e) =>
+                                      updateContent(section.id, e.target.value)
+                                    }
+                                    className={`min-h-32 border-2 ${
+                                      isReadOnly
+                                        ? "bg-muted/50 border-border"
+                                        : "border-primary/30 focus:border-primary"
+                                    }`}
+                                    placeholder="請輸入內容..."
+                                    disabled={
+                                      isReadOnly ||
+                                      (showDocumentMethodChoice &&
+                                        documentMethod === "no-change")
+                                    }
+                                    readOnly={isReadOnly}
+                                  />
+                                </div>
+
+                                {/* Right: Revision Note (inline, scrolls with content) */}
+                                {hasChanges && !isReadOnly && documentMethod === "change" && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-medium text-muted-foreground">
+                                        修訂說明
+                                      </span>
+                                      {!applyUnifiedNote && (
+                                        <span
+                                          className={`h-2 w-2 rounded-full ${
+                                            noteIsFilled ? "bg-green-500" : "bg-amber-400"
+                                          }`}
+                                        />
+                                      )}
+                                    </div>
+                                    {applyUnifiedNote ? (
+                                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-800">
+                                        <p className="text-xs text-blue-600 mb-1">使用統一說明：</p>
+                                        {unifiedNote || <span className="text-blue-400">（尚未填寫）</span>}
+                                      </div>
+                                    ) : (
+                                      <Textarea
+                                        value={revisionNotes[section.id] || ""}
+                                        onChange={(e) =>
+                                          updateRevisionNote(section.id, e.target.value)
+                                        }
+                                        placeholder="請說明此處修訂原因..."
+                                        className="min-h-28 text-sm resize-none"
+                                      />
+                                    )}
+                                    {!applyUnifiedNote && !noteIsFilled && (
+                                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" />
+                                        此處修訂尚未填寫說明
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </CollapsibleContent>
                         </div>
                       </Collapsible>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
+                    )
+                  })}
+                </div>
+              </TabsContent>
 
-            <div className="flex items-center justify-end gap-3 pt-4">
-              <Button variant="outline">{isReadOnly ? "返回" : "取消"}</Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-1">
-                    匯出檔案
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <FileText className="h-4 w-4 mr-2" />
-                    匯出 Word 檔
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileText className="h-4 w-4 mr-2" />
-                    匯出 PDF 檔
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {!isReadOnly && (
-                <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">
-                  儲存草稿
-                </Button>
-              )}
-            </div>
+              {/* Previous Year Tab - Read-only */}
+              <TabsContent value="previous" className="p-6 mt-0">
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-sm text-blue-800">
+                    此為 113 年度已核定內容，僅供參考，無法編輯。
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  {previousYearData.map((section) => (
+                    <Collapsible
+                      key={section.id}
+                      open={expandedSections.includes(section.id)}
+                      onOpenChange={() => toggleSection(section.id)}
+                    >
+                      <div className="border rounded-lg border-border bg-muted/20">
+                        <CollapsibleTrigger className="w-full">
+                          <div className="flex items-center justify-between px-4 py-3 hover:bg-muted/50">
+                            <div className="flex items-center gap-2">
+                              {expandedSections.includes(section.id) ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="font-medium text-muted-foreground">
+                                {section.title}
+                              </span>
+                            </div>
+                          </div>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 pb-4">
+                            <div className="p-4 bg-muted/30 rounded-lg text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
+                              {section.content}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
-          {/* Right Sidebar - Revision Notes Panel */}
-          {!isReadOnly && documentMethod === "change" && (
-            <RevisionNotesPanel
-              notes={sectionRevisionNotes}
-              onNoteChange={handleNoteChange}
-              activeSectionId={activeSection}
-              onSectionClick={handleSectionClick}
-              applyToAll={applyToAll}
-              onApplyToAllChange={handleApplyToAllChange}
-            />
-          )}
+          <div className="flex items-center justify-end gap-3 pt-4">
+            <Button variant="outline">{isReadOnly ? "返回" : "取消"}</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1">
+                  匯出檔案
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <FileText className="h-4 w-4 mr-2" />
+                  匯出 Word 檔
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <FileText className="h-4 w-4 mr-2" />
+                  匯出 PDF 檔
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {!isReadOnly && (
+              <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+                儲存草稿
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
