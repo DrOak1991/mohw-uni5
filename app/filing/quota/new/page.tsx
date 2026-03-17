@@ -240,7 +240,7 @@ export default function NewQuotaPage() {
               <div>
                 <Label className="text-sm text-muted-foreground mb-2 block">容額上限</Label>
                 <div className="bg-[#fef9c3] px-4 py-3 rounded-lg text-foreground font-medium">
-                  50 名
+                  15 名
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   本年度容額不可超過此上限
@@ -256,10 +256,10 @@ export default function NewQuotaPage() {
                   value={currentQuota}
                   onChange={(e) => setCurrentQuota(e.target.value)}
                   placeholder="請輸入容額"
-                  min={0}
-                  max={50}
+                  min={1}
+                  max={15}
                 />
-                <p className="text-xs text-primary mt-1">請輸入 0 ~ 50 之間的數值</p>
+                <p className="text-xs text-primary mt-1">請輸入 1 ~ 15 之間的數值</p>
               </div>
             </div>
           </div>
