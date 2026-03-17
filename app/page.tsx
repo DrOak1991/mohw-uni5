@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator, FileEdit } from "lucide-react"
+import { Users, Megaphone, ClipboardCheck, ArrowRight, Globe, BarChart3, Calculator, FileEdit, Settings } from "lucide-react"
 
 export default function HomePage() {
   const reviewDescription = [
@@ -28,7 +28,7 @@ export default function HomePage() {
       pages: [
         { name: "文件填報", href: "/filing", description: "管理年度文件填報作業" },
         { name: "容額填報", href: "/filing?tab=quota", description: "管理訓練醫院名單與容額分配" },
-        { name: "新增醫院容額", href: "/filing/quota/new", description: "新增醫院容額分配申請" },
+        { name: "外加容額申請", href: "/filing/additional-quota", description: "申請額外訓練容額" },
       ],
     },
     {
@@ -40,7 +40,18 @@ export default function HomePage() {
         { name: "填報審查", href: "/review/submissions", description: "審查醫學會提交的五份填報文件" },
         { name: "醫院容額分配審查", href: "/review/hospital-quota", description: "審查醫院容額分配申請" },
         { name: "外加容額審查", href: "/review/additional-quota", description: "審查外加容額申請" },
-        { name: "填報文件大綱", href: "/review/outline-management", description: "管理填報文件的大綱結構與版本" },
+      ],
+    },
+    {
+      title: "管理專區",
+      description: "主管機關管理功能與系統設定",
+      icon: Settings,
+      color: "bg-slate-500",
+      pages: [
+        { name: "大綱規範管理", href: "/admin/outline-management", description: "管理填報文件的大綱結構與版本" },
+        { name: "使用者管理", href: "/account/users", description: "檢視與管理系統使用者" },
+        { name: "角色模板管理", href: "/account/role-templates", description: "管理權限角色模板" },
+        { name: "公告管理", href: "/announcement-management", description: "管理公告的新增、編輯、發布與下架" },
       ],
     },
     {

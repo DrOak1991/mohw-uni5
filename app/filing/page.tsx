@@ -241,9 +241,9 @@ function QuotaFilingSection({
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
       extension: "4 年 (至 2030/7/31)",
-      limit: 50,
-      prevQuota: 42,
-      currentQuota: 45,
+      limit: 15,
+      prevQuota: 5,
+      currentQuota: 5,
     },
     {
       id: 2,
@@ -253,9 +253,9 @@ function QuotaFilingSection({
       statusColor: "bg-blue-100 text-blue-700",
       expiry: "有效至 2026/7/31",
       extension: "-",
-      limit: 40,
-      prevQuota: 35,
-      currentQuota: 38,
+      limit: 12,
+      prevQuota: 3,
+      currentQuota: 4,
     },
     {
       id: 3,
@@ -265,9 +265,9 @@ function QuotaFilingSection({
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2024/7/31",
       extension: "4 年 (至 2028/7/31)",
-      limit: 40,
-      prevQuota: 30,
-      currentQuota: 40,
+      limit: 10,
+      prevQuota: 2,
+      currentQuota: 3,
     },
     {
       id: 4,
@@ -277,9 +277,9 @@ function QuotaFilingSection({
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
       extension: "4 年 (至 2030/7/31)",
-      limit: 45,
-      prevQuota: 35,
-      currentQuota: 35,
+      limit: 8,
+      prevQuota: 2,
+      currentQuota: 2,
     },
     {
       id: "5.1",
@@ -289,9 +289,9 @@ function QuotaFilingSection({
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
       extension: "4 年 (至 2030/7/31)",
-      limit: 60,
-      prevQuota: 50,
-      currentQuota: 55,
+      limit: 15,
+      prevQuota: 4,
+      currentQuota: 5,
       isSubRow: false,
     },
     {
@@ -398,7 +398,23 @@ function QuotaFilingSection({
       </div>
 
       <div>
-        <h3 className="text-lg font-bold text-foreground mb-4">不合格醫院名單</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={onOpenImport}
+            >
+              <Upload className="h-4 w-4" />
+              匯入名單
+            </Button>
+            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+              <Plus className="h-4 w-4" />
+              新增不合格醫院
+            </Button>
+          </div>
+        </div>
         <div className="bg-card rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
             <thead>
@@ -407,6 +423,7 @@ function QuotaFilingSection({
                 <th className="px-4 py-3 text-left">醫事機構代碼</th>
                 <th className="px-4 py-3 text-left">主訓醫院</th>
                 <th className="px-4 py-3 text-left">不合格原因</th>
+                <th className="px-4 py-3 text-center">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -416,6 +433,11 @@ function QuotaFilingSection({
                   <td className="px-4 py-4 text-sm text-muted-foreground">{hospital.code}</td>
                   <td className="px-4 py-4 font-medium">{hospital.name}</td>
                   <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
+                  <td className="px-4 py-4 text-center">
+                    <Button variant="link" className="text-primary p-0 h-auto">
+                      編輯
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>

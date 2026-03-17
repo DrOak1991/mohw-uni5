@@ -37,51 +37,52 @@ const specialties = [
 
 const generateHospitalDataForSpecialty = (specialtyId: string) => {
   // 根據專科產生不同的容額數據（模擬）
+  // 業務邏輯：一間醫院最多申請 15 名容額，大部分案件是 1-5 名
   const baseMultiplier = specialties.findIndex((s) => s.id === specialtyId) + 1
-  const randomFactor = (baseMultiplier % 5) + 1
+  const variation = (baseMultiplier % 3) + 1
 
   return {
     north: {
       name: "北區",
       color: "#ef4444",
       hospitals: [
-        { id: "n1", name: "台大醫院", quota: Math.round(45 * randomFactor * 0.3) },
-        { id: "n2", name: "台北榮民總醫院", quota: Math.round(38 * randomFactor * 0.3) },
-        { id: "n3", name: "三軍總醫院", quota: Math.round(28 * randomFactor * 0.3) },
-        { id: "n4", name: "林口長庚醫院", quota: Math.round(35 * randomFactor * 0.3) },
-        { id: "n5", name: "馬偕紀念醫院", quota: Math.round(18 * randomFactor * 0.3) },
-        { id: "n6", name: "新光醫院", quota: Math.round(10 * randomFactor * 0.3) },
+        { id: "n1", name: "台大醫院", quota: Math.min(15, 3 + variation * 2) },
+        { id: "n2", name: "台北榮民總醫院", quota: Math.min(15, 2 + variation * 2) },
+        { id: "n3", name: "三軍總醫院", quota: Math.min(12, 2 + variation) },
+        { id: "n4", name: "林口長庚醫院", quota: Math.min(15, 3 + variation) },
+        { id: "n5", name: "馬偕紀念醫院", quota: Math.min(10, 1 + variation) },
+        { id: "n6", name: "新光醫院", quota: Math.min(8, variation) },
       ],
     },
     central: {
       name: "中區",
       color: "#f97316",
       hospitals: [
-        { id: "c1", name: "台中榮民總醫院", quota: Math.round(42 * randomFactor * 0.25) },
-        { id: "c2", name: "中國醫藥大學附設醫院", quota: Math.round(38 * randomFactor * 0.25) },
-        { id: "c3", name: "彰化基督教醫院", quota: Math.round(32 * randomFactor * 0.25) },
-        { id: "c4", name: "中山醫學大學附設醫院", quota: Math.round(25 * randomFactor * 0.25) },
-        { id: "c5", name: "童綜合醫院", quota: Math.round(13 * randomFactor * 0.25) },
+        { id: "c1", name: "台中榮民總醫院", quota: Math.min(12, 2 + variation * 2) },
+        { id: "c2", name: "中國醫藥大學附設醫院", quota: Math.min(10, 2 + variation) },
+        { id: "c3", name: "彰化基督教醫院", quota: Math.min(8, 1 + variation) },
+        { id: "c4", name: "中山醫學大學附設醫院", quota: Math.min(6, variation) },
+        { id: "c5", name: "童綜合醫院", quota: Math.min(5, variation) },
       ],
     },
     south: {
       name: "南區",
       color: "#eab308",
       hospitals: [
-        { id: "s1", name: "成大醫院", quota: Math.round(40 * randomFactor * 0.25) },
-        { id: "s2", name: "高雄榮民總醫院", quota: Math.round(35 * randomFactor * 0.25) },
-        { id: "s3", name: "高雄長庚醫院", quota: Math.round(32 * randomFactor * 0.25) },
-        { id: "s4", name: "高雄醫學大學附設醫院", quota: Math.round(22 * randomFactor * 0.25) },
-        { id: "s5", name: "奇美醫院", quota: Math.round(10 * randomFactor * 0.25) },
+        { id: "s1", name: "成大醫院", quota: Math.min(12, 2 + variation * 2) },
+        { id: "s2", name: "高雄榮民總醫院", quota: Math.min(10, 2 + variation) },
+        { id: "s3", name: "高雄長庚醫院", quota: Math.min(10, 1 + variation) },
+        { id: "s4", name: "高雄醫學大學附設醫院", quota: Math.min(8, variation) },
+        { id: "s5", name: "奇美醫院", quota: Math.min(5, variation) },
       ],
     },
     east: {
       name: "東區",
       color: "#22c55e",
       hospitals: [
-        { id: "e1", name: "花蓮慈濟醫院", quota: Math.round(20 * randomFactor * 0.2) },
-        { id: "e2", name: "門諾醫院", quota: Math.round(10 * randomFactor * 0.2) },
-        { id: "e3", name: "台東馬偕醫院", quota: Math.round(5 * randomFactor * 0.2) },
+        { id: "e1", name: "花蓮慈濟醫院", quota: Math.min(8, 1 + variation) },
+        { id: "e2", name: "門諾醫院", quota: Math.min(5, variation) },
+        { id: "e3", name: "台東馬偕醫院", quota: Math.min(3, variation) },
       ],
     },
   }

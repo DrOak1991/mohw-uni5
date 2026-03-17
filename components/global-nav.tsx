@@ -50,16 +50,36 @@ export function GlobalNav() {
                 </Link>
               </Button>
 
-              <Button
-                variant={isActive("/filing") ? "default" : "ghost"}
-                size="sm"
-                asChild
-              >
-                <Link href="/filing" className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  填報專區
-                </Link>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={isActive("/filing") ? "default" : "ghost"}
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <FileText className="w-4 h-4" />
+                    填報專區
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/filing" className="cursor-pointer">
+                      文件填報
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/filing?tab=quota" className="cursor-pointer">
+                      容額填報
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/filing/additional-quota" className="cursor-pointer">
+                      外加容額申請
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -89,11 +109,6 @@ export function GlobalNav() {
                       外加容額審查
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/review/outline-management" className="cursor-pointer">
-                      大綱規範管理
-                    </Link>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -113,6 +128,11 @@ export function GlobalNav() {
                   <DropdownMenuItem asChild>
                     <Link href="/admin" className="cursor-pointer">
                       管理總覽
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/outline-management" className="cursor-pointer">
+                      大綱規範管理
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
