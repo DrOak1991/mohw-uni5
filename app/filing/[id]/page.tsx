@@ -345,43 +345,7 @@ export default function FilingDetailPage({
             </div>
           )}
 
-          {hasReviewComments && (
-            <div className="bg-card rounded-lg p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="h-5 w-5 rounded-full border-2 border-current flex items-center justify-center text-xs">
-                    i
-                  </span>
-                  前次提交檔案
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Eye className="h-4 w-4" />
-                    檢視
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-1">
-                        <Download className="h-4 w-4" />
-                        下載
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <FileText className="h-4 w-4 mr-2" />
-                        下載 Word 檔
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <FileText className="h-4 w-4 mr-2" />
-                        下載 PDF 檔
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </div>
-          )}
+          
 
           {/* Unified Note Option - Only show when editing */}
           {!isReadOnly && documentMethod === "change" && stats.totalChanges > 1 && (
@@ -398,7 +362,7 @@ export default function FilingDetailPage({
                     htmlFor="apply-unified"
                     className="text-sm font-medium text-blue-800 cursor-pointer"
                   >
-                    套用統��修訂說明到所有修訂處
+                    套用統一修訂說明到所有修訂處
                   </label>
                   <p className="text-xs text-blue-600 mt-0.5">
                     勾選後，下方所有修訂項目將使用相同的說明文字
@@ -590,10 +554,29 @@ export default function FilingDetailPage({
 
               {/* Previous Year Tab - Read-only */}
               <TabsContent value="previous" className="p-6 mt-0">
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-between">
                   <p className="text-sm text-blue-800">
                     此為 113 年度已核定內容，僅供參考，無法編輯。
                   </p>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-1 bg-white">
+                        <Download className="h-4 w-4" />
+                        下載前次檔案
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <FileText className="h-4 w-4 mr-2" />
+                        下載 Word 檔
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <FileText className="h-4 w-4 mr-2" />
+                        下載 PDF 檔
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="space-y-4">
                   {previousYearData.map((section) => (

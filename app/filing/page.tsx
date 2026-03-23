@@ -166,10 +166,14 @@ export default function FilingPage() {
           </TabsContent>
         </Tabs>
 
-        <div className="fixed bottom-8 right-8">
+        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+          <Button variant="outline" size="lg" className="gap-2">
+            <Download className="h-4 w-4" />
+            儲存草稿
+          </Button>
           <Button
             size="lg"
-            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white shadow-lg"
+            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
           >
             <Send className="h-4 w-4" />
             送件
@@ -232,6 +236,8 @@ function QuotaFilingSection({
   availableHospitals: { code: string; name: string }[]
   onOpenImport: () => void
 }) {
+  // groupId: null = 單獨申請，string = 聯合申請組合識別碼
+  // 未來新增聯合申請組合只需指定相同 groupId 即可
   const hospitals = [
     {
       id: 1,
@@ -244,6 +250,8 @@ function QuotaFilingSection({
       limit: 15,
       prevQuota: 5,
       currentQuota: 5,
+      groupId: null,
+      isSubRow: false,
     },
     {
       id: 2,
@@ -256,6 +264,8 @@ function QuotaFilingSection({
       limit: 12,
       prevQuota: 3,
       currentQuota: 4,
+      groupId: null,
+      isSubRow: false,
     },
     {
       id: 3,
@@ -268,6 +278,8 @@ function QuotaFilingSection({
       limit: 10,
       prevQuota: 2,
       currentQuota: 3,
+      groupId: null,
+      isSubRow: false,
     },
     {
       id: 4,
@@ -280,6 +292,8 @@ function QuotaFilingSection({
       limit: 8,
       prevQuota: 2,
       currentQuota: 2,
+      groupId: null,
+      isSubRow: false,
     },
     {
       id: "5.1",
@@ -292,6 +306,7 @@ function QuotaFilingSection({
       limit: 15,
       prevQuota: 4,
       currentQuota: 5,
+      groupId: "group-a",
       isSubRow: false,
     },
     {
@@ -305,9 +320,26 @@ function QuotaFilingSection({
       limit: null,
       prevQuota: null,
       currentQuota: null,
+      groupId: "group-a",
       isSubRow: true,
     },
   ]
+
+  // 為每個不重複的 groupId 分配一個顏色，方便日後擴充多組聯合申請
+  const groupColors: Record<string, string> = {}
+  const palette = [
+    "border-l-violet-400 bg-violet-50/40",
+    "border-l-teal-400 bg-teal-50/40",
+    "border-l-orange-400 bg-orange-50/40",
+    "border-l-pink-400 bg-pink-50/40",
+  ]
+  let colorIndex = 0
+  for (const h of hospitals) {
+    if (h.groupId && !groupColors[h.groupId]) {
+      groupColors[h.groupId] = palette[colorIndex % palette.length]
+      colorIndex++
+    }
+  }
 
   const disqualifiedHospitals = [
     {
@@ -358,11 +390,21 @@ function QuotaFilingSection({
               </tr>
             </thead>
             <tbody className="divide-y">
-              {hospitals.map((hospital) => (
-                <tr key={hospital.id} className="hover:bg-muted/30">
+              {hospitals.map((hospital) => {
+                const groupStyle = hospital.groupId ? groupColors[hospital.groupId] : ""
+                return (
+                <tr
+                  key={hospital.id}
+                  className={`hover:bg-muted/30 ${groupStyle ? `border-l-4 ${groupStyle}` : ""}`}
+                >
                   <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
                   <td className="px-4 py-4 text-sm text-muted-foreground">{hospital.code}</td>
-                  <td className="px-4 py-4 font-medium">{hospital.name}</td>
+                  <td className="px-4 py-4 font-medium">
+                    {hospital.groupId && (
+                      <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
+                    )}
+                    {hospital.name}
+                  </td>
                   <td className="px-4 py-4 text-center">
                     {hospital.status && (
                       <span
@@ -391,7 +433,8 @@ function QuotaFilingSection({
                     )}
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -401,6 +444,10 @@ function QuotaFilingSection({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
           <div className="flex items-center gap-3">
+            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+              <Plus className="h-4 w-4" />
+              新增不合格醫院
+            </Button>
             <Button
               variant="outline"
               className="gap-2"
@@ -408,10 +455,6 @@ function QuotaFilingSection({
             >
               <Upload className="h-4 w-4" />
               匯入名單
-            </Button>
-            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
-              <Plus className="h-4 w-4" />
-              新增不合格醫院
             </Button>
           </div>
         </div>

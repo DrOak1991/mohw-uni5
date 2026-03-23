@@ -1,0 +1,284 @@
+"use client"
+
+import { use, useState } from "react"
+import Link from "next/link"
+import { ReviewSimpleNav } from "@/components/review/simple-nav"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ArrowLeft, Upload, FileText, Download, Eye } from "lucide-react"
+import { getHospitalQuotaDetail, getHospitalQuotaStageConfig } from "@/lib/mock/review-hospital-quota"
+
+export default function HospitalQuotaDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = use(params)
+  const detail = getHospitalQuotaDetail(id)
+  const stageConfig = getHospitalQuotaStageConfig()
+
+  const [reviewComment, setReviewComment] = useState(detail?.reviewComment || "")
+  const [selectedStage, setSelectedStage] = useState(detail?.society.stage || "pending")
+
+  if (!detail) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ReviewSimpleNav />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-20">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">找不到該醫學會</h2>
+            <Button asChild>
+              <Link href="/review/hospital-quota">返回列表</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const { society, hospitals, disqualifiedHospitals, groupReviewData } = detail
+  const isMainReview = society.stage === "main-review"
+  const isUploadPending = society.stage === "upload-pending"
+
+  // 為聯合申請組合分配顏色
+  const groupColors: Record<string, string> = {}
+  const palette = [
+    "border-l-violet-400 bg-violet-50/40",
+    "border-l-teal-400 bg-teal-50/40",
+    "border-l-orange-400 bg-orange-50/40",
+    "border-l-pink-400 bg-pink-50/40",
+  ]
+  let colorIndex = 0
+  for (const h of hospitals) {
+    if (h.groupId && !groupColors[h.groupId]) {
+      groupColors[h.groupId] = palette[colorIndex % palette.length]
+      colorIndex++
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <ReviewSimpleNav />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <Link
+          href="/review/hospital-quota"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回醫院容額分配審查
+        </Link>
+
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{society.name}</h1>
+            <div className="flex items-center gap-3 mt-2">
+              <Badge variant="outline">{society.year}</Badge>
+              <Badge className={stageConfig[society.stage].color}>
+                {stageConfig[society.stage].label}
+              </Badge>
+              <span className="text-sm text-gray-500">送件日期：{society.submittedDate}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* RRC 大會審核階段：顯示分組會議資料 */}
+        {(isMainReview || isUploadPending) && groupReviewData && (
+          <Card className="mb-6 border-purple-200 bg-purple-50/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-medium text-purple-900">
+                分組會議審查資料
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600">
+                    會議日期：<span className="font-medium text-gray-900">{groupReviewData.meetingDate}</span>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    審查決議：<Badge variant="outline" className="ml-1 bg-green-50 text-green-700 border-green-200">{groupReviewData.decision}</Badge>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Eye className="h-4 w-4" />
+                    檢視會議記錄
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Download className="h-4 w-4" />
+                    下載
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                檔案：{groupReviewData.meetingRecord}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 訓練醫院名單與容額分配 */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">訓練醫院名單與容額分配</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-16">序號</TableHead>
+                  <TableHead>醫事機構代碼</TableHead>
+                  <TableHead>主訓醫院</TableHead>
+                  <TableHead>狀態</TableHead>
+                  <TableHead>效期</TableHead>
+                  <TableHead>延長效期</TableHead>
+                  <TableHead className="text-center">容額上限</TableHead>
+                  <TableHead className="text-center">前年度核定容額</TableHead>
+                  <TableHead className="text-center">本年度容額</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {hospitals.map((hospital) => {
+                  const groupStyle = hospital.groupId ? groupColors[hospital.groupId] : ""
+                  return (
+                    <TableRow
+                      key={hospital.id}
+                      className={groupStyle ? `border-l-4 ${groupStyle}` : ""}
+                    >
+                      <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{hospital.code}</TableCell>
+                      <TableCell className="font-medium">
+                        {hospital.groupId && (
+                          <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
+                        )}
+                        {hospital.name}
+                      </TableCell>
+                      <TableCell>
+                        {hospital.status && (
+                          <Badge className={hospital.statusColor}>{hospital.status}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{hospital.expiry}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{hospital.extension}</TableCell>
+                      <TableCell className="text-center font-medium">
+                        {hospital.limit !== null ? hospital.limit : "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        {hospital.prevQuota !== null ? hospital.prevQuota : "-"}
+                      </TableCell>
+                      <TableCell className="text-center font-medium text-primary">
+                        {hospital.currentQuota !== null ? hospital.currentQuota : "-"}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* 不合格醫院名單 */}
+        {disqualifiedHospitals.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">不合格醫院名單</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-16">序號</TableHead>
+                    <TableHead>醫事機構代碼</TableHead>
+                    <TableHead>主訓醫院</TableHead>
+                    <TableHead>不合格原因</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {disqualifiedHospitals.map((hospital) => (
+                    <TableRow key={hospital.id}>
+                      <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{hospital.code}</TableCell>
+                      <TableCell className="font-medium">{hospital.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{hospital.reason}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 審查操作區 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">審查操作</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* 審查評語 */}
+            <div className="space-y-2">
+              <Label>審查評語</Label>
+              <Textarea
+                placeholder="請輸入審查評語或會議決議內容..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="min-h-32"
+              />
+            </div>
+
+            {/* 上傳會議記錄 */}
+            <div className="space-y-2">
+              <Label>上傳會議記錄</Label>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  點擊或拖曳檔案至此處上傳
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  支援 PDF、DOC、DOCX 格式
+                </p>
+              </div>
+            </div>
+
+            {/* 審查階段操作 */}
+            <div className="space-y-2">
+              <Label>變更審查階段</Label>
+              <div className="flex items-center gap-4">
+                <Select value={selectedStage} onValueChange={setSelectedStage}>
+                  <SelectTrigger className="w-64">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">待審查</SelectItem>
+                    <SelectItem value="group-review">分組會議審核</SelectItem>
+                    <SelectItem value="main-review">RRC 大會審核</SelectItem>
+                    <SelectItem value="upload-pending">待公告</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground">
+                  目前階段：{stageConfig[society.stage].label}
+                </span>
+              </div>
+            </div>
+
+            {/* 操作按鈕 */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline">
+                儲存草稿
+              </Button>
+              <Button className="bg-[#2d3a8c] hover:bg-[#252f73]">
+                確認送出
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

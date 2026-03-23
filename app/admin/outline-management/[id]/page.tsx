@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { ReviewSimpleNav } from "@/components/review/simple-nav"
+
 import {
   OutlineItem,
   outlineMeta,
@@ -132,12 +132,10 @@ export default function OutlineEditorPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <ReviewSimpleNav />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* breadcrumb */}
         <Link
-          href="/review/outline-management"
+          href="/admin/outline-management"
           className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
