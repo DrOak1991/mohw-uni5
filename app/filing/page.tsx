@@ -401,6 +401,10 @@ function QuotaFilingSection({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
           <div className="flex items-center gap-3">
+            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+              <Plus className="h-4 w-4" />
+              新增不合格醫院
+            </Button>
             <Button
               variant="outline"
               className="gap-2"
@@ -408,10 +412,6 @@ function QuotaFilingSection({
             >
               <Upload className="h-4 w-4" />
               匯入名單
-            </Button>
-            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
-              <Plus className="h-4 w-4" />
-              新增不合格醫院
             </Button>
           </div>
         </div>
