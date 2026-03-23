@@ -166,10 +166,14 @@ export default function FilingPage() {
           </TabsContent>
         </Tabs>
 
-        <div className="fixed bottom-8 right-8">
+        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+          <Button variant="outline" size="lg" className="gap-2">
+            <Download className="h-4 w-4" />
+            儲存草稿
+          </Button>
           <Button
             size="lg"
-            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white shadow-lg"
+            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
           >
             <Send className="h-4 w-4" />
             送件
