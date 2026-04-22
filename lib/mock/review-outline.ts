@@ -82,7 +82,7 @@ export const filingItemsConfig: FilingItemConfig[] = [
     isScheduled: false,
     isManualControl: true,
   },
-}
+]
 
 export function getInitialOutline(): OutlineItem[] {
   return [
