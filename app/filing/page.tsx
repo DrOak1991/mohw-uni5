@@ -35,7 +35,6 @@ import {
   Download,
   Plus,
   ChevronDown,
-  Lock,
 } from "lucide-react"
 import Link from "next/link"
 import { filingItemsConfig } from "@/lib/mock/review-outline"
@@ -127,18 +126,14 @@ export default function FilingPage() {
                       key={doc.id}
                       className={`grid grid-cols-12 gap-4 px-6 py-5 items-center ${!filingOpen ? "bg-muted/20" : ""}`}
                     >
-                      <div className="col-span-5 flex items-center gap-2">
-                        {!filingOpen && <Lock className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />}
+                      <div className="col-span-5">
                         <span className={`font-medium ${!filingOpen ? "text-muted-foreground" : "text-foreground"}`}>
                           {doc.title}
                         </span>
-                        {!filingOpen && (
-                          <span className="text-xs text-muted-foreground/70 font-normal">（尚未開放）</span>
-                        )}
                       </div>
 
-                      <div className={`col-span-2 text-center font-medium ${!filingOpen ? "text-muted-foreground/50" : getStatusStyle(doc.status)}`}>
-                        {filingOpen ? doc.status : "—"}
+                      <div className={`col-span-2 text-center font-medium ${!filingOpen ? "text-muted-foreground/60 text-sm" : getStatusStyle(doc.status)}`}>
+                        {filingOpen ? doc.status : "尚未開放"}
                       </div>
 
                       <div className="col-span-2 text-center text-sm text-muted-foreground">
