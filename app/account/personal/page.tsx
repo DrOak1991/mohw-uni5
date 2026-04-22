@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { Key, User, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -48,14 +47,6 @@ export default function PersonalSettingsPage() {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">所屬單位</p>
                   <p className="text-base font-medium">醫事司五科</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">目前角色</p>
-                  <div>
-                    <Badge variant="secondary" className="text-sm">
-                      一般使用者
-                    </Badge>
-                  </div>
                 </div>
               </div>
             </CardContent>
