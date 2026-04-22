@@ -3,19 +3,28 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { User, Users, Settings } from "lucide-react"
+import { Users, FileText, Megaphone, ShieldCheck } from "lucide-react"
 
 const navItems = [
   {
-    title: "個人設定",
-    href: "/account/personal",
-    icon: User,
+    title: "填報項目管理",
+    href: "/admin/outline-management",
+    icon: FileText,
   },
   {
     title: "使用者管理",
     href: "/account/users",
     icon: Users,
-    requiresAdmin: true,
+  },
+  {
+    title: "角色模板管理",
+    href: "/account/role-templates",
+    icon: ShieldCheck,
+  },
+  {
+    title: "公告管理",
+    href: "/announcement-management",
+    icon: Megaphone,
   },
 ]
 
@@ -26,10 +35,6 @@ export function SimpleNav() {
     <nav className="border-b border-border bg-background">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 py-4">
-            <Settings className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-foreground">帳號管理</span>
-          </div>
           <div className="flex gap-1">
             {navItems.map((item) => {
               const Icon = item.icon

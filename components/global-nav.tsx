@@ -10,9 +10,11 @@ import {
   FileText,
   Bell,
   Settings,
+  User,
+  LogOut,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function GlobalNav() {
   const pathname = usePathname()
@@ -115,7 +117,7 @@ export function GlobalNav() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={isActive("/admin/outline-management") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
+                    variant={isActive("/admin") || isActive("/account/users") || isActive("/account/role-templates") || isActive("/announcement-management") ? "default" : "ghost"}
                     size="sm"
                     className="flex items-center gap-1"
                   >
@@ -127,7 +129,7 @@ export function GlobalNav() {
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/admin/outline-management" className="cursor-pointer">
-                      大綱規範管理
+                      填報項目管理
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -145,17 +147,33 @@ export function GlobalNav() {
                       公告管理
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/personal" className="cursor-pointer">
-                      個人設定
-                    </Link>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
 
-          <div className="text-sm text-gray-500 hidden sm:block">衛生福利部醫事司 · 專科醫師訓練管理</div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-sm text-gray-600 hidden sm:flex">
+                <User className="w-4 h-4" />
+                王小明
+                <ChevronDown className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href="/account/personal" className="cursor-pointer flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  個人設定
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 flex items-center gap-2">
+                <LogOut className="w-4 h-4" />
+                登出
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>
