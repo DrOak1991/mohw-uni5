@@ -115,7 +115,7 @@ export function GlobalNav() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={isActive("/admin") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
+                    variant={isActive("/admin/outline-management") || isActive("/account") || isActive("/announcement-management") ? "default" : "ghost"}
                     size="sm"
                     className="flex items-center gap-1"
                   >
@@ -125,11 +125,6 @@ export function GlobalNav() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin" className="cursor-pointer">
-                      管理總覽
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/admin/outline-management" className="cursor-pointer">
                       大綱規範管理
