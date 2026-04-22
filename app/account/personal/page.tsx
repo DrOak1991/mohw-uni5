@@ -1,17 +1,24 @@
-import { SimpleNav } from "@/components/account/simple-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Key, User } from "lucide-react"
+import { Key, User, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function PersonalSettingsPage() {
   return (
     <div className="min-h-screen bg-muted/30">
-      <SimpleNav />
-
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* 返回連結 */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回首頁
+        </Link>
+
         {/* 頁面標題 */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">個人設定</h1>

@@ -1,9 +1,8 @@
-import { SimpleNav } from "@/components/account/simple-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Copy, Shield, Users } from "lucide-react"
+import { Plus, Edit, Trash2, Copy, Shield, Users, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 // 模擬角色模板資料
@@ -67,9 +66,16 @@ const roleTemplates = [
 export default function RoleTemplatesPage() {
   return (
     <div className="min-h-screen bg-muted/30">
-      <SimpleNav />
-
       <div className="container mx-auto px-4 py-8">
+        {/* 返回連結 */}
+        <Link
+          href="/account/users"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回使用者管理
+        </Link>
+
         {/* 頁面標題 */}
         <div className="mb-6 flex items-center justify-between">
           <div>

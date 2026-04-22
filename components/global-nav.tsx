@@ -117,7 +117,7 @@ export function GlobalNav() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={isActive("/admin") || isActive("/account/users") || isActive("/account/role-templates") || isActive("/announcement-management") ? "default" : "ghost"}
+                    variant={isActive("/admin") || isActive("/account/users") || isActive("/announcement-management") ? "default" : "ghost"}
                     size="sm"
                     className="flex items-center gap-1"
                   >
@@ -135,11 +135,6 @@ export function GlobalNav() {
                   <DropdownMenuItem asChild>
                     <Link href="/account/users" className="cursor-pointer">
                       使用者管理
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account/role-templates" className="cursor-pointer">
-                      角色模板管理
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

@@ -1,14 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { SimpleNav } from "@/components/account/simple-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Filter, UserPlus, Edit, Power, MoreHorizontal } from "lucide-react"
+import { Search, Filter, UserPlus, Edit, Power, MoreHorizontal, ShieldCheck, ChevronRight, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AddUserDialog } from "@/components/account/add-user-dialog"
@@ -84,13 +83,29 @@ export default function UsersManagementPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <SimpleNav />
-
       <div className="container mx-auto px-4 py-8">
+        {/* 返回連結 */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回首頁
+        </Link>
+
         {/* 頁面標題 */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">使用者管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理系統使用者帳號與權限設定</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">使用者管理</h1>
+            <p className="text-sm text-muted-foreground mt-1">管理系統使用者帳號與權限設定</p>
+          </div>
+          <Link href="/account/role-templates">
+            <Button variant="outline" className="gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              角色模板管理
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         <Card>
