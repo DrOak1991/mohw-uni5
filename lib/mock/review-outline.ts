@@ -29,17 +29,18 @@ export interface FilingItemConfig {
 }
 
 export const outlineMeta: Record<string, { name: string }> = {
-  "screening-principle": { name: "甄審原則" },
-  "hospital-accreditation": { name: "訓練醫院認定基準" },
+  "training-plan": { name: "訓練計畫認定基準" },
   "training-curriculum": { name: "訓練課程基準" },
   "evaluation-standards": { name: "評核標準與評核表" },
   "quota-allocation": { name: "容額分配原則" },
+  "improvement-guide": { name: "精進指南" },
+  "screening-principle": { name: "甄審原則" },
 }
 
 export const filingItemsConfig: FilingItemConfig[] = [
   {
-    id: "hospital-accreditation",
-    name: "訓練醫院認定基準",
+    id: "training-plan",
+    name: "訓練計畫認定基準",
     status: "open",
     openingDate: "2026/03/01 09:00",
     closingDate: "2026/03/31 17:00",
@@ -74,15 +75,34 @@ export const filingItemsConfig: FilingItemConfig[] = [
     isManualControl: false,
   },
   {
-    id: "screening-principle",
-    name: "甄審原則",
+    id: "improvement-guide",
+    name: "精進指南",
     status: "closed",
     openingDate: "",
     closingDate: "",
     isScheduled: false,
     isManualControl: true,
   },
+  {
+    id: "screening-principle",
+    name: "甄審原則",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/03/31 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
 ]
+
+export const quotaFilingConfig: FilingItemConfig = {
+  id: "hospital-quota",
+  name: "容額填報",
+  status: "open",
+  openingDate: "2026/03/01 09:00",
+  closingDate: "2026/05/31 17:00",
+  isScheduled: true,
+  isManualControl: false,
+}
 
 export function getInitialOutline(): OutlineItem[] {
   return [

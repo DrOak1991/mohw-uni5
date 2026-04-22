@@ -35,16 +35,23 @@ import {
   Download,
   Plus,
   ChevronDown,
+  Lock,
 } from "lucide-react"
 import Link from "next/link"
+import { filingItemsConfig } from "@/lib/mock/review-outline"
+
+// 從 filingItemsConfig 建立開放狀態查詢表
+const filingStatusMap = Object.fromEntries(
+  filingItemsConfig.map((item) => [item.id, item.status])
+)
 
 const documents = [
-  { id: "plan", title: "計畫認定基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "course", title: "訓練課程基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "evaluation", title: "評核標準", status: "待審查", deadline: "2025/04/15" },
-  { id: "quota-principle", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
-  { id: "guidelines", title: "精進指南", status: "待審查", deadline: "2025/04/30" },
-  { id: "review-principles", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
+  { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "2025/03/31" },
+  { id: "training-curriculum", title: "訓練課程基準", status: "需補件", deadline: "2025/03/31" },
+  { id: "evaluation-standards", title: "評核標準與評核表", status: "待審查", deadline: "2025/04/15" },
+  { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
+  { id: "improvement-guide", title: "精進指南", status: "待審查", deadline: "2025/04/30" },
+  { id: "screening-principle", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
 ]
 
 const getStatusStyle = (status: string) => {
@@ -113,47 +120,58 @@ export default function FilingPage() {
               </div>
 
               <div className="divide-y">
-                {documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="grid grid-cols-12 gap-4 px-6 py-5 items-center"
-                  >
-                    <div className="col-span-5">
-                      <span className="font-medium text-foreground">{doc.title}</span>
-                    </div>
-
-                    <div className={`col-span-2 text-center font-medium ${getStatusStyle(doc.status)}`}>
-                      {doc.status}
-                    </div>
-
-                    <div className="col-span-2 text-center text-sm text-muted-foreground">
-                      {doc.deadline}
-                    </div>
-
-                    <div className="col-span-3 flex justify-end">
-                      <Link href={`/filing/${doc.id}?status=${doc.status}`}>
-                        {doc.status === "通過" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                          >
-                            <FileText className="h-4 w-4" />
-                            已送件
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                            編輯
-                          </Button>
+                {documents.map((doc) => {
+                  const filingOpen = filingStatusMap[doc.id] === "open"
+                  return (
+                    <div
+                      key={doc.id}
+                      className={`grid grid-cols-12 gap-4 px-6 py-5 items-center ${!filingOpen ? "bg-muted/20" : ""}`}
+                    >
+                      <div className="col-span-5 flex items-center gap-2">
+                        {!filingOpen && <Lock className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />}
+                        <span className={`font-medium ${!filingOpen ? "text-muted-foreground" : "text-foreground"}`}>
+                          {doc.title}
+                        </span>
+                        {!filingOpen && (
+                          <span className="text-xs text-muted-foreground/70 font-normal">（尚未開放）</span>
                         )}
-                      </Link>
+                      </div>
+
+                      <div className={`col-span-2 text-center font-medium ${!filingOpen ? "text-muted-foreground/50" : getStatusStyle(doc.status)}`}>
+                        {filingOpen ? doc.status : "—"}
+                      </div>
+
+                      <div className="col-span-2 text-center text-sm text-muted-foreground">
+                        {filingOpen ? doc.deadline : "—"}
+                      </div>
+
+                      <div className="col-span-3 flex justify-end">
+                        {filingOpen ? (
+                          <Link href={`/filing/${doc.id}?status=${doc.status}`}>
+                            {doc.status === "通過" ? (
+                              <Button size="sm" variant="outline" className="gap-2">
+                                <FileText className="h-4 w-4" />
+                                已送件
+                              </Button>
+                            ) : (
+                              <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+                                <Edit3 className="h-4 w-4" />
+                                編輯
+                              </Button>
+                            )}
+                          </Link>
+                        ) : (
+                          <Link href={`/filing/${doc.id}?status=view`}>
+                            <Button size="sm" variant="outline" className="gap-2 text-muted-foreground">
+                              <FileText className="h-4 w-4" />
+                              檢視前年度
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </TabsContent>

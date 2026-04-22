@@ -6,7 +6,7 @@ import { ArrowLeft, Pencil, Settings2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FilingScheduleDialog } from "@/components/admin/filing-schedule-dialog"
-import { filingItemsConfig } from "@/lib/mock/review-outline"
+import { filingItemsConfig, quotaFilingConfig } from "@/lib/mock/review-outline"
 import type { FilingItemConfig } from "@/lib/mock/review-outline"
 
 export default function FilingItemManagementPage() {
@@ -48,54 +48,101 @@ export default function FilingItemManagementPage() {
             返回首頁
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">填報項目管理</h1>
-          <p className="text-sm text-gray-500 mt-1">設定各項填報文件的開放時間和狀態</p>
+          <p className="text-sm text-gray-500 mt-1">設定各填報項目的開放時間和狀態</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">文件名稱</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filingItemsConfig.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+        {/* 文件填報管理 */}
+        <div className="mb-8">
+          <h2 className="text-base font-semibold text-gray-700 mb-3">文件填報管理</h2>
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">文件名稱</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filingItemsConfig.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {getStatusBadge(item)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-500">{getFilingPeriod(item)}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 h-8"
+                          onClick={() => handleSettingsClick(item)}
+                        >
+                          <Settings2 className="w-3.5 h-3.5" />
+                          <span className="text-xs">開放設定</span>
+                        </Button>
+                        <Button asChild variant="ghost" size="sm" className="gap-1.5 h-8">
+                          <Link href={`/admin/outline-management/${item.id}`}>
+                            <Pencil className="w-3.5 h-3.5" />
+                            <span className="text-xs">編輯大綱</span>
+                          </Link>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 容額填報管理 */}
+        <div>
+          <h2 className="text-base font-semibold text-gray-700 mb-3">容額填報管理</h2>
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">項目名稱</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                    <span className="text-sm font-medium text-gray-900">{quotaFilingConfig.name}</span>
                   </td>
                   <td className="px-6 py-4">
-                    {getStatusBadge(item)}
+                    {getStatusBadge(quotaFilingConfig)}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-500">{getFilingPeriod(item)}</span>
+                    <span className="text-sm text-gray-500">{getFilingPeriod(quotaFilingConfig)}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end">
                       <Button
                         variant="outline"
                         size="sm"
                         className="gap-1.5 h-8"
-                        onClick={() => handleSettingsClick(item)}
+                        onClick={() => handleSettingsClick(quotaFilingConfig)}
                       >
                         <Settings2 className="w-3.5 h-3.5" />
                         <span className="text-xs">開放設定</span>
                       </Button>
-                      <Button asChild variant="ghost" size="sm" className="gap-1.5 h-8">
-                        <Link href={`/admin/outline-management/${item.id}`}>
-                          <Pencil className="w-3.5 h-3.5" />
-                          <span className="text-xs">編輯大綱</span>
-                        </Link>
-                      </Button>
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
