@@ -1,73 +1,105 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Pencil } from "lucide-react"
+import { ArrowLeft, Pencil, Clock, Power } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { FilingScheduleDialog } from "@/components/admin/filing-schedule-dialog"
+import { filingItemsConfig } from "@/lib/mock/review-outline"
+import type { FilingItemConfig } from "@/lib/mock/review-outline"
 
+export default function FilingItemManagementPage() {
+  const [selectedItem, setSelectedItem] = useState<FilingItemConfig | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-const outlineItems = [
-  {
-    id: "screening-principle",
-    name: "\u7504\u5BE9\u539F\u5247",
-    description: "\u5167\u79D1\u5C08\u79D1\u91AB\u5E2B\u7504\u5BE9\u7684\u57FA\u672C\u539F\u5247\u548C\u8CC7\u683C\u8981\u6C42",
-  },
-  {
-    id: "hospital-accreditation",
-    name: "\u8A13\u7DF4\u91AB\u9662\u8A8D\u5B9A\u57FA\u6E96",
-    description: "\u8A13\u7DF4\u91AB\u9662\u8A8D\u5B9A\u548C\u7BA1\u7406\u7684\u6A19\u6E96",
-  },
-  {
-    id: "training-curriculum",
-    name: "\u8A13\u7DF4\u8AB2\u7A0B\u57FA\u6E96",
-    description: "\u8A13\u7DF4\u8AB2\u7A0B\u8A2D\u7F6E\u548C\u5167\u5BB9\u7684\u57FA\u672C\u8981\u6C42",
-  },
-  {
-    id: "evaluation-standards",
-    name: "\u8A55\u6838\u6A19\u6E96\u8207\u8A55\u6838\u8868",
-    description: "\u5C08\u79D1\u91AB\u5E2B\u8A13\u7DF4\u7684\u8A55\u6838\u6A19\u6E96\u548C\u8868\u683C",
-  },
-  {
-    id: "quota-allocation",
-    name: "\u5BB9\u984D\u5206\u914D\u539F\u5247",
-    description: "\u57F9\u8A13\u5BB9\u984D\u5206\u914D\u7684\u539F\u5247\u548C\u65B9\u6CD5",
-  },
-]
+  const getStatusBadge = (item: FilingItemConfig) => {
+    switch (item.status) {
+      case "open":
+        return <Badge className="bg-green-100 text-green-800">開放中</Badge>
+      case "closed":
+        return <Badge className="bg-gray-100 text-gray-800">未開放</Badge>
+      case "scheduled":
+        return <Badge className="bg-blue-100 text-blue-800">排程中</Badge>
+    }
+  }
 
-export default function OutlineManagementPage() {
+  const getFilingPeriod = (item: FilingItemConfig) => {
+    if (!item.openingDate) return "尚未設定"
+    const startDate = item.openingDate.split(" ")[0]
+    const endDate = item.closingDate?.split(" ")[0]
+    return `${startDate} ~ ${endDate}`
+  }
+
+  const handleScheduleClick = (item: FilingItemConfig) => {
+    setSelectedItem(item)
+    setDialogOpen(true)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link
-            href="/admin"
+            href="/"
             className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回管理專區
+            返回首頁
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">大綱規範管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900">填報項目管理</h1>
+          <p className="text-sm text-gray-600 mt-1">設定各項填報文件的開放時間和狀態</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto] items-center px-6 py-3 border-b border-gray-200 bg-gray-50">
-            <span className="text-sm font-medium text-gray-500">項目名稱</span>
-            <span className="text-sm font-medium text-gray-500">操作</span>
+          <div className="grid grid-cols-[2fr_1fr_2fr_auto_auto] items-center px-6 py-3 border-b border-gray-200 bg-gray-50">
+            <span className="text-xs font-semibold text-gray-500 uppercase">文件名稱</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase">狀態</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase">填報期間</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase">操作</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase">大綱</span>
           </div>
 
           <div className="divide-y divide-gray-200">
-            {outlineItems.map((item) => (
+            {filingItemsConfig.map((item) => (
               <div
                 key={item.id}
-                className="grid grid-cols-[1fr_auto] items-center px-6 py-5"
+                className="grid grid-cols-[2fr_1fr_2fr_auto_auto] items-center px-6 py-4 hover:bg-gray-50"
               >
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">{item.name}</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">{item.description}</p>
+                  <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
                 </div>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={`/admin/outline-management/${item.id}`} className="flex items-center gap-2">
-                    <Pencil className="w-4 h-4" />
-                    編輯
+
+                <div>{getStatusBadge(item)}</div>
+
+                <div className="text-xs text-gray-600">{getFilingPeriod(item)}</div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1 h-8 px-2"
+                    onClick={() => handleScheduleClick(item)}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="text-xs">排程</span>
+                  </Button>
+                  {item.status === "open" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1 h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Power className="w-3.5 h-3.5" />
+                      <span className="text-xs">關閉</span>
+                    </Button>
+                  )}
+                </div>
+
+                <Button asChild size="sm" variant="outline" className="gap-1 h-8">
+                  <Link href={`/admin/outline-management/${item.id}`}>
+                    <Pencil className="w-3.5 h-3.5" />
+                    <span className="text-xs">編輯</span>
                   </Link>
                 </Button>
               </div>
@@ -75,6 +107,14 @@ export default function OutlineManagementPage() {
           </div>
         </div>
       </div>
+
+      {selectedItem && (
+        <FilingScheduleDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          item={selectedItem}
+        />
+      )}
     </div>
   )
 }

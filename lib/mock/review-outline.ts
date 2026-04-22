@@ -18,12 +18,70 @@ export interface TemplateRecord {
   label: string
 }
 
+export interface FilingItemConfig {
+  id: string
+  name: string
+  status: "open" | "closed" | "scheduled"
+  openingDate?: string
+  closingDate?: string
+  isScheduled: boolean
+  isManualControl: boolean
+}
+
 export const outlineMeta: Record<string, { name: string }> = {
   "screening-principle": { name: "甄審原則" },
   "hospital-accreditation": { name: "訓練醫院認定基準" },
   "training-curriculum": { name: "訓練課程基準" },
   "evaluation-standards": { name: "評核標準與評核表" },
   "quota-allocation": { name: "容額分配原則" },
+}
+
+export const filingItemsConfig: FilingItemConfig[] = [
+  {
+    id: "hospital-accreditation",
+    name: "訓練醫院認定基準",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/03/31 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "training-curriculum",
+    name: "訓練課程基準",
+    status: "closed",
+    openingDate: "",
+    closingDate: "",
+    isScheduled: false,
+    isManualControl: true,
+  },
+  {
+    id: "evaluation-standards",
+    name: "評核標準與評核表",
+    status: "scheduled",
+    openingDate: "2026/04/01 09:00",
+    closingDate: "2026/04/30 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "quota-allocation",
+    name: "容額分配原則",
+    status: "open",
+    openingDate: "2026/03/15 09:00",
+    closingDate: "2026/04/15 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "screening-principle",
+    name: "甄審原則",
+    status: "closed",
+    openingDate: "",
+    closingDate: "",
+    isScheduled: false,
+    isManualControl: true,
+  },
 }
 
 export function getInitialOutline(): OutlineItem[] {
