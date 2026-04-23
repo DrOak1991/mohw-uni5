@@ -396,19 +396,19 @@ function QuotaFilingSection({
 
       <div className="bg-card rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
-                <th className="px-4 py-3 text-left">序號</th>
-                <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left">主訓醫院</th>
-                <th className="px-4 py-3 text-center">狀態</th>
-                <th className="px-4 py-3 text-center">效期</th>
-                <th className="px-4 py-3 text-center">延長效期</th>
-                <th className="px-4 py-3 text-center">容額上限</th>
-                <th className="px-4 py-3 text-center">前年度核定容額</th>
-                <th className="px-4 py-3 text-center">本年度容額</th>
-                <th className="px-4 py-3 text-center">操作</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-12">序號</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-36">醫事機構代碼</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">主訓醫院</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-24">狀態</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-36">效期</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-40">延長效期</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-20">容額上限</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-28">前年度核定容額</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-24">本年度容額</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-16">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -419,15 +419,15 @@ function QuotaFilingSection({
                   key={hospital.id}
                   className={`hover:bg-muted/30 ${groupStyle ? `border-l-4 ${groupStyle}` : ""}`}
                 >
-                  <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
-                  <td className="px-4 py-4 text-sm text-muted-foreground">{hospital.code}</td>
-                  <td className="px-4 py-4 font-medium">
+                  <td className="px-4 py-4 text-muted-foreground whitespace-nowrap">{hospital.id}</td>
+                  <td className="px-4 py-4 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                  <td className="px-4 py-4 font-medium whitespace-nowrap">
                     {hospital.groupId && (
                       <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
                     )}
                     {hospital.name}
                   </td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
                     {hospital.status && (
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${hospital.statusColor}`}
@@ -436,16 +436,16 @@ function QuotaFilingSection({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center text-sm text-muted-foreground">
+                  <td className="px-4 py-4 text-center text-sm text-muted-foreground whitespace-nowrap">
                     {hospital.expiry}
                   </td>
-                  <td className="px-4 py-4 text-center text-sm text-muted-foreground">
+                  <td className="px-4 py-4 text-center text-sm text-muted-foreground whitespace-nowrap">
                     {hospital.extension}
                   </td>
-                  <td className="px-4 py-4 text-center">{hospital.limit}</td>
-                  <td className="px-4 py-4 text-center">{hospital.prevQuota}</td>
-                  <td className="px-4 py-4 text-center">{hospital.currentQuota}</td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.limit}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.prevQuota}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.currentQuota}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
                     {!("isSubRow" in hospital && hospital.isSubRow) && (
                       <Link href={`/filing/quota/${hospital.id}`}>
                         <Button variant="link" className="text-primary p-0 h-auto">
