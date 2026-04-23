@@ -140,7 +140,7 @@ const mockReviewFeedback: ReviewFeedback = {
     2. 第 3.2 條訓練時數說明過於簡略，請補充具體課程安排。建議明列各項核心課程之訓練時數、訓練方式及評核標準，以利受訓學員及訓練醫院有所依循。
 
 （二）關於訓練課程規劃部分：
-    1. 建議新增第 4.3 條關於緊急應變的說明，包含但不限於：
+    1. 建議新增第 4.3 條關於緊急應變的說明，包含���不限於：
        - 重大傳染病疫情之應變措施
        - 大量傷患事件之處置流程
        - 緊急醫療救護��統之整合運作
@@ -177,7 +177,7 @@ export default function FilingDetailPage({
   const isUnfilled = status === "尚未送出"
   const initialData = isUnfilled ? currentYearUnchanged : currentYearWithChanges
 
-  const [documentMethod, setDocumentMethod] = useState<string>(isUnfilled ? "" : "change")
+  const [documentMethod, setDocumentMethod] = useState<string>(isUnfilled ? "no-change" : "change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1", "2", "3", "2-2"])
   const [activeTab, setActiveTab] = useState<string>("current")
@@ -483,11 +483,15 @@ export default function FilingDetailPage({
                                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                 )}
                                 <span className="font-medium">{section.title}</span>
-                                {hasChanges && (
+                                {hasChanges ? (
                                   <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
                                     已修訂
                                   </span>
-                                )}
+                                ) : documentMethod === "change" && !isReadOnly ? (
+                                  <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded">
+                                    未修正
+                                  </span>
+                                ) : null}
                               </div>
                             </div>
                           </CollapsibleTrigger>
