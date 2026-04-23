@@ -148,6 +148,16 @@ export const stageColors: Record<string, string> = {
   announced: "bg-green-100 text-green-800 border-green-200",
 }
 
+// 學會層級的目前階段管理（按文件類型）
+export const societyCurrentStages: Record<string, string> = {
+  "screening-principle": "pending-review",
+  "hospital-accreditation": "pending-review",
+  "training-curriculum": "pending-review",
+  "evaluation-standards": "pending-review",
+  "quota-allocation": "pending-review",
+  "improvement-guide": "pending-review",
+}
+
 export function getDocumentTypes() {
   return documentTypes
 }
@@ -166,5 +176,35 @@ export function getSocieties() {
 
 export function getStageColors() {
   return stageColors
+}
+
+// 獲取文件類型目前所處的整體階段
+export function getCurrentStageForDocumentType(documentTypeId: string) {
+  return societyCurrentStages[documentTypeId] ?? "pending-review"
+}
+
+// 取得指定階段的案件統計
+export function getSubmissionCountsByStage(documentTypeId: string) {
+  const submissions = getDocumentSubmissions(documentTypeId)
+  const stages = getStagesForDocumentType(documentTypeId)
+
+  return stages.map((stage) => ({
+    stage: stage.value,
+    label: stage.label,
+    count: submissions.filter((s) => s.stage === stage.value).length,
+  }))
+}
+
+// 推進到下一階段
+export function advanceDocumentTypeToNextStage(documentTypeId: string) {
+  const stages = getStagesForDocumentType(documentTypeId)
+  const currentStage = societyCurrentStages[documentTypeId] ?? stages[0]?.value
+  const currentIndex = stages.findIndex((s) => s.value === currentStage)
+
+  if (currentIndex < stages.length - 1) {
+    societyCurrentStages[documentTypeId] = stages[currentIndex + 1].value
+    return true
+  }
+  return false
 }
 

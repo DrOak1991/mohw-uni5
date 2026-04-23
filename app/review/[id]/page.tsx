@@ -116,27 +116,9 @@ const currentYearData = [
   },
 ]
 
-// Documents with two-stage review process
+// Documents with two-stage review process (already handled by batch advancement)
+// Keep for reference but not used in current stage management
 const twoStageDocuments = ["計畫認定基準", "訓練課程基準", "評核標準", "容額分配原則"]
-
-// Review stages for two-stage documents
-const twoStageReviewStages = [
-  { value: "pending", label: "待審查" },
-  { value: "reviewing", label: "承辦審查中" },
-  { value: "group-review", label: "分組會議審查" },
-  { value: "group-approved", label: "分組會議通過" },
-  { value: "rrc-review", label: "RRC 大會審查" },
-  { value: "returned", label: "退回補件" },
-  { value: "approved", label: "審查通過" },
-]
-
-// Review stages for simple documents (甄審原則, 精進指南)
-const simpleReviewStages = [
-  { value: "pending", label: "待審查" },
-  { value: "reviewing", label: "承辦審查中" },
-  { value: "returned", label: "退回補件" },
-  { value: "approved", label: "審查通過" },
-]
 
 // Mock group review files (from previous stage)
 const mockGroupReviewFiles = [
@@ -161,7 +143,6 @@ export default function ReviewDetailPage({
 
   // Determine if this document has two-stage review
   const hasTwoStageReview = twoStageDocuments.includes(documentInfo.documentType)
-  const reviewStages = hasTwoStageReview ? twoStageReviewStages : simpleReviewStages
   const isRRCReviewStage = documentInfo.currentStage === "rrc-review"
   const showGroupReviewFiles = hasTwoStageReview && isRRCReviewStage
 
@@ -170,11 +151,12 @@ export default function ReviewDetailPage({
   )
   const [activeTab, setActiveTab] = useState<string>("current")
   
-  // Review state
+  // Review state - now only handles review result (pass/needs-revision)
+  // Stage progression is managed at the document type level, not per submission
+  const [reviewResult, setReviewResult] = useState("pending") // pending | approved | needs-revision
   const [reviewComment, setReviewComment] = useState("")
-  const [currentStage, setCurrentStage] = useState(documentInfo.currentStage)
-  const [showStageDialog, setShowStageDialog] = useState(false)
-  const [pendingStage, setPendingStage] = useState("")
+  const [showResultDialog, setShowResultDialog] = useState(false)
+  const [pendingResult, setPendingResult] = useState("")
   
   // Uploaded files
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: number; date: string }>>([])
@@ -206,16 +188,20 @@ export default function ReviewDetailPage({
     toast.success("已移除檔案")
   }
 
-  const handleStageChange = (newStage: string) => {
-    setPendingStage(newStage)
-    setShowStageDialog(true)
+  const handleResultChange = (newResult: string) => {
+    setPendingResult(newResult)
+    setShowResultDialog(true)
   }
 
-  const confirmStageChange = () => {
-    setCurrentStage(pendingStage)
-    setShowStageDialog(false)
-    const stageLabel = reviewStages.find((s) => s.value === pendingStage)?.label
-    toast.success(`審查階段已變更為「${stageLabel}」`)
+  const confirmResultChange = () => {
+    setReviewResult(pendingResult)
+    setShowResultDialog(false)
+    const resultLabel = {
+      approved: "通過",
+      "needs-revision": "需補件",
+      pending: "待審查",
+    }[pendingResult] || pendingResult
+    toast.success(`審查結果已記錄為「${resultLabel}」`)
   }
 
   const formatFileSize = (bytes: number) => {
@@ -232,13 +218,9 @@ export default function ReviewDetailPage({
         return "bg-blue-100 text-blue-700"
       case "group-review":
         return "bg-purple-100 text-purple-700"
-      case "group-approved":
-        return "bg-purple-100 text-purple-700"
       case "rrc-review":
         return "bg-indigo-100 text-indigo-700"
-      case "returned":
-        return "bg-red-100 text-red-700"
-      case "approved":
+      case "announced":
         return "bg-green-100 text-green-700"
       default:
         return "bg-gray-100 text-gray-700"
@@ -273,9 +255,24 @@ export default function ReviewDetailPage({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge className={getStageColor(currentStage)}>
-                {reviewStages.find((s) => s.value === currentStage)?.label}
-              </Badge>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">審查結果</p>
+                <Badge
+                  className={`${
+                    reviewResult === "approved"
+                      ? "bg-green-100 text-green-700"
+                      : reviewResult === "needs-revision"
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {reviewResult === "approved"
+                    ? "通過"
+                    : reviewResult === "needs-revision"
+                      ? "需補件"
+                      : "待審查"}
+                </Badge>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1">
@@ -445,21 +442,25 @@ export default function ReviewDetailPage({
 
           {/* Right Sidebar - Review Actions */}
           <div className="space-y-4">
-            {/* Stage Control */}
+            {/* Review Result Selection */}
             <div className="bg-white rounded-lg border shadow-sm p-4">
-              <Label className="text-sm font-medium">審查階段</Label>
-              <Select value={currentStage} onValueChange={handleStageChange}>
-                <SelectTrigger className="mt-2">
+              <Label className="text-sm font-medium mb-3 block">審查結果 <span className="text-destructive">*</span></Label>
+              <Select value={reviewResult} onValueChange={handleResultChange}>
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {reviewStages.map((stage) => (
-                    <SelectItem key={stage.value} value={stage.value}>
-                      {stage.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="approved">
+                    <span className="text-green-600 font-medium">通過</span>
+                  </SelectItem>
+                  <SelectItem value="needs-revision">
+                    <span className="text-orange-600 font-medium">需補件</span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                選擇審查結果，文件會在批次推進時統一進入下一階段。
+              </p>
             </div>
 
             {/* Group Review Files (only shown in RRC review stage for two-stage documents) */}
@@ -581,43 +582,44 @@ export default function ReviewDetailPage({
         </div>
       </div>
 
-      {/* Stage Change Confirmation Dialog */}
-      <Dialog open={showStageDialog} onOpenChange={setShowStageDialog}>
+      {/* 審查結果確認 Dialog */}
+      <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>確認變更審查階段</DialogTitle>
+            <DialogTitle>確認審查結果</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-4 space-y-3">
             <p className="text-sm text-muted-foreground">
-              確定要將審查階段變更為「
+              確定要將審查結果記錄為「
               <span className="font-medium text-foreground">
-                {reviewStages.find((s) => s.value === pendingStage)?.label}
+                {pendingResult === "approved"
+                  ? "通過"
+                  : pendingResult === "needs-revision"
+                    ? "需補件"
+                    : "待審查"}
               </span>
               」嗎？
             </p>
-            {pendingStage === "returned" && (
-              <p className="mt-2 text-sm text-amber-600">
-                退回補件後，醫學會將收到通知並可重新修改內容。
-              </p>
+            {pendingResult === "needs-revision" && (
+              <div className="bg-orange-50 border border-orange-200 rounded p-3">
+                <p className="text-sm text-orange-700">
+                  需補件後，醫學會將收到通知並可重新修改內容，審查流程會重新開始。
+                </p>
+              </div>
             )}
-            {pendingStage === "approved" && (
-              <p className="mt-2 text-sm text-green-600">
-                審查通過後，此文件將進入公告流程。
-              </p>
-            )}
-            {pendingStage === "group-approved" && (
-              <p className="mt-2 text-sm text-purple-600">
-                分組會議通過後，此文件將進入 RRC 大會審查階段。
-              </p>
+            {pendingResult === "approved" && (
+              <div className="bg-green-50 border border-green-200 rounded p-3">
+                <p className="text-sm text-green-700">
+                  此結果將在批次推進時統一納入考量。
+                </p>
+              </div>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowStageDialog(false)}>
+            <Button variant="outline" onClick={() => setShowResultDialog(false)}>
               取消
             </Button>
-            <Button onClick={confirmStageChange}>
-              確認變更
-            </Button>
+            <Button onClick={confirmResultChange}>確認</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

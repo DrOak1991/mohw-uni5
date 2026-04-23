@@ -2,13 +2,20 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Search, Clock, ChevronRight, AlertCircle } from "lucide-react"
+import { Search, Clock, ChevronRight, AlertCircle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { ReviewSimpleNav } from "@/components/review/simple-nav"
 import {
   getDocumentSubmissions,
@@ -16,6 +23,9 @@ import {
   getSocieties,
   getStageColors,
   getStagesForDocumentType,
+  getCurrentStageForDocumentType,
+  getSubmissionCountsByStage,
+  advanceDocumentTypeToNextStage,
 } from "@/lib/mock/review-submissions"
 
 export default function SubmissionsReviewPage() {
@@ -23,11 +33,13 @@ export default function SubmissionsReviewPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeDocumentType, setActiveDocumentType] = useState("screening-principle")
   const [currentStage, setCurrentStage] = useState("pending-review")
+  const [showAdvanceDialog, setShowAdvanceDialog] = useState(false)
 
   const documentTypes = getDocumentTypes()
   const allStagesForActiveType = getStagesForDocumentType(activeDocumentType)
   const currentDocumentSubmissions = getDocumentSubmissions(activeDocumentType)
   const societies = getSocieties()
+  const currentDocumentStage = getCurrentStageForDocumentType(activeDocumentType)
 
   const filteredSubmissions = currentDocumentSubmissions
     .map((submission) => ({
@@ -37,7 +49,6 @@ export default function SubmissionsReviewPage() {
     .filter((submission) => submission.society.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((submission) => submission.stage === currentStage)
     .sort((a, b) => {
-      // 已上傳的排在前面
       if (a.uploaded && !b.uploaded) return -1
       if (!a.uploaded && b.uploaded) return 1
       return 0
@@ -48,6 +59,21 @@ export default function SubmissionsReviewPage() {
     count: currentDocumentSubmissions.filter((s) => s.stage === stage.value).length,
   }))
 
+  const currentStageLabel = allStagesForActiveType.find((s) => s.value === currentDocumentStage)?.label || currentDocumentStage
+  const nextStageIndex = allStagesForActiveType.findIndex((s) => s.value === currentDocumentStage) + 1
+  const hasNextStage = nextStageIndex < allStagesForActiveType.length
+  const nextStageLabel = hasNextStage ? allStagesForActiveType[nextStageIndex].label : null
+
+  const handleAdvanceStage = () => {
+    if (advanceDocumentTypeToNextStage(activeDocumentType)) {
+      setShowAdvanceDialog(false)
+      // 自動切換到下一階段的 tab
+      if (nextStageLabel) {
+        setCurrentStage(allStagesForActiveType[nextStageIndex].value)
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ReviewSimpleNav />
@@ -57,6 +83,23 @@ export default function SubmissionsReviewPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">填報審查</h1>
             <p className="text-sm text-gray-500 mt-1">以文件類型為單位檢視各醫學會的填報狀態並進行審查</p>
+            <div className="flex items-center gap-3 mt-3">
+              <span className="text-sm text-gray-600">目前階段：</span>
+              <Badge className={`${getStageColors()[currentDocumentStage] || "bg-gray-100 text-gray-800"} text-base px-3 py-1.5`}>
+                {currentStageLabel}
+              </Badge>
+              {hasNextStage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 ml-2"
+                  onClick={() => setShowAdvanceDialog(true)}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  推進至{nextStageLabel}
+                </Button>
+              )}
+            </div>
           </div>
 
           <Button
@@ -212,6 +255,47 @@ export default function SubmissionsReviewPage() {
             </TabsContent>
           ))}
         </Tabs>
+
+        {/* 推進階段確認 Dialog */}
+        <Dialog open={showAdvanceDialog} onOpenChange={setShowAdvanceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>推進至下一階段</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  即將推進 <span className="font-medium">{documentTypes.find((d) => d.id === activeDocumentType)?.name}</span> 至{" "}
+                  <span className="font-medium">{nextStageLabel}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  推進後，所有案件將統一進入下一階段。各醫學會將無法在此階段再進行修改。
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-medium text-gray-700">目前各階段統計</p>
+                {stagesWithCounts.map((stage) => (
+                  <div key={stage.value} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">{stage.label}</span>
+                    <Badge variant="outline" className="bg-white">
+                      {stage.count} 件
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowAdvanceDialog(false)}>
+                取消
+              </Button>
+              <Button onClick={handleAdvanceStage} className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
+                <ArrowRight className="h-4 w-4" />
+                確認推進
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
