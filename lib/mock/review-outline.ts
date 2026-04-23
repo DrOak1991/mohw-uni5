@@ -109,56 +109,38 @@ export function getInitialOutline(): OutlineItem[] {
     {
       id: "1",
       number: "1",
-      title: "基本資訊",
-      description: "包含專科名稱、訓練年限等基本設定",
-      children: [
-        {
-          id: "1-1",
-          number: "1.1",
-          title: "專科名稱",
-          description: "請填明確標示專科全名",
-        },
-        {
-          id: "1-2",
-          number: "1.2",
-          title: "訓練年限",
-          description: "請填明完整訓練年限(年/月)",
-        },
-        {
-          id: "1-3",
-          number: "1.3",
-          title: "法規依據",
-          description: "相關法規與辦法引用",
-        },
-      ],
+      title: "甄審原則",
+      description: "規定醫師參加專科醫師甄審之基本原則",
     },
     {
       id: "2",
       number: "2",
-      title: "訓練目標",
-      description: "明確說明訓練計畫之整體目標",
-      children: [
-        {
-          id: "2-1",
-          number: "2.1",
-          title: "核心能力",
-          description: "請列舉至少五項核心能力",
-        },
-      ],
+      title: "醫師資格",
+      description: "明確列舉符合甄審資格之醫師條件",
     },
     {
       id: "3",
       number: "3",
-      title: "訓練內容",
-      description: "詳細列出訓練內容與課程規劃",
-      children: [],
+      title: "訓練醫院資格",
+      description: "規定訓練醫院應符合之認定基準",
     },
     {
       id: "4",
       number: "4",
-      title: "評估方式",
-      description: "說明訓練成效的評估標準與方法",
-      children: [],
+      title: "訓練計畫執行架構",
+      description: "說明訓練計畫之執行方式與組織架構",
+    },
+    {
+      id: "5",
+      number: "5",
+      title: "甄審程序",
+      description: "詳細說明甄審之報名、初審、複審等程序",
+    },
+    {
+      id: "6",
+      number: "6",
+      title: "甄審結果",
+      description: "規定甄審結果之公告與異議處理方式",
     },
   ]
 }
