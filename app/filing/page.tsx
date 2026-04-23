@@ -46,7 +46,7 @@ const filingStatusMap = Object.fromEntries(
 
 const documents = [
   { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "training-curriculum", title: "訓練課程基準", status: "需補件", deadline: "2025/03/31" },
+  { id: "training-curriculum", title: "訓練課程基準", status: "尚未填寫", deadline: "2025/04/30" },
   { id: "evaluation-standards", title: "評核標準與評核表", status: "審查中", deadline: "2025/04/15" },
   { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
   { id: "improvement-guide", title: "精進指南", status: "待送件", deadline: "2025/04/30" },
@@ -55,6 +55,8 @@ const documents = [
 
 const getStatusStyle = (status: string) => {
   switch (status) {
+    case "尚未填寫":
+      return "text-muted-foreground"
     case "待送件":
       return "text-muted-foreground"
     case "審查中":
@@ -149,6 +151,11 @@ export default function FilingPage() {
                               <Button size="sm" variant="outline" className="gap-2">
                                 <FileText className="h-4 w-4" />
                                 {doc.status === "通過" ? "已通過" : "審查中"}
+                              </Button>
+                            ) : doc.status === "尚未填寫" ? (
+                              <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+                                <Edit3 className="h-4 w-4" />
+                                開始填寫
                               </Button>
                             ) : (
                               <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
