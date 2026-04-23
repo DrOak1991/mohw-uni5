@@ -252,7 +252,7 @@ export default function FilingDetailPage({
 
   // Compute stats
   const stats = useMemo(() => {
-    const sectionsWithChanges = currentYearInitialData.filter((s) => sectionHasChanges(s.id))
+    const sectionsWithChanges = initialData.filter((s) => sectionHasChanges(s.id))
     const notesFilledCount = sectionsWithChanges.filter((s) => {
       const note = applyUnifiedNote ? unifiedNote : revisionNotes[s.id]
       return note && note.trim() !== ""
@@ -262,7 +262,7 @@ export default function FilingDetailPage({
       notesFilled: notesFilledCount,
       pending: sectionsWithChanges.length - notesFilledCount,
     }
-  }, [currentYearContent, revisionNotes, applyUnifiedNote, unifiedNote])
+  }, [currentYearContent, revisionNotes, applyUnifiedNote, unifiedNote, initialData])
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
