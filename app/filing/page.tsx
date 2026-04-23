@@ -46,16 +46,19 @@ const filingStatusMap = Object.fromEntries(
 
 const documents = [
   { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "training-curriculum", title: "訓練課程基準", status: "尚未填寫", deadline: "2025/04/30" },
+  { id: "training-curriculum", title: "訓練課程基準", status: "尚未送出", deadline: "2025/04/30" },
   { id: "evaluation-standards", title: "評核標準與評核表", status: "審查中", deadline: "2025/04/15" },
   { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
   { id: "improvement-guide", title: "精進指南", status: "待送件", deadline: "2025/04/30" },
   { id: "screening-principle", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
 ]
 
+// 可送件的狀態（已有內容但尚未送出）
+const submittableStatuses = ["待送件", "需補件", "尚未送出"]
+
 const getStatusStyle = (status: string) => {
   switch (status) {
-    case "尚未填寫":
+    case "尚未送出":
       return "text-muted-foreground"
     case "待送件":
       return "text-muted-foreground"
@@ -88,6 +91,30 @@ const availableHospitals = [
 export default function FilingPage() {
   const [activeTab, setActiveTab] = useState<string>("documents")
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [selectedSubmitIds, setSelectedSubmitIds] = useState<string[]>([])
+
+  const submittableDocs = documents.filter((doc) => {
+    const filingOpen = filingStatusMap[doc.id] === "open"
+    return filingOpen && submittableStatuses.includes(doc.status)
+  })
+
+  const toggleSubmitDoc = (id: string) => {
+    setSelectedSubmitIds((prev) =>
+      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
+    )
+  }
+
+  const handleOpenSubmitDialog = () => {
+    // 預設全選可送件文件
+    setSelectedSubmitIds(submittableDocs.map((d) => d.id))
+    setShowSubmitDialog(true)
+  }
+
+  const handleConfirmSubmit = () => {
+    setShowSubmitDialog(false)
+    setSelectedSubmitIds([])
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -152,7 +179,7 @@ export default function FilingPage() {
                                 <FileText className="h-4 w-4" />
                                 {doc.status === "通過" ? "已通過" : "審查中"}
                               </Button>
-                            ) : doc.status === "尚未填寫" ? (
+                            ) : doc.status === "尚未送出" ? (
                               <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
                                 <Edit3 className="h-4 w-4" />
                                 開始填寫
@@ -188,20 +215,86 @@ export default function FilingPage() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
-          <Button variant="outline" size="lg" className="gap-2">
-            <Download className="h-4 w-4" />
-            儲存草稿
-          </Button>
-          <Button
-            size="lg"
-            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-          >
-            <Send className="h-4 w-4" />
-            送件
-          </Button>
-        </div>
+        {activeTab === "documents" && (
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+            <Button variant="outline" size="lg" className="gap-2">
+              <Download className="h-4 w-4" />
+              儲存草稿
+            </Button>
+            <Button
+              size="lg"
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              disabled={submittableDocs.length === 0}
+              onClick={handleOpenSubmitDialog}
+            >
+              <Send className="h-4 w-4" />
+              送件
+              {submittableDocs.length > 0 && (
+                <span className="ml-1 bg-white/20 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {submittableDocs.length}
+                </span>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* 送件確認 Dialog */}
+      <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>選擇要送件的文件</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              請勾選本次要送出審查的文件。送出後將無法再編輯，直到審查結果出爐。
+            </p>
+            {submittableDocs.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">目前沒有可送件的文件</p>
+            ) : (
+              <div className="space-y-2">
+                {submittableDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                      selectedSubmitIds.includes(doc.id)
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                    onClick={() => toggleSubmitDoc(doc.id)}
+                  >
+                    <Checkbox
+                      checked={selectedSubmitIds.includes(doc.id)}
+                      onCheckedChange={() => toggleSubmitDoc(doc.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        送件期限：{doc.deadline}　狀態：
+                        <span className={getStatusStyle(doc.status)}>{doc.status}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+              取消
+            </Button>
+            <Button
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              disabled={selectedSubmitIds.length === 0}
+              onClick={handleConfirmSubmit}
+            >
+              <Send className="h-4 w-4" />
+              確認送出 {selectedSubmitIds.length > 0 && `(${selectedSubmitIds.length} 件)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="max-w-md">
