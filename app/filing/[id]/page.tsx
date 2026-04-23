@@ -76,8 +76,8 @@ const previousYearData = [
   },
 ]
 
-// Mock data - Current year content (editable, pre-filled with last year data)
-const currentYearInitialData = [
+// Mock data - Current year content with changes (for 待送件/需補件 status)
+const currentYearWithChanges = [
   {
     id: "1",
     title: "一、甄審原則",
@@ -108,6 +108,11 @@ const currentYearInitialData = [
 2.2.4為達到本計畫所載訓練之完整目標，不限同一家機構訓練，允許與合作醫院聯合訓練。`,
   },
 ]
+
+// Mock data - Current year content unchanged (for 尚未送出 status - same as previous year)
+const currentYearUnchanged = previousYearData.map((section) => ({
+  ...section,
+}))
 
 // Mock review feedback - larger content for testing
 const mockReviewFeedback: ReviewFeedback = {
@@ -168,14 +173,18 @@ export default function FilingDetailPage({
   const searchParams = useSearchParams()
   const status = searchParams.get("status") || "待審查"
 
-  const [documentMethod, setDocumentMethod] = useState<string>("change")
+  // 根據狀態決定初始資料：尚未送出 = 未修改（與前一年相同），其他 = 已有修改
+  const isUnfilled = status === "尚未送出"
+  const initialData = isUnfilled ? currentYearUnchanged : currentYearWithChanges
+
+  const [documentMethod, setDocumentMethod] = useState<string>(isUnfilled ? "" : "change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1", "2", "3", "2-2"])
   const [activeTab, setActiveTab] = useState<string>("current")
   
   // Current year editable content
   const [currentYearContent, setCurrentYearContent] = useState<Record<string, string>>(
-    currentYearInitialData.reduce((acc, section) => {
+    initialData.reduce((acc, section) => {
       acc[section.id] = section.content
       return acc
     }, {} as Record<string, string>)
@@ -192,7 +201,7 @@ export default function FilingDetailPage({
   const isReadOnly = status === "通過" || status === "審查中"
   const isReviewInProgress = status === "審查中"
   const isPreviousYearOnly = status === "view"
-  const showDocumentMethodChoice = status === "待送件"
+  const showDocumentMethodChoice = status === "待送件" || status === "尚未送出"
 
   const getDocumentTitle = () => {
     const titles: Record<string, string> = {
