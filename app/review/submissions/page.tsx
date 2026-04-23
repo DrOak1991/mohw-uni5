@@ -24,8 +24,8 @@ import {
   getStageColors,
   getStagesForDocumentType,
   getCurrentStageForDocumentType,
-  getSubmissionCountsByStage,
   advanceDocumentTypeToNextStage,
+  getAdvanceCheckStats,
 } from "@/lib/mock/review-submissions"
 
 export default function SubmissionsReviewPage() {
@@ -63,6 +63,7 @@ export default function SubmissionsReviewPage() {
   const nextStageIndex = allStagesForActiveType.findIndex((s) => s.value === currentDocumentStage) + 1
   const hasNextStage = nextStageIndex < allStagesForActiveType.length
   const nextStageLabel = hasNextStage ? allStagesForActiveType[nextStageIndex].label : null
+  const advanceStats = getAdvanceCheckStats(activeDocumentType)
 
   const handleAdvanceStage = () => {
     if (advanceDocumentTypeToNextStage(activeDocumentType)) {
@@ -182,7 +183,7 @@ export default function SubmissionsReviewPage() {
                               {filteredSubmissions.length === 0 ? (
                                 <TableRow>
                                   <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                                    沒有符合條件的資料
+                                    沒有符合條件的資��
                                   </TableCell>
                                 </TableRow>
                               ) : (
@@ -258,32 +259,93 @@ export default function SubmissionsReviewPage() {
 
         {/* 推進階段確認 Dialog */}
         <Dialog open={showAdvanceDialog} onOpenChange={setShowAdvanceDialog}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>推進至下一階段</DialogTitle>
             </DialogHeader>
-            <div className="py-4 space-y-4">
+            <div className="py-2 space-y-4">
               <div>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-gray-600">
                   即將推進 <span className="font-medium">{documentTypes.find((d) => d.id === activeDocumentType)?.name}</span> 至{" "}
                   <span className="font-medium">{nextStageLabel}</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  推進後，所有案件將統一進入下一階段。各醫學會將無法在此階段再進行修改。
-                </p>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                <p className="text-sm font-medium text-gray-700">目前各階段統計</p>
-                {stagesWithCounts.map((stage) => (
-                  <div key={stage.value} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">{stage.label}</span>
-                    <Badge variant="outline" className="bg-white">
-                      {stage.count} 件
+              {/* 送件狀態統計 */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-700">送件狀態</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-green-700">已送件</span>
+                      <Badge className="bg-green-100 text-green-700">{advanceStats.uploaded.count} 件</Badge>
+                    </div>
+                  </div>
+                  <div className={`border rounded-lg p-3 ${advanceStats.notUploaded.count > 0 ? "bg-orange-50 border-orange-200" : "bg-gray-50 border-gray-200"}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-sm ${advanceStats.notUploaded.count > 0 ? "text-orange-700" : "text-gray-600"}`}>未送件</span>
+                      <Badge className={advanceStats.notUploaded.count > 0 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-600"}>
+                        {advanceStats.notUploaded.count} 件
+                      </Badge>
+                    </div>
+                    {advanceStats.notUploaded.count > 0 && (
+                      <p className="text-xs text-orange-600 mt-1 line-clamp-2">
+                        {advanceStats.notUploaded.societies.slice(0, 3).join("、")}
+                        {advanceStats.notUploaded.societies.length > 3 && `...等 ${advanceStats.notUploaded.societies.length} 間`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 審查狀態統計 */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-700">審查狀態</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <span className="text-sm text-green-700">已審查通過</span>
+                    <Badge className="bg-green-100 text-green-700">{advanceStats.approved.count} 件</Badge>
+                  </div>
+                  <div className={`flex items-center justify-between p-3 border rounded-lg ${advanceStats.needsRevision.count > 0 ? "bg-orange-50 border-orange-200" : "bg-gray-50 border-gray-200"}`}>
+                    <div>
+                      <span className={`text-sm ${advanceStats.needsRevision.count > 0 ? "text-orange-700" : "text-gray-600"}`}>需補件</span>
+                      {advanceStats.needsRevision.count > 0 && (
+                        <p className="text-xs text-orange-600 mt-0.5">
+                          {advanceStats.needsRevision.societies.slice(0, 3).join("、")}
+                          {advanceStats.needsRevision.societies.length > 3 && `...等`}
+                        </p>
+                      )}
+                    </div>
+                    <Badge className={advanceStats.needsRevision.count > 0 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-600"}>
+                      {advanceStats.needsRevision.count} 件
                     </Badge>
                   </div>
-                ))}
+                  <div className={`flex items-center justify-between p-3 border rounded-lg ${advanceStats.pendingReview.count > 0 ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-200"}`}>
+                    <div>
+                      <span className={`text-sm ${advanceStats.pendingReview.count > 0 ? "text-amber-700" : "text-gray-600"}`}>尚未審查</span>
+                      {advanceStats.pendingReview.count > 0 && (
+                        <p className="text-xs text-amber-600 mt-0.5">
+                          {advanceStats.pendingReview.societies.slice(0, 3).join("、")}
+                          {advanceStats.pendingReview.societies.length > 3 && `...等`}
+                        </p>
+                      )}
+                    </div>
+                    <Badge className={advanceStats.pendingReview.count > 0 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"}>
+                      {advanceStats.pendingReview.count} 件
+                    </Badge>
+                  </div>
+                </div>
               </div>
+
+              {/* 警告提示 */}
+              {(advanceStats.notUploaded.count > 0 || advanceStats.pendingReview.count > 0) && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-xs text-amber-700">
+                    <AlertCircle className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />
+                    有 {advanceStats.notUploaded.count + advanceStats.pendingReview.count} 件案件尚未完成送件或審查，推進後這些案件將一併進入下一階段。
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setShowAdvanceDialog(false)}>

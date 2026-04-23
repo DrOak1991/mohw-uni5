@@ -76,8 +76,7 @@ export const mockSocieties = [
 
 const generateMockSubmissionsByStage = (stages: string[]) => {
   return mockSocieties.map((society, index) => {
-    const stageIndex = index % (stages.length + 1)
-
+    // 未送件的案件
     if (index % 5 === 0) {
       return {
         societyId: society.id,
@@ -85,15 +84,26 @@ const generateMockSubmissionsByStage = (stages: string[]) => {
         uploaded: false,
         uploadedDate: null as string | null,
         lastUpdated: null as string | null,
+        reviewResult: "pending" as "pending" | "approved" | "needs-revision",
       }
     }
 
+    // 已送件的案件，根據 index 分配不同審查結果
+    let reviewResult: "pending" | "approved" | "needs-revision" = "pending"
+    if (index % 4 === 1) {
+      reviewResult = "approved"
+    } else if (index % 4 === 2) {
+      reviewResult = "needs-revision"
+    }
+    // index % 4 === 0 或 3 保持 pending
+
     return {
       societyId: society.id,
-      stage: stages[stageIndex % stages.length],
+      stage: stages[index % stages.length],
       uploaded: true,
       uploadedDate: `2025-01-${String(5 + index).padStart(2, "0")}`,
       lastUpdated: `2025-01-${String(10 + index).padStart(2, "0")}`,
+      reviewResult,
     }
   })
 }
@@ -106,6 +116,7 @@ export const mockDocumentSubmissions: Record<
     uploaded: boolean
     uploadedDate: string | null
     lastUpdated: string | null
+    reviewResult: "pending" | "approved" | "needs-revision"
   }>
 > = {
   "screening-principle": generateMockSubmissionsByStage(["pending-review", "pending-announcement", "announced"]),
@@ -206,5 +217,46 @@ export function advanceDocumentTypeToNextStage(documentTypeId: string) {
     return true
   }
   return false
+}
+
+// 取得推進前的防呆統計資料
+export function getAdvanceCheckStats(documentTypeId: string) {
+  const submissions = getDocumentSubmissions(documentTypeId)
+  const societies = getSocieties()
+
+  const uploaded = submissions.filter((s) => s.uploaded)
+  const notUploaded = submissions.filter((s) => !s.uploaded)
+
+  const approved = submissions.filter((s) => s.reviewResult === "approved")
+  const needsRevision = submissions.filter((s) => s.reviewResult === "needs-revision")
+  const pendingReview = submissions.filter((s) => s.reviewResult === "pending")
+
+  // 取得各類別的醫學會名單
+  const getSocietyNames = (subs: typeof submissions) =>
+    subs.map((s) => societies.find((soc) => soc.id === s.societyId)?.name || s.societyId)
+
+  return {
+    total: submissions.length,
+    uploaded: {
+      count: uploaded.length,
+      societies: getSocietyNames(uploaded),
+    },
+    notUploaded: {
+      count: notUploaded.length,
+      societies: getSocietyNames(notUploaded),
+    },
+    approved: {
+      count: approved.length,
+      societies: getSocietyNames(approved),
+    },
+    needsRevision: {
+      count: needsRevision.length,
+      societies: getSocietyNames(needsRevision),
+    },
+    pendingReview: {
+      count: pendingReview.length,
+      societies: getSocietyNames(pendingReview),
+    },
+  }
 }
 
