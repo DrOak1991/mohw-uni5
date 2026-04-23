@@ -460,7 +460,7 @@ export default function FilingDetailPage({
               {/* Current Year Tab - Editable with Diff Display and Inline Notes */}
               <TabsContent value="current" className="p-6 mt-0">
                 <div className="space-y-6">
-                  {currentYearInitialData.map((section) => {
+                  {initialData.map((section) => {
                     const prevContent = getPreviousYearContent(section.id)
                     const currContent = currentYearContent[section.id] || ""
                     const hasChanges = prevContent !== currContent
