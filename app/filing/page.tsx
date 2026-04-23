@@ -265,6 +265,8 @@ function QuotaFilingSection({
       id: 1,
       code: "0401180014",
       name: "台大醫院",
+      county: "台北市",
+      district: "中山區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -279,6 +281,8 @@ function QuotaFilingSection({
       id: 2,
       code: "0401180015",
       name: "榮民總醫院",
+      county: "台北市",
+      district: "北投區",
       status: "新申請",
       statusColor: "bg-blue-100 text-blue-700",
       expiry: "有效至 2026/7/31",
@@ -293,6 +297,8 @@ function QuotaFilingSection({
       id: 3,
       code: "0401180016",
       name: "長庚醫院",
+      county: "台北市",
+      district: "內湖區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2024/7/31",
@@ -307,6 +313,8 @@ function QuotaFilingSection({
       id: 4,
       code: "0401180017",
       name: "中國醫藥大學附醫",
+      county: "台中市",
+      district: "北區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -321,6 +329,8 @@ function QuotaFilingSection({
       id: "5.1",
       code: "0401180018",
       name: "聯合申請 (仁愛院區)",
+      county: "台北市",
+      district: "大安區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -335,6 +345,8 @@ function QuotaFilingSection({
       id: "5.2",
       code: "0401180019",
       name: "聯合申請 (和平院區)",
+      county: "台北市",
+      district: "中正區",
       status: "",
       statusColor: "",
       expiry: "",
@@ -396,12 +408,13 @@ function QuotaFilingSection({
 
       <div className="bg-card rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+          <table className="w-full min-w-[1000px]">
             <thead>
               <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
                 <th className="px-4 py-3 text-left whitespace-nowrap w-12">序號</th>
                 <th className="px-4 py-3 text-left whitespace-nowrap w-36">醫事機構代碼</th>
                 <th className="px-4 py-3 text-left whitespace-nowrap">主訓醫院</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-28">縣市 / 行政區</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-24">狀態</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-36">效期</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-40">延長效期</th>
@@ -426,6 +439,18 @@ function QuotaFilingSection({
                       <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
                     )}
                     {hospital.name}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    {hospital.county ? (
+                      <div>
+                        <span className="text-sm text-foreground">{hospital.county}</span>
+                        {hospital.district && (
+                          <span className="text-xs text-muted-foreground ml-1">{hospital.district}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-center whitespace-nowrap">
                     {hospital.status && (
