@@ -150,23 +150,55 @@ export default function HospitalQuotaDetailPage({
                   return (
                     <TableRow
                       key={hospital.id}
-                      className={groupStyle ? `border-l-4 ${groupStyle}` : ""}
+                      className={`${groupStyle ? `border-l-4 ${groupStyle}` : ""} ${hospital.isSubRow ? "bg-muted/20" : ""}`}
                     >
-                      <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{hospital.code}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">
+                        {!hospital.isSubRow ? hospital.id : ""}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                        {hospital.code}
+                      </TableCell>
                       <TableCell className="font-medium">
-                        {hospital.groupId && (
-                          <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
+                        {hospital.groupId && !hospital.isSubRow ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded font-medium">主訓</span>
+                              {(hospital.mainHospitalCodes ?? [hospital.code]).map((code, i) => {
+                                const h = hospitals.find(hh => hh.code === code)
+                                return (
+                                  <span key={code} className="text-sm font-medium">
+                                    {h?.name ?? code}{i < (hospital.mainHospitalCodes ?? []).length - 1 ? "、" : ""}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                            {(hospital.partnerHospitalCodes ?? []).length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">合作</span>
+                                {(hospital.partnerHospitalCodes ?? []).map((code, i) => {
+                                  const h = hospitals.find(hh => hh.code === code)
+                                  return (
+                                    <span key={code} className="text-sm text-muted-foreground">
+                                      {h?.name ?? code}{i < (hospital.partnerHospitalCodes ?? []).length - 1 ? "、" : ""}
+                                    </span>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ) : hospital.isSubRow ? (
+                          <span className="text-sm text-muted-foreground pl-2">{hospital.name}</span>
+                        ) : (
+                          hospital.name
                         )}
-                        {hospital.name}
                       </TableCell>
                       <TableCell>
                         {hospital.status && (
                           <Badge className={hospital.statusColor}>{hospital.status}</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{hospital.expiry}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{hospital.extension}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{hospital.expiry}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{hospital.extension}</TableCell>
                       <TableCell className="text-center font-medium">
                         {hospital.limit !== null ? hospital.limit : "-"}
                       </TableCell>

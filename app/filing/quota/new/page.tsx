@@ -42,6 +42,7 @@ export default function NewQuotaPage() {
   const [selectedMainHospitals, setSelectedMainHospitals] = useState<string[]>([])
   const [selectedPartnerHospitals, setSelectedPartnerHospitals] = useState<string[]>([])
   const [extensionYears, setExtensionYears] = useState("0")
+  const [quotaLimit, setQuotaLimit] = useState("")
   const [currentQuota, setCurrentQuota] = useState("")
 
   const removeMainHospital = (hospitalCode: string) => {
@@ -70,7 +71,10 @@ export default function NewQuotaPage() {
   const canSave =
     selectedMainHospitals.length > 0 &&
     (applicationMode === "single" || selectedPartnerHospitals.length > 0) &&
-    currentQuota
+    quotaLimit &&
+    Number(quotaLimit) >= 1 && Number(quotaLimit) <= 50 &&
+    currentQuota &&
+    Number(currentQuota) >= 1 && Number(currentQuota) <= 50
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -238,13 +242,18 @@ export default function NewQuotaPage() {
               </div>
 
               <div>
-                <Label className="text-sm text-muted-foreground mb-2 block">容額上限</Label>
-                <div className="bg-[#fef9c3] px-4 py-3 rounded-lg text-foreground font-medium">
-                  15 名
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  本年度容額不可超過此上限
-                </p>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  容額上限 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="number"
+                  value={quotaLimit}
+                  onChange={(e) => setQuotaLimit(e.target.value)}
+                  placeholder="請輸入容額上限"
+                  min={1}
+                  max={50}
+                />
+                <p className="text-xs text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
               </div>
 
               <div>
@@ -257,9 +266,9 @@ export default function NewQuotaPage() {
                   onChange={(e) => setCurrentQuota(e.target.value)}
                   placeholder="請輸入容額"
                   min={1}
-                  max={15}
+                  max={50}
                 />
-                <p className="text-xs text-primary mt-1">請輸入 1 ~ 15 之間的數值</p>
+                <p className="text-xs text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
               </div>
             </div>
           </div>

@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ChevronLeft, Save, X } from "lucide-react"
+
 import Link from "next/link"
 import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital-multi-select"
 
@@ -31,8 +32,7 @@ const availableHospitals: Hospital[] = [
 const hospitalData: Record<
   string,
   {
-    code: string
-    name: string
+    mainHospitalCodes: string[]
     expiry: string
     extensionYears: string
     extensionDate: string
@@ -44,8 +44,7 @@ const hospitalData: Record<
   }
 > = {
   "1": {
-    code: "0401180014",
-    name: "台大醫院",
+    mainHospitalCodes: ["0401180014"],
     expiry: "有效至 2026/7/31",
     extensionYears: "4",
     extensionDate: "2030/7/31",
@@ -56,8 +55,7 @@ const hospitalData: Record<
     partnerHospitals: [],
   },
   "2": {
-    code: "0401190015",
-    name: "榮民總醫院",
+    mainHospitalCodes: ["0401190015"],
     expiry: "有效至 2026/7/31",
     extensionYears: "0",
     extensionDate: "",
@@ -68,8 +66,7 @@ const hospitalData: Record<
     partnerHospitals: [],
   },
   "3": {
-    code: "0401200016",
-    name: "長庚醫院",
+    mainHospitalCodes: ["0401200016"],
     expiry: "有效至 2024/7/31",
     extensionYears: "4",
     extensionDate: "2028/7/31",
@@ -80,8 +77,7 @@ const hospitalData: Record<
     partnerHospitals: [],
   },
   "5": {
-    code: "0401260022",
-    name: "仁愛醫院",
+    mainHospitalCodes: ["0401260022", "0401250021"],
     expiry: "有效至 2026/7/31",
     extensionYears: "4",
     extensionDate: "2030/7/31",
@@ -104,11 +100,14 @@ export default function QuotaEditPage({
   const [applicationMode, setApplicationMode] = useState<"single" | "joint">(
     hospital.applicationMode,
   )
-  const [selectedMainHospital, setSelectedMainHospital] = useState(hospital.code)
+  const [selectedMainHospitals, setSelectedMainHospitals] = useState<string[]>(
+    hospital.mainHospitalCodes,
+  )
   const [selectedPartnerHospitals, setSelectedPartnerHospitals] = useState<string[]>(
     hospital.partnerHospitals,
   )
   const [extensionYears, setExtensionYears] = useState(hospital.extensionYears)
+  const [quotaLimit, setQuotaLimit] = useState(hospital.quotaLimit.toString())
   const [currentQuota, setCurrentQuota] = useState(hospital.currentQuota.toString())
 
   const calculateExtensionDate = (years: string) => {
@@ -118,14 +117,16 @@ export default function QuotaEditPage({
     return `${extendedYear}/7/31`
   }
 
-  const togglePartnerHospital = (hospitalCode: string) => {
-    setSelectedPartnerHospitals((prev) =>
-      prev.includes(hospitalCode) ? prev.filter((code) => code !== hospitalCode) : [...prev, hospitalCode],
-    )
-  }
-
   const getHospitalName = (code: string) => {
     return availableHospitals.find((h) => h.code === code)?.name || code
+  }
+
+  const removeMainHospital = (code: string) => {
+    setSelectedMainHospitals((prev) => prev.filter((c) => c !== code))
+  }
+
+  const removePartnerHospital = (code: string) => {
+    setSelectedPartnerHospitals((prev) => prev.filter((c) => c !== code))
   }
 
   return (
@@ -144,7 +145,7 @@ export default function QuotaEditPage({
         </div>
 
         <h1 className="text-2xl font-bold text-foreground mb-6">
-          {hospital.name} - 容額分配編輯
+          容額分配編輯
         </h1>
       </div>
 
@@ -188,22 +189,38 @@ export default function QuotaEditPage({
           <h2 className="text-lg font-bold text-foreground mb-6">基本資訊與容額設定</h2>
 
           <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-            <div>
+            <div className="col-span-2">
               <Label className="text-sm text-muted-foreground mb-2 block">
                 主訓醫院 <span className="text-destructive">*</span>
+                {applicationMode === "joint" && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">（可多選）</span>
+                )}
               </Label>
-              <Select value={selectedMainHospital} onValueChange={setSelectedMainHospital}>
-                <SelectTrigger>
-                  <SelectValue placeholder="請選擇主訓醫院" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableHospitals.map((h) => (
-                    <SelectItem key={h.code} value={h.code}>
-                      {h.code} - {h.name}
-                    </SelectItem>
+              <HospitalMultiSelect
+                hospitals={availableHospitals}
+                selected={selectedMainHospitals}
+                onSelect={setSelectedMainHospitals}
+                mode={applicationMode === "joint" ? "multiple" : "single"}
+                triggerLabel="請選擇主訓醫院"
+              />
+              {selectedMainHospitals.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {selectedMainHospitals.map((code) => (
+                    <div
+                      key={code}
+                      className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
+                    >
+                      {getHospitalName(code)}
+                      <button
+                        onClick={() => removeMainHospital(code)}
+                        className="hover:bg-primary/20 rounded-full p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
 
             <div>
@@ -250,43 +267,29 @@ export default function QuotaEditPage({
                 合作醫院 <span className="text-destructive">*</span>
                 <span className="text-muted-foreground font-normal ml-1">（可多選）</span>
               </Label>
-              <div className="border rounded-lg max-h-60 overflow-y-auto">
-                {availableHospitals
-                  .filter((h) => h.code !== selectedMainHospital)
-                  .map((h) => (
+              <HospitalMultiSelect
+                hospitals={availableHospitals.filter((h) => !selectedMainHospitals.includes(h.code))}
+                selected={selectedPartnerHospitals}
+                onSelect={setSelectedPartnerHospitals}
+                mode="multiple"
+                triggerLabel="請選擇合作醫院"
+              />
+              {selectedPartnerHospitals.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {selectedPartnerHospitals.map((code) => (
                     <div
-                      key={h.code}
-                      className="flex items-center gap-3 px-4 py-3 border-b last:border-0 hover:bg-muted/50"
+                      key={code}
+                      className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
                     >
-                      <Checkbox
-                        id={`partner-edit-${h.code}`}
-                        checked={selectedPartnerHospitals.includes(h.code)}
-                        onCheckedChange={() => togglePartnerHospital(h.code)}
-                      />
-                      <Label
-                        htmlFor={`partner-edit-${h.code}`}
-                        className="text-sm cursor-pointer flex-1"
+                      {getHospitalName(code)}
+                      <button
+                        onClick={() => removePartnerHospital(code)}
+                        className="hover:bg-primary/20 rounded-full p-0.5"
                       >
-                        {h.code} - {h.name}
-                      </Label>
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
                   ))}
-              </div>
-              {selectedPartnerHospitals.length > 0 && (
-                <div className="mt-3 p-3 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    已選擇 {selectedPartnerHospitals.length} 間合作醫院：
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedPartnerHospitals.map((code) => (
-                      <span
-                        key={code}
-                        className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary text-xs rounded"
-                      >
-                        {getHospitalName(code)}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
@@ -296,30 +299,33 @@ export default function QuotaEditPage({
 
           <div className="grid grid-cols-2 gap-x-12 gap-y-6">
             <div>
-              <Label className="text-sm text-muted-foreground mb-2 block">容額上限</Label>
-              <div className="bg-yellow-100 px-4 py-3 rounded-lg text-yellow-800 font-medium">
-                {hospital.quotaLimit} 名
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                本年度容額不可超過此上限
-              </p>
+              <Label className="text-sm text-muted-foreground mb-2 block">
+                容額上限 <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="number"
+                value={quotaLimit}
+                onChange={(e) => setQuotaLimit(e.target.value)}
+                className="max-w-32"
+                min={1}
+                max={50}
+              />
+              <p className="text-xs text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
             </div>
 
             <div>
               <Label className="text-sm text-muted-foreground mb-2 block">
-                本年度擬核定容額
+                本年度擬核定容額 <span className="text-destructive">*</span>
               </Label>
               <Input
                 type="number"
                 value={currentQuota}
                 onChange={(e) => setCurrentQuota(e.target.value)}
                 className="max-w-32"
-                min={0}
-                max={hospital.quotaLimit}
+                min={1}
+                max={50}
               />
-              <p className="text-xs text-primary mt-2">
-                請輸入 0 ~ {hospital.quotaLimit} 之間的數值
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
             </div>
           </div>
 
@@ -329,7 +335,12 @@ export default function QuotaEditPage({
             </Link>
             <Button
               className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-              disabled={applicationMode === "joint" && selectedPartnerHospitals.length === 0}
+              disabled={
+                selectedMainHospitals.length === 0 ||
+                (applicationMode === "joint" && selectedPartnerHospitals.length === 0) ||
+                !quotaLimit || Number(quotaLimit) < 1 || Number(quotaLimit) > 50 ||
+                !currentQuota || Number(currentQuota) < 1 || Number(currentQuota) > 50
+              }
             >
               <Save className="h-4 w-4" />
               儲存變更

@@ -60,6 +60,8 @@ export const mockHospitalQuotaDetails: Record<string, {
     currentQuota: number | null;
     groupId: string | null;
     isSubRow: boolean;
+    mainHospitalCodes?: string[];
+    partnerHospitalCodes?: string[];
   }>;
   disqualifiedHospitals: Array<{
     id: number;
@@ -81,8 +83,9 @@ export const mockHospitalQuotaDetails: Record<string, {
       { id: 2, code: "0401180015", name: "榮民總醫院", status: "新申請", statusColor: "bg-blue-100 text-blue-700", expiry: "有效至 2026/7/31", extension: "-", limit: 12, prevQuota: 3, currentQuota: 4, groupId: null, isSubRow: false },
       { id: 3, code: "0401180016", name: "長庚醫院", status: "效期屆滿", statusColor: "bg-yellow-100 text-yellow-700", expiry: "有效至 2024/7/31", extension: "4 年 (至 2028/7/31)", limit: 10, prevQuota: 2, currentQuota: 3, groupId: null, isSubRow: false },
       { id: 4, code: "0401180017", name: "中國醫藥大學附醫", status: "效期屆滿", statusColor: "bg-yellow-100 text-yellow-700", expiry: "有效至 2026/7/31", extension: "4 年 (至 2030/7/31)", limit: 8, prevQuota: 2, currentQuota: 2, groupId: null, isSubRow: false },
-      { id: "5.1", code: "0401180018", name: "聯合申請 (仁愛院區)", status: "效期屆滿", statusColor: "bg-yellow-100 text-yellow-700", expiry: "有效至 2026/7/31", extension: "4 年 (至 2030/7/31)", limit: 15, prevQuota: 4, currentQuota: 5, groupId: "group-a", isSubRow: false },
-      { id: "5.2", code: "0401180019", name: "聯合申請 (和平院區)", status: "", statusColor: "", expiry: "", extension: "", limit: null, prevQuota: null, currentQuota: null, groupId: "group-a", isSubRow: true },
+      { id: "5.1", code: "0401180018", name: "仁愛醫院", status: "效期屆滿", statusColor: "bg-yellow-100 text-yellow-700", expiry: "有效至 2026/7/31", extension: "4 年 (至 2030/7/31)", limit: 15, prevQuota: 4, currentQuota: 5, groupId: "group-a", isSubRow: false, mainHospitalCodes: ["0401180018", "0401180019"], partnerHospitalCodes: ["0401180020"] },
+      { id: "5.2", code: "0401180019", name: "和平醫院", status: "", statusColor: "", expiry: "", extension: "", limit: null, prevQuota: null, currentQuota: null, groupId: "group-a", isSubRow: true },
+      { id: "5.3", code: "0401180020", name: "新光醫院（合作）", status: "", statusColor: "", expiry: "", extension: "", limit: null, prevQuota: null, currentQuota: null, groupId: "group-a", isSubRow: true },
     ],
     disqualifiedHospitals: [
       { id: 1, code: "0401180020", name: "新光醫院", reason: "未符合訓練醫院認證基準第3條：專任主治醫師人數不足" },
