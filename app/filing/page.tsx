@@ -47,16 +47,18 @@ const filingStatusMap = Object.fromEntries(
 const documents = [
   { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "2025/03/31" },
   { id: "training-curriculum", title: "訓練課程基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "evaluation-standards", title: "評核標準與評核表", status: "待審查", deadline: "2025/04/15" },
+  { id: "evaluation-standards", title: "評核標準與評核表", status: "審查中", deadline: "2025/04/15" },
   { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
-  { id: "improvement-guide", title: "精進指南", status: "待審查", deadline: "2025/04/30" },
+  { id: "improvement-guide", title: "精進指南", status: "待送件", deadline: "2025/04/30" },
   { id: "screening-principle", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
 ]
 
 const getStatusStyle = (status: string) => {
   switch (status) {
-    case "待審查":
+    case "待送件":
       return "text-muted-foreground"
+    case "審查中":
+      return "text-blue-600"
     case "需補件":
       return "text-orange-600"
     case "通過":
@@ -143,10 +145,10 @@ export default function FilingPage() {
                       <div className="col-span-3 flex justify-end">
                         {filingOpen ? (
                           <Link href={`/filing/${doc.id}?status=${doc.status}`}>
-                            {doc.status === "通過" ? (
+                            {doc.status === "通過" || doc.status === "審查中" ? (
                               <Button size="sm" variant="outline" className="gap-2">
                                 <FileText className="h-4 w-4" />
-                                已送件
+                                {doc.status === "通過" ? "已通過" : "審查中"}
                               </Button>
                             ) : (
                               <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
