@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
   SelectContent,
@@ -15,34 +14,38 @@ import {
 import { ChevronLeft, X, Save } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital-multi-select"
 
-const availableHospitals = [
-  { code: "0401180014", name: "台大醫院" },
-  { code: "0401180015", name: "台北榮民總醫院" },
-  { code: "0401180016", name: "三軍總醫院" },
-  { code: "0401180017", name: "馬偕紀念醫院" },
-  { code: "0401180018", name: "新光醫院" },
-  { code: "0401180019", name: "國泰醫院" },
-  { code: "0401180020", name: "亞東醫院" },
-  { code: "0401180021", name: "慈濟醫院" },
-  { code: "0401180022", name: "奇美醫院" },
-  { code: "0401180023", name: "成大醫院" },
-  { code: "0401180024", name: "高雄長庚醫院" },
-  { code: "0401180025", name: "高雄榮民總醫院" },
+const availableHospitals: Hospital[] = [
+  { code: "0401180014", name: "台大醫院", county: "台北市", district: "中山區" },
+  { code: "0401180015", name: "台北榮民總醫院", county: "台北市", district: "北投區" },
+  { code: "0401180016", name: "三軍總醫院", county: "台北市", district: "內湖區" },
+  { code: "0401180017", name: "馬偕紀念醫院", county: "台北市", district: "中山區" },
+  { code: "0401180018", name: "新光醫院", county: "台北市", district: "信義區" },
+  { code: "0401180019", name: "國泰醫院", county: "台北市", district: "大安區" },
+  { code: "0401180020", name: "亞東醫院", county: "新北市", district: "板橋區" },
+  { code: "0401180021", name: "慈濟醫院", county: "新北市", district: "新店區" },
+  { code: "0401180022", name: "奇美醫院", county: "台南市", district: "東區" },
+  { code: "0401180023", name: "成大醫院", county: "台南市", district: "東區" },
+  { code: "0401180024", name: "高雄長庚醫院", county: "高雄市", district: "左營區" },
+  { code: "0401180025", name: "高雄榮民總醫院", county: "高雄市", district: "左營區" },
+  { code: "0401180026", name: "高醫附設醫院", county: "高雄市", district: "前金區" },
+  { code: "0401180027", name: "中國醫藥大學附醫", county: "台中市", district: "北區" },
+  { code: "0401180028", name: "中山醫學大學附設醫院", county: "台中市", district: "南區" },
+  { code: "0401180029", name: "彰化基督教醫院", county: "彰化縣", district: "彰化市" },
+  { code: "0401180030", name: "台大雲林分院", county: "雲林縣", district: "斗六市" },
 ]
 
 export default function NewQuotaPage() {
   const router = useRouter()
   const [applicationMode, setApplicationMode] = useState<"single" | "joint">("single")
-  const [selectedMainHospital, setSelectedMainHospital] = useState("")
+  const [selectedMainHospitals, setSelectedMainHospitals] = useState<string[]>([])
   const [selectedPartnerHospitals, setSelectedPartnerHospitals] = useState<string[]>([])
   const [extensionYears, setExtensionYears] = useState("0")
   const [currentQuota, setCurrentQuota] = useState("")
 
-  const togglePartnerHospital = (hospitalCode: string) => {
-    setSelectedPartnerHospitals((prev) =>
-      prev.includes(hospitalCode) ? prev.filter((code) => code !== hospitalCode) : [...prev, hospitalCode],
-    )
+  const removeMainHospital = (hospitalCode: string) => {
+    setSelectedMainHospitals((prev) => prev.filter((code) => code !== hospitalCode))
   }
 
   const removePartnerHospital = (hospitalCode: string) => {
@@ -55,7 +58,7 @@ export default function NewQuotaPage() {
 
   const handleSave = () => {
     console.log("申請方式:", applicationMode === "single" ? "單一機構申請" : "聯合申請")
-    console.log("主訓醫院:", selectedMainHospital)
+    console.log("主訓醫院:", selectedMainHospitals)
     if (applicationMode === "joint") {
       console.log("合作醫院:", selectedPartnerHospitals)
     }
@@ -65,7 +68,7 @@ export default function NewQuotaPage() {
   }
 
   const canSave =
-    selectedMainHospital &&
+    selectedMainHospitals.length > 0 &&
     (applicationMode === "single" || selectedPartnerHospitals.length > 0) &&
     currentQuota
 
@@ -131,19 +134,37 @@ export default function NewQuotaPage() {
           <div className="bg-card rounded-lg p-6 shadow-sm">
             <h2 className="font-semibold text-foreground mb-4">
               主訓醫院 <span className="text-destructive">*</span>
+              {applicationMode === "joint" && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">（可多選）</span>
+              )}
             </h2>
-            <Select value={selectedMainHospital} onValueChange={setSelectedMainHospital}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="請選擇主訓醫院" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableHospitals.map((hospital) => (
-                  <SelectItem key={hospital.code} value={hospital.code}>
-                    {hospital.code} - {hospital.name}
-                  </SelectItem>
+            
+            <HospitalMultiSelect
+              hospitals={availableHospitals}
+              selected={selectedMainHospitals}
+              onSelect={setSelectedMainHospitals}
+              mode={applicationMode === "joint" ? "multiple" : "single"}
+              triggerLabel="請選擇主訓醫院"
+            />
+
+            {selectedMainHospitals.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {selectedMainHospitals.map((code) => (
+                  <div
+                    key={code}
+                    className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
+                  >
+                    {getHospitalName(code)}
+                    <button
+                      onClick={() => removeMainHospital(code)}
+                      className="hover:bg-primary/20 rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
           </div>
 
           {applicationMode === "joint" && (
@@ -153,8 +174,16 @@ export default function NewQuotaPage() {
                 <span className="text-sm font-normal text-muted-foreground ml-2">（可多選）</span>
               </h2>
 
+              <HospitalMultiSelect
+                hospitals={availableHospitals.filter((h) => !selectedMainHospitals.includes(h.code))}
+                selected={selectedPartnerHospitals}
+                onSelect={setSelectedPartnerHospitals}
+                mode="multiple"
+                triggerLabel="請選擇合作醫院"
+              />
+
               {selectedPartnerHospitals.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mt-4">
                   {selectedPartnerHospitals.map((code) => (
                     <div
                       key={code}
@@ -170,35 +199,6 @@ export default function NewQuotaPage() {
                     </div>
                   ))}
                 </div>
-              )}
-
-              <div className="border rounded-lg max-h-60 overflow-y-auto">
-                {availableHospitals
-                  .filter((h) => h.code !== selectedMainHospital)
-                  .map((hospital) => (
-                    <div
-                      key={hospital.code}
-                      className="flex items-center gap-3 px-4 py-3 border-b last:border-0 hover:bg-muted/50"
-                    >
-                      <Checkbox
-                        id={`partner-${hospital.code}`}
-                        checked={selectedPartnerHospitals.includes(hospital.code)}
-                        onCheckedChange={() => togglePartnerHospital(hospital.code)}
-                      />
-                      <Label
-                        htmlFor={`partner-${hospital.code}`}
-                        className="text-sm cursor-pointer flex-1"
-                      >
-                        {hospital.code} - {hospital.name}
-                      </Label>
-                    </div>
-                  ))}
-              </div>
-
-              {selectedPartnerHospitals.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-3">
-                  已選擇 {selectedPartnerHospitals.length} 間合作醫院
-                </p>
               )}
             </div>
           )}

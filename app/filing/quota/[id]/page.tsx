@@ -4,7 +4,6 @@ import { useState, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
   SelectContent,
@@ -12,20 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ChevronLeft, Save } from "lucide-react"
+import { ChevronLeft, Save, X } from "lucide-react"
 import Link from "next/link"
+import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital-multi-select"
 
-const availableHospitals = [
-  { code: "0401180014", name: "台大醫院" },
-  { code: "0401190015", name: "榮民總醫院" },
-  { code: "0401200016", name: "長庚醫院" },
-  { code: "0401210017", name: "中國醫藥大學附醫" },
-  { code: "0401220018", name: "成大醫院" },
-  { code: "0401230019", name: "高雄長庚" },
-  { code: "0401240020", name: "馬偕醫院" },
-  { code: "0401250021", name: "新光醫院" },
-  { code: "0401260022", name: "仁愛醫院" },
-  { code: "0401270023", name: "和平醫院" },
+const availableHospitals: Hospital[] = [
+  { code: "0401180014", name: "台大醫院", county: "台北市", district: "中山區" },
+  { code: "0401190015", name: "榮民總醫院", county: "台北市", district: "北投區" },
+  { code: "0401200016", name: "長庚醫院", county: "台北市", district: "內湖區" },
+  { code: "0401210017", name: "中國醫藥大學附醫", county: "台中市", district: "北區" },
+  { code: "0401220018", name: "成大醫院", county: "台南市", district: "東區" },
+  { code: "0401230019", name: "高雄長庚", county: "高雄市", district: "左營區" },
+  { code: "0401240020", name: "馬偕醫院", county: "台北市", district: "中山區" },
+  { code: "0401250021", name: "新光醫院", county: "台北市", district: "信義區" },
+  { code: "0401260022", name: "仁愛醫院", county: "台北市", district: "大安區" },
+  { code: "0401270023", name: "和平醫院", county: "台北市", district: "中正區" },
 ]
 
 const hospitalData: Record<
