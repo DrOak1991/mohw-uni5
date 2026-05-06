@@ -15,28 +15,28 @@ export const stagesByDocumentType: Record<string, Array<{ value: string; label: 
   ],
   "hospital-accreditation": [
     { value: "pending-review", label: "待審查" },
-    { value: "group-meeting", label: "分組會議審核" },
+    { value: "group-meeting", label: "分組會議審查" },
     { value: "rrc-meeting", label: "RRC 大會審核" },
     { value: "pending-announcement", label: "待公告" },
     { value: "announced", label: "已公告" },
   ],
   "training-curriculum": [
     { value: "pending-review", label: "待審查" },
-    { value: "group-meeting", label: "分組會議審核" },
+    { value: "group-meeting", label: "分組會議審查" },
     { value: "rrc-meeting", label: "RRC 大會審核" },
     { value: "pending-announcement", label: "待公告" },
     { value: "announced", label: "已公告" },
   ],
   "evaluation-standards": [
     { value: "pending-review", label: "待審查" },
-    { value: "group-meeting", label: "分組會議審核" },
+    { value: "group-meeting", label: "分組會議審查" },
     { value: "rrc-meeting", label: "RRC 大會審核" },
     { value: "pending-announcement", label: "待公告" },
     { value: "announced", label: "已公告" },
   ],
   "quota-allocation": [
     { value: "pending-review", label: "待審查" },
-    { value: "group-meeting", label: "分組會議審核" },
+    { value: "group-meeting", label: "分組會議審查" },
     { value: "rrc-meeting", label: "RRC 大會審核" },
     { value: "pending-announcement", label: "待公告" },
     { value: "announced", label: "已公告" },
@@ -74,13 +74,17 @@ export const mockSocieties = [
   { id: "23", name: "台灣重症醫學會" },
 ]
 
-const generateMockSubmissionsByStage = (stages: string[]) => {
+// 生成該文件類型的案件（所有案件都處於同一階段）
+const generateMockSubmissionsForDocType = (documentTypeId: string) => {
+  // 取得該文件類型目前所在階段
+  const currentStage = societyCurrentStages[documentTypeId] ?? "pending-review"
+  
   return mockSocieties.map((society, index) => {
-    // 未送件的案件
-    if (index % 5 === 0) {
+    // 未送件的案件（少數）
+    if (index % 8 === 0) {
       return {
         societyId: society.id,
-        stage: "pending-review",
+        stage: currentStage,
         uploaded: false,
         uploadedDate: null as string | null,
         lastUpdated: null as string | null,
@@ -99,7 +103,7 @@ const generateMockSubmissionsByStage = (stages: string[]) => {
 
     return {
       societyId: society.id,
-      stage: stages[index % stages.length],
+      stage: currentStage,
       uploaded: true,
       uploadedDate: `2025-01-${String(5 + index).padStart(2, "0")}`,
       lastUpdated: `2025-01-${String(10 + index).padStart(2, "0")}`,
@@ -119,36 +123,12 @@ export const mockDocumentSubmissions: Record<
     reviewResult: "pending" | "approved" | "needs-revision"
   }>
 > = {
-  "screening-principle": generateMockSubmissionsByStage(["pending-review", "pending-announcement", "announced"]),
-  "hospital-accreditation": generateMockSubmissionsByStage([
-    "pending-review",
-    "group-meeting",
-    "rrc-meeting",
-    "pending-announcement",
-    "announced",
-  ]),
-  "training-curriculum": generateMockSubmissionsByStage([
-    "pending-review",
-    "group-meeting",
-    "rrc-meeting",
-    "pending-announcement",
-    "announced",
-  ]),
-  "evaluation-standards": generateMockSubmissionsByStage([
-    "pending-review",
-    "group-meeting",
-    "rrc-meeting",
-    "pending-announcement",
-    "announced",
-  ]),
-  "quota-allocation": generateMockSubmissionsByStage([
-    "pending-review",
-    "group-meeting",
-    "rrc-meeting",
-    "pending-announcement",
-    "announced",
-  ]),
-  "improvement-guide": generateMockSubmissionsByStage(["pending-review", "pending-announcement", "announced"]),
+  "screening-principle": generateMockSubmissionsForDocType("screening-principle"),
+  "hospital-accreditation": generateMockSubmissionsForDocType("hospital-accreditation"),
+  "training-curriculum": generateMockSubmissionsForDocType("training-curriculum"),
+  "evaluation-standards": generateMockSubmissionsForDocType("evaluation-standards"),
+  "quota-allocation": generateMockSubmissionsForDocType("quota-allocation"),
+  "improvement-guide": generateMockSubmissionsForDocType("improvement-guide"),
 }
 
 export const stageColors: Record<string, string> = {
@@ -160,13 +140,14 @@ export const stageColors: Record<string, string> = {
 }
 
 // 學會層級的目前階段管理（按文件類型）
+// 為了 demo 展示，各文件類型設定不同階段
 export const societyCurrentStages: Record<string, string> = {
-  "screening-principle": "pending-review",
-  "hospital-accreditation": "pending-review",
-  "training-curriculum": "pending-review",
-  "evaluation-standards": "pending-review",
-  "quota-allocation": "pending-review",
-  "improvement-guide": "pending-review",
+  "screening-principle": "pending-review",        // 待審查
+  "hospital-accreditation": "group-meeting",      // 分組會議審查
+  "training-curriculum": "rrc-meeting",           // RRC 大會審核
+  "evaluation-standards": "pending-announcement", // 待公告
+  "quota-allocation": "pending-review",           // 待審查
+  "improvement-guide": "pending-announcement",    // 待公告
 }
 
 export function getDocumentTypes() {
