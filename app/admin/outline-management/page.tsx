@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Pencil, Settings2, SlidersHorizontal } from "lucide-react"
+import { ArrowLeft, Pencil, Settings2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FilingScheduleDialog } from "@/components/admin/filing-schedule-dialog"
@@ -25,7 +25,7 @@ export default function FilingItemManagementPage() {
   }
 
   const getFilingPeriod = (item: FilingItemConfig) => {
-    if (!item.openingDate) return "尚未設定"
+    if (!item.openingDate) return "未開放"
     const startDate = item.openingDate.split(" ")[0]
     const endDate = item.closingDate?.split(" ")[0]
     return `${startDate} ~ ${endDate}`
@@ -139,7 +139,7 @@ export default function FilingItemManagementPage() {
                       </Button>
                       <Button asChild variant="ghost" size="sm" className="gap-1.5 h-8">
                         <Link href="/admin/society-quota-limit">
-                          <SlidersHorizontal className="w-3.5 h-3.5" />
+                          <Pencil className="w-3.5 h-3.5" />
                           <span className="text-xs">容額上限設定</span>
                         </Link>
                       </Button>
