@@ -18,12 +18,90 @@ export interface TemplateRecord {
   label: string
 }
 
+export interface FilingItemConfig {
+  id: string
+  name: string
+  status: "open" | "closed" | "scheduled"
+  openingDate?: string
+  closingDate?: string
+  isScheduled: boolean
+  isManualControl: boolean
+}
+
 export const outlineMeta: Record<string, { name: string }> = {
-  "screening-principle": { name: "甄審原則" },
-  "hospital-accreditation": { name: "訓練醫院認定基準" },
+  "training-plan": { name: "訓練計畫認定基準" },
   "training-curriculum": { name: "訓練課程基準" },
   "evaluation-standards": { name: "評核標準與評核表" },
   "quota-allocation": { name: "容額分配原則" },
+  "improvement-guide": { name: "精進指南" },
+  "screening-principle": { name: "甄審原則" },
+}
+
+export const filingItemsConfig: FilingItemConfig[] = [
+  {
+    id: "training-plan",
+    name: "訓練計畫認定基準",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/03/31 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "training-curriculum",
+    name: "訓練課程基準",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/04/30 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "evaluation-standards",
+    name: "評核標準與評核表",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/04/30 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "quota-allocation",
+    name: "容額分配原則",
+    status: "open",
+    openingDate: "2026/03/15 09:00",
+    closingDate: "2026/04/15 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+  {
+    id: "improvement-guide",
+    name: "精進指南",
+    status: "closed",
+    openingDate: "",
+    closingDate: "",
+    isScheduled: false,
+    isManualControl: true,
+  },
+  {
+    id: "screening-principle",
+    name: "甄審原則",
+    status: "open",
+    openingDate: "2026/03/01 09:00",
+    closingDate: "2026/03/31 17:00",
+    isScheduled: true,
+    isManualControl: false,
+  },
+]
+
+export const quotaFilingConfig: FilingItemConfig = {
+  id: "hospital-quota",
+  name: "容額填報",
+  status: "open",
+  openingDate: "2026/03/01 09:00",
+  closingDate: "2026/05/31 17:00",
+  isScheduled: true,
+  isManualControl: false,
 }
 
 export function getInitialOutline(): OutlineItem[] {
@@ -31,56 +109,38 @@ export function getInitialOutline(): OutlineItem[] {
     {
       id: "1",
       number: "1",
-      title: "基本資訊",
-      description: "包含專科名稱、訓練年限等基本設定",
-      children: [
-        {
-          id: "1-1",
-          number: "1.1",
-          title: "專科名稱",
-          description: "請填明確標示專科全名",
-        },
-        {
-          id: "1-2",
-          number: "1.2",
-          title: "訓練年限",
-          description: "請填明完整訓練年限(年/月)",
-        },
-        {
-          id: "1-3",
-          number: "1.3",
-          title: "法規依據",
-          description: "相關法規與辦法引用",
-        },
-      ],
+      title: "甄審原則",
+      description: "規定醫師參加專科醫師甄審之基本原則",
     },
     {
       id: "2",
       number: "2",
-      title: "訓練目標",
-      description: "明確說明訓練計畫之整體目標",
-      children: [
-        {
-          id: "2-1",
-          number: "2.1",
-          title: "核心能力",
-          description: "請列舉至少五項核心能力",
-        },
-      ],
+      title: "醫師資格",
+      description: "明確列舉符合甄審資格之醫師條件",
     },
     {
       id: "3",
       number: "3",
-      title: "訓練內容",
-      description: "詳細列出訓練內容與課程規劃",
-      children: [],
+      title: "訓練醫院資格",
+      description: "規定訓練醫院應符合之認定基準",
     },
     {
       id: "4",
       number: "4",
-      title: "評估方式",
-      description: "說明訓練成效的評估標準與方法",
-      children: [],
+      title: "訓練計畫執行架構",
+      description: "說明訓練計畫之執行方式與組織架構",
+    },
+    {
+      id: "5",
+      number: "5",
+      title: "甄審程序",
+      description: "詳細說明甄審之報名、初審、複審等程序",
+    },
+    {
+      id: "6",
+      number: "6",
+      title: "甄審結果",
+      description: "規定甄審結果之公告與異議處理方式",
     },
   ]
 }

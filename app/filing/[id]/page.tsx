@@ -76,8 +76,8 @@ const previousYearData = [
   },
 ]
 
-// Mock data - Current year content (editable, pre-filled with last year data)
-const currentYearInitialData = [
+// Mock data - Current year content with changes (for 待送件/需補件 status)
+const currentYearWithChanges = [
   {
     id: "1",
     title: "一、甄審原則",
@@ -109,6 +109,11 @@ const currentYearInitialData = [
   },
 ]
 
+// Mock data - Current year content unchanged (for 尚未送出 status - same as previous year)
+const currentYearUnchanged = previousYearData.map((section) => ({
+  ...section,
+}))
+
 // Mock review feedback - larger content for testing
 const mockReviewFeedback: ReviewFeedback = {
   reviewDate: "114/03/10",
@@ -135,7 +140,7 @@ const mockReviewFeedback: ReviewFeedback = {
     2. 第 3.2 條訓練時數說明過於簡略，請補充具體課程安排。建議明列各項核心課程之訓練時數、訓練方式及評核標準，以利受訓學員及訓練醫院有所依循。
 
 （二）關於訓練課程規劃部分：
-    1. 建議新增第 4.3 條關於緊急應變的說明，包含但不限於：
+    1. 建議新增第 4.3 條關於緊急應變的說明，包含���不限於：
        - 重大傳染病疫情之應變措施
        - 大量傷患事件之處置流程
        - 緊急醫療救護��統之整合運作
@@ -168,14 +173,18 @@ export default function FilingDetailPage({
   const searchParams = useSearchParams()
   const status = searchParams.get("status") || "待審查"
 
-  const [documentMethod, setDocumentMethod] = useState<string>("change")
+  // 根據狀態決定初始資料：尚未送出 = 未修改（與前一年相同），其他 = 已有修改
+  const isUnfilled = status === "尚未送出"
+  const initialData = isUnfilled ? currentYearUnchanged : currentYearWithChanges
+
+  const [documentMethod, setDocumentMethod] = useState<string>(isUnfilled ? "no-change" : "change")
   const [showVersionDialog, setShowVersionDialog] = useState(false)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1", "2", "3", "2-2"])
   const [activeTab, setActiveTab] = useState<string>("current")
   
   // Current year editable content
   const [currentYearContent, setCurrentYearContent] = useState<Record<string, string>>(
-    currentYearInitialData.reduce((acc, section) => {
+    initialData.reduce((acc, section) => {
       acc[section.id] = section.content
       return acc
     }, {} as Record<string, string>)
@@ -189,19 +198,21 @@ export default function FilingDetailPage({
   const [unifiedNote, setUnifiedNote] = useState("")
 
   const hasReviewComments = status === "需補件"
-  const isReadOnly = status === "通過"
-  const showDocumentMethodChoice = status === "待審查"
+  const isReadOnly = status === "通過" || status === "審查中"
+  const isReviewInProgress = status === "審查中"
+  const isPreviousYearOnly = status === "view"
+  const showDocumentMethodChoice = status === "待送件" || status === "尚未送出"
 
   const getDocumentTitle = () => {
     const titles: Record<string, string> = {
-      plan: "計畫認定基準",
-      course: "訓練醫院認定基準",
-      evaluation: "評核標準",
-      "quota-principle": "容額分配原則",
-      guidelines: "精進指南",
-      "review-principles": "甄審原則",
+      "training-plan": "訓練計畫認定基準",
+      "training-curriculum": "訓練課程基準",
+      "evaluation-standards": "評核標準與評核表",
+      "quota-allocation": "容額分配原則",
+      "improvement-guide": "精進指南",
+      "screening-principle": "甄審原則",
     }
-    return titles[id] || "甄審原則"
+    return titles[id] || id
   }
 
   const toggleSection = (sectionId: string) => {
@@ -241,7 +252,7 @@ export default function FilingDetailPage({
 
   // Compute stats
   const stats = useMemo(() => {
-    const sectionsWithChanges = currentYearInitialData.filter((s) => sectionHasChanges(s.id))
+    const sectionsWithChanges = initialData.filter((s) => sectionHasChanges(s.id))
     const notesFilledCount = sectionsWithChanges.filter((s) => {
       const note = applyUnifiedNote ? unifiedNote : revisionNotes[s.id]
       return note && note.trim() !== ""
@@ -251,7 +262,7 @@ export default function FilingDetailPage({
       notesFilled: notesFilledCount,
       pending: sectionsWithChanges.length - notesFilledCount,
     }
-  }, [currentYearContent, revisionNotes, applyUnifiedNote, unifiedNote])
+  }, [currentYearContent, revisionNotes, applyUnifiedNote, unifiedNote, initialData])
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -272,7 +283,7 @@ export default function FilingDetailPage({
 
         <div className="flex items-center justify-between mt-4 mb-6">
           <h1 className="text-2xl font-bold text-foreground">
-            內科專科醫師{getDocumentTitle()} - 114年度文件填報
+            內科專科醫師{getDocumentTitle()} - {isPreviousYearOnly ? "113年度核定內容" : "114年度文件填報"}
           </h1>
           <div className="flex items-center gap-2">
             <Button
@@ -298,7 +309,29 @@ export default function FilingDetailPage({
       <div className="container mx-auto px-6 pb-8">
 
         <div className="space-y-6">
-          {isReadOnly && (
+          {isPreviousYearOnly && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-amber-700">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                <span className="font-medium">
+                  本年度填報尚未開放，以下顯示 113 年度已核定內容供參考
+                </span>
+              </div>
+            </div>
+          )}
+
+          {isReviewInProgress && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-blue-700">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                <span className="font-medium">
+                  此文件已送件，目前審查中，僅供查看
+                </span>
+              </div>
+            </div>
+          )}
+
+          {isReadOnly && !isReviewInProgress && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-700">
                 <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
@@ -311,7 +344,7 @@ export default function FilingDetailPage({
             </div>
           )}
 
-          {showDocumentMethodChoice && (
+          {!isPreviousYearOnly && showDocumentMethodChoice && (
             <div className="bg-card rounded-lg p-6">
               <h3 className="font-medium text-foreground mb-4">
                 本年度文件處理方式
@@ -348,7 +381,7 @@ export default function FilingDetailPage({
           
 
           {/* Unified Note Option - Only show when editing */}
-          {!isReadOnly && documentMethod === "change" && stats.totalChanges > 1 && (
+          {!isReadOnly && !isPreviousYearOnly && documentMethod === "change" && stats.totalChanges > 1 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <Checkbox
@@ -381,7 +414,7 @@ export default function FilingDetailPage({
           )}
 
           {/* Stats Bar - Only show when editing */}
-          {!isReadOnly && documentMethod === "change" && stats.totalChanges > 0 && (
+          {!isReadOnly && !isPreviousYearOnly && documentMethod === "change" && stats.totalChanges > 0 && (
             <div className="flex items-center gap-4 text-sm">
               <span className="text-muted-foreground">
                 修訂狀態：
@@ -404,20 +437,22 @@ export default function FilingDetailPage({
 
           {/* Tab Switching: Previous Year (Read-only) vs Current Year (Editable) */}
           <div className="bg-card rounded-lg">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={isPreviousYearOnly ? "previous" : activeTab} onValueChange={isPreviousYearOnly ? undefined : setActiveTab}>
               <div className="border-b px-4">
                 <TabsList className="h-12 bg-transparent p-0 gap-4">
-                  <TabsTrigger
-                    value="current"
-                    className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
-                  >
-                    114 年度 (編輯中)
-                  </TabsTrigger>
+                  {!isPreviousYearOnly && (
+                    <TabsTrigger
+                      value="current"
+                      className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
+                    >
+                      {isReadOnly ? "114 年度 (已送件)" : "114 年度 (編輯中)"}
+                    </TabsTrigger>
+                  )}
                   <TabsTrigger
                     value="previous"
                     className="relative h-12 rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none bg-transparent"
                   >
-                    113 年度 (參考)
+                    113 年度 {isPreviousYearOnly ? "(核定內容)" : "(參考)"}
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -425,7 +460,7 @@ export default function FilingDetailPage({
               {/* Current Year Tab - Editable with Diff Display and Inline Notes */}
               <TabsContent value="current" className="p-6 mt-0">
                 <div className="space-y-6">
-                  {currentYearInitialData.map((section) => {
+                  {initialData.map((section) => {
                     const prevContent = getPreviousYearContent(section.id)
                     const currContent = currentYearContent[section.id] || ""
                     const hasChanges = prevContent !== currContent
@@ -448,11 +483,15 @@ export default function FilingDetailPage({
                                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                 )}
                                 <span className="font-medium">{section.title}</span>
-                                {hasChanges && (
+                                {hasChanges ? (
                                   <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
                                     已修訂
                                   </span>
-                                )}
+                                ) : documentMethod === "change" && !isReadOnly ? (
+                                  <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded">
+                                    未修正
+                                  </span>
+                                ) : null}
                               </div>
                             </div>
                           </CollapsibleTrigger>
@@ -616,26 +655,28 @@ export default function FilingDetailPage({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4">
-            <Button variant="outline">{isReadOnly ? "返回" : "取消"}</Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1">
-                  匯出檔案
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <FileText className="h-4 w-4 mr-2" />
-                  匯出 Word 檔
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <FileText className="h-4 w-4 mr-2" />
-                  匯出 PDF 檔
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {!isReadOnly && (
+            <Button variant="outline">返回</Button>
+            {!isPreviousYearOnly && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-1">
+                    匯出檔案
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <FileText className="h-4 w-4 mr-2" />
+                    匯出 Word 檔
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <FileText className="h-4 w-4 mr-2" />
+                    匯出 PDF 檔
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {!isReadOnly && !isPreviousYearOnly && (
               <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">
                 儲存草稿
               </Button>

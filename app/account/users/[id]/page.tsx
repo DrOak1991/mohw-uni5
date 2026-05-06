@@ -1,4 +1,3 @@
-import { SimpleNav } from "@/components/account/simple-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -201,15 +200,14 @@ function ExportPermissionSelector({
 export default function UserPermissionPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-muted/30">
-      <SimpleNav />
-
       <div className="container mx-auto px-4 py-8">
         {/* 返回按鈕 */}
-        <Link href="/account/users">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            返回使用者列表
-          </Button>
+        <Link
+          href="/account/users"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回使用者列表
         </Link>
 
         {/* 頁面標題 */}
@@ -378,7 +376,7 @@ export default function UserPermissionPage({ params }: { params: { id: string } 
               <div key={index} className="space-y-1 pb-4 border-b last:border-0 last:pb-0">
                 <p className="text-sm font-medium">{record.action}</p>
                 <p className="text-xs text-muted-foreground">
-                  {record.date} · {record.operator}
+                  {record.date} �� {record.operator}
                 </p>
               </div>
             ))}

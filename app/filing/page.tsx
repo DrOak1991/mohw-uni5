@@ -37,20 +37,33 @@ import {
   ChevronDown,
 } from "lucide-react"
 import Link from "next/link"
+import { filingItemsConfig } from "@/lib/mock/review-outline"
+
+// 從 filingItemsConfig 建立開放狀態查詢表
+const filingStatusMap = Object.fromEntries(
+  filingItemsConfig.map((item) => [item.id, item.status])
+)
 
 const documents = [
-  { id: "plan", title: "計畫認定基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "course", title: "訓練課程基準", status: "需補件", deadline: "2025/03/31" },
-  { id: "evaluation", title: "評核標準", status: "待審查", deadline: "2025/04/15" },
-  { id: "quota-principle", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
-  { id: "guidelines", title: "精進指南", status: "待審查", deadline: "2025/04/30" },
-  { id: "review-principles", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
+  { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "2025/03/31" },
+  { id: "training-curriculum", title: "訓練課程基準", status: "尚未送出", deadline: "2025/04/30" },
+  { id: "evaluation-standards", title: "評核標準與評核表", status: "審查中", deadline: "2025/04/15" },
+  { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "2025/03/15" },
+  { id: "improvement-guide", title: "精進指南", status: "待送件", deadline: "2025/04/30" },
+  { id: "screening-principle", title: "甄審原則", status: "通過", deadline: "2025/03/15" },
 ]
+
+// 可送件的狀態（已有內容但尚未送出）
+const submittableStatuses = ["待送件", "需補件", "尚未送出"]
 
 const getStatusStyle = (status: string) => {
   switch (status) {
-    case "待審查":
+    case "尚未送出":
       return "text-muted-foreground"
+    case "待送件":
+      return "text-muted-foreground"
+    case "審查中":
+      return "text-blue-600"
     case "需補件":
       return "text-orange-600"
     case "通過":
@@ -78,6 +91,30 @@ const availableHospitals = [
 export default function FilingPage() {
   const [activeTab, setActiveTab] = useState<string>("documents")
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [selectedSubmitIds, setSelectedSubmitIds] = useState<string[]>([])
+
+  const submittableDocs = documents.filter((doc) => {
+    const filingOpen = filingStatusMap[doc.id] === "open"
+    return filingOpen && submittableStatuses.includes(doc.status)
+  })
+
+  const toggleSubmitDoc = (id: string) => {
+    setSelectedSubmitIds((prev) =>
+      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
+    )
+  }
+
+  const handleOpenSubmitDialog = () => {
+    // 預設全選可送件文件
+    setSelectedSubmitIds(submittableDocs.map((d) => d.id))
+    setShowSubmitDialog(true)
+  }
+
+  const handleConfirmSubmit = () => {
+    setShowSubmitDialog(false)
+    setSelectedSubmitIds([])
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -113,47 +150,59 @@ export default function FilingPage() {
               </div>
 
               <div className="divide-y">
-                {documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="grid grid-cols-12 gap-4 px-6 py-5 items-center"
-                  >
-                    <div className="col-span-5">
-                      <span className="font-medium text-foreground">{doc.title}</span>
-                    </div>
+                {documents.map((doc) => {
+                  const filingOpen = filingStatusMap[doc.id] === "open"
+                  return (
+                    <div
+                      key={doc.id}
+                      className={`grid grid-cols-12 gap-4 px-6 py-5 items-center ${!filingOpen ? "bg-muted/20" : ""}`}
+                    >
+                      <div className="col-span-5">
+                        <span className={`font-medium ${!filingOpen ? "text-muted-foreground" : "text-foreground"}`}>
+                          {doc.title}
+                        </span>
+                      </div>
 
-                    <div className={`col-span-2 text-center font-medium ${getStatusStyle(doc.status)}`}>
-                      {doc.status}
-                    </div>
+                      <div className={`col-span-2 text-center font-medium ${!filingOpen ? "text-muted-foreground/60 text-sm" : getStatusStyle(doc.status)}`}>
+                        {filingOpen ? doc.status : "尚未開放"}
+                      </div>
 
-                    <div className="col-span-2 text-center text-sm text-muted-foreground">
-                      {doc.deadline}
-                    </div>
+                      <div className="col-span-2 text-center text-sm text-muted-foreground">
+                        {filingOpen ? doc.deadline : "—"}
+                      </div>
 
-                    <div className="col-span-3 flex justify-end">
-                      <Link href={`/filing/${doc.id}?status=${doc.status}`}>
-                        {doc.status === "通過" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                          >
-                            <FileText className="h-4 w-4" />
-                            已送件
-                          </Button>
+                      <div className="col-span-3 flex justify-end">
+                        {filingOpen ? (
+                          <Link href={`/filing/${doc.id}?status=${doc.status}`}>
+                            {doc.status === "通過" || doc.status === "審查中" ? (
+                              <Button size="sm" variant="outline" className="gap-2">
+                                <FileText className="h-4 w-4" />
+                                {doc.status === "通過" ? "已通過" : "審查中"}
+                              </Button>
+                            ) : doc.status === "尚未送出" ? (
+                              <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+                                <Edit3 className="h-4 w-4" />
+                                開始填寫
+                              </Button>
+                            ) : (
+                              <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+                                <Edit3 className="h-4 w-4" />
+                                編輯
+                              </Button>
+                            )}
+                          </Link>
                         ) : (
-                          <Button
-                            size="sm"
-                            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                            編輯
-                          </Button>
+                          <Link href={`/filing/${doc.id}?status=view`}>
+                            <Button size="sm" variant="outline" className="gap-2 text-muted-foreground">
+                              <FileText className="h-4 w-4" />
+                              檢視前年度
+                            </Button>
+                          </Link>
                         )}
-                      </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </TabsContent>
@@ -166,20 +215,86 @@ export default function FilingPage() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
-          <Button variant="outline" size="lg" className="gap-2">
-            <Download className="h-4 w-4" />
-            儲存草稿
-          </Button>
-          <Button
-            size="lg"
-            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-          >
-            <Send className="h-4 w-4" />
-            送件
-          </Button>
-        </div>
+        {activeTab === "documents" && (
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+            <Button variant="outline" size="lg" className="gap-2">
+              <Download className="h-4 w-4" />
+              儲存草稿
+            </Button>
+            <Button
+              size="lg"
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              disabled={submittableDocs.length === 0}
+              onClick={handleOpenSubmitDialog}
+            >
+              <Send className="h-4 w-4" />
+              送件
+              {submittableDocs.length > 0 && (
+                <span className="ml-1 bg-white/20 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {submittableDocs.length}
+                </span>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* 送件確認 Dialog */}
+      <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>選擇要送件的文件</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              請勾選本次要送出審查的文件。送出後將無法再編輯，直到審查結果出爐。
+            </p>
+            {submittableDocs.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">目前沒有可送件的文件</p>
+            ) : (
+              <div className="space-y-2">
+                {submittableDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                      selectedSubmitIds.includes(doc.id)
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:bg-muted/40"
+                    }`}
+                    onClick={() => toggleSubmitDoc(doc.id)}
+                  >
+                    <Checkbox
+                      checked={selectedSubmitIds.includes(doc.id)}
+                      onCheckedChange={() => toggleSubmitDoc(doc.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        送件期限：{doc.deadline}　狀態：
+                        <span className={getStatusStyle(doc.status)}>{doc.status}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+              取消
+            </Button>
+            <Button
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              disabled={selectedSubmitIds.length === 0}
+              onClick={handleConfirmSubmit}
+            >
+              <Send className="h-4 w-4" />
+              確認送出 {selectedSubmitIds.length > 0 && `(${selectedSubmitIds.length} 件)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="max-w-md">
@@ -243,6 +358,8 @@ function QuotaFilingSection({
       id: 1,
       code: "0401180014",
       name: "台大醫院",
+      county: "台北市",
+      district: "中山區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -257,6 +374,8 @@ function QuotaFilingSection({
       id: 2,
       code: "0401180015",
       name: "榮民總醫院",
+      county: "台北市",
+      district: "北投區",
       status: "新申請",
       statusColor: "bg-blue-100 text-blue-700",
       expiry: "有效至 2026/7/31",
@@ -271,6 +390,8 @@ function QuotaFilingSection({
       id: 3,
       code: "0401180016",
       name: "長庚醫院",
+      county: "台北市",
+      district: "內湖區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2024/7/31",
@@ -285,6 +406,8 @@ function QuotaFilingSection({
       id: 4,
       code: "0401180017",
       name: "中國醫藥大學附醫",
+      county: "台中市",
+      district: "北區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -299,6 +422,8 @@ function QuotaFilingSection({
       id: "5.1",
       code: "0401180018",
       name: "聯合申請 (仁愛院區)",
+      county: "台北市",
+      district: "大安區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2026/7/31",
@@ -313,6 +438,8 @@ function QuotaFilingSection({
       id: "5.2",
       code: "0401180019",
       name: "聯合申請 (和平院區)",
+      county: "台北市",
+      district: "中正區",
       status: "",
       statusColor: "",
       expiry: "",
@@ -374,19 +501,20 @@ function QuotaFilingSection({
 
       <div className="bg-card rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1000px]">
             <thead>
               <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
-                <th className="px-4 py-3 text-left">序號</th>
-                <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left">主訓醫院</th>
-                <th className="px-4 py-3 text-center">狀態</th>
-                <th className="px-4 py-3 text-center">效期</th>
-                <th className="px-4 py-3 text-center">延長效期</th>
-                <th className="px-4 py-3 text-center">容額上限</th>
-                <th className="px-4 py-3 text-center">前年度核定容額</th>
-                <th className="px-4 py-3 text-center">本年度容額</th>
-                <th className="px-4 py-3 text-center">操作</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-12">序號</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-36">醫事機構代碼</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">主訓醫院</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-28">縣市 / 行政區</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-24">狀態</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-36">效期</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-40">延長效期</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-20">容額上限</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-28">前年度核定容額</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-24">本年度容額</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap w-16">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -397,15 +525,27 @@ function QuotaFilingSection({
                   key={hospital.id}
                   className={`hover:bg-muted/30 ${groupStyle ? `border-l-4 ${groupStyle}` : ""}`}
                 >
-                  <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
-                  <td className="px-4 py-4 text-sm text-muted-foreground">{hospital.code}</td>
-                  <td className="px-4 py-4 font-medium">
+                  <td className="px-4 py-4 text-muted-foreground whitespace-nowrap">{hospital.id}</td>
+                  <td className="px-4 py-4 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                  <td className="px-4 py-4 font-medium whitespace-nowrap">
                     {hospital.groupId && (
                       <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
                     )}
                     {hospital.name}
                   </td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    {hospital.county ? (
+                      <div>
+                        <span className="text-sm text-foreground">{hospital.county}</span>
+                        {hospital.district && (
+                          <span className="text-xs text-muted-foreground ml-1">{hospital.district}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
                     {hospital.status && (
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${hospital.statusColor}`}
@@ -414,16 +554,16 @@ function QuotaFilingSection({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center text-sm text-muted-foreground">
+                  <td className="px-4 py-4 text-center text-sm text-muted-foreground whitespace-nowrap">
                     {hospital.expiry}
                   </td>
-                  <td className="px-4 py-4 text-center text-sm text-muted-foreground">
+                  <td className="px-4 py-4 text-center text-sm text-muted-foreground whitespace-nowrap">
                     {hospital.extension}
                   </td>
-                  <td className="px-4 py-4 text-center">{hospital.limit}</td>
-                  <td className="px-4 py-4 text-center">{hospital.prevQuota}</td>
-                  <td className="px-4 py-4 text-center">{hospital.currentQuota}</td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.limit}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.prevQuota}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.currentQuota}</td>
+                  <td className="px-4 py-4 text-center whitespace-nowrap">
                     {!("isSubRow" in hospital && hospital.isSubRow) && (
                       <Link href={`/filing/quota/${hospital.id}`}>
                         <Button variant="link" className="text-primary p-0 h-auto">

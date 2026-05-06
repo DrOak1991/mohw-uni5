@@ -76,8 +76,7 @@ export const mockSocieties = [
 
 const generateMockSubmissionsByStage = (stages: string[]) => {
   return mockSocieties.map((society, index) => {
-    const stageIndex = index % (stages.length + 1)
-
+    // 未送件的案件
     if (index % 5 === 0) {
       return {
         societyId: society.id,
@@ -85,15 +84,26 @@ const generateMockSubmissionsByStage = (stages: string[]) => {
         uploaded: false,
         uploadedDate: null as string | null,
         lastUpdated: null as string | null,
+        reviewResult: "pending" as "pending" | "approved" | "needs-revision",
       }
     }
 
+    // 已送件的案件，根據 index 分配不同審查結果
+    let reviewResult: "pending" | "approved" | "needs-revision" = "pending"
+    if (index % 4 === 1) {
+      reviewResult = "approved"
+    } else if (index % 4 === 2) {
+      reviewResult = "needs-revision"
+    }
+    // index % 4 === 0 或 3 保持 pending
+
     return {
       societyId: society.id,
-      stage: stages[stageIndex % stages.length],
+      stage: stages[index % stages.length],
       uploaded: true,
       uploadedDate: `2025-01-${String(5 + index).padStart(2, "0")}`,
       lastUpdated: `2025-01-${String(10 + index).padStart(2, "0")}`,
+      reviewResult,
     }
   })
 }
@@ -106,6 +116,7 @@ export const mockDocumentSubmissions: Record<
     uploaded: boolean
     uploadedDate: string | null
     lastUpdated: string | null
+    reviewResult: "pending" | "approved" | "needs-revision"
   }>
 > = {
   "screening-principle": generateMockSubmissionsByStage(["pending-review", "pending-announcement", "announced"]),
@@ -148,6 +159,16 @@ export const stageColors: Record<string, string> = {
   announced: "bg-green-100 text-green-800 border-green-200",
 }
 
+// 學會層級的目前階段管理（按文件類型）
+export const societyCurrentStages: Record<string, string> = {
+  "screening-principle": "pending-review",
+  "hospital-accreditation": "pending-review",
+  "training-curriculum": "pending-review",
+  "evaluation-standards": "pending-review",
+  "quota-allocation": "pending-review",
+  "improvement-guide": "pending-review",
+}
+
 export function getDocumentTypes() {
   return documentTypes
 }
@@ -166,5 +187,76 @@ export function getSocieties() {
 
 export function getStageColors() {
   return stageColors
+}
+
+// 獲取文件類型目前所處的整體階段
+export function getCurrentStageForDocumentType(documentTypeId: string) {
+  return societyCurrentStages[documentTypeId] ?? "pending-review"
+}
+
+// 取得指定階段的案件統計
+export function getSubmissionCountsByStage(documentTypeId: string) {
+  const submissions = getDocumentSubmissions(documentTypeId)
+  const stages = getStagesForDocumentType(documentTypeId)
+
+  return stages.map((stage) => ({
+    stage: stage.value,
+    label: stage.label,
+    count: submissions.filter((s) => s.stage === stage.value).length,
+  }))
+}
+
+// 推進到下一階段
+export function advanceDocumentTypeToNextStage(documentTypeId: string) {
+  const stages = getStagesForDocumentType(documentTypeId)
+  const currentStage = societyCurrentStages[documentTypeId] ?? stages[0]?.value
+  const currentIndex = stages.findIndex((s) => s.value === currentStage)
+
+  if (currentIndex < stages.length - 1) {
+    societyCurrentStages[documentTypeId] = stages[currentIndex + 1].value
+    return true
+  }
+  return false
+}
+
+// 取得推進前的防呆統計資料
+export function getAdvanceCheckStats(documentTypeId: string) {
+  const submissions = getDocumentSubmissions(documentTypeId)
+  const societies = getSocieties()
+
+  const uploaded = submissions.filter((s) => s.uploaded)
+  const notUploaded = submissions.filter((s) => !s.uploaded)
+
+  const approved = submissions.filter((s) => s.reviewResult === "approved")
+  const needsRevision = submissions.filter((s) => s.reviewResult === "needs-revision")
+  const pendingReview = submissions.filter((s) => s.reviewResult === "pending")
+
+  // 取得各類別的醫學會名單
+  const getSocietyNames = (subs: typeof submissions) =>
+    subs.map((s) => societies.find((soc) => soc.id === s.societyId)?.name || s.societyId)
+
+  return {
+    total: submissions.length,
+    uploaded: {
+      count: uploaded.length,
+      societies: getSocietyNames(uploaded),
+    },
+    notUploaded: {
+      count: notUploaded.length,
+      societies: getSocietyNames(notUploaded),
+    },
+    approved: {
+      count: approved.length,
+      societies: getSocietyNames(approved),
+    },
+    needsRevision: {
+      count: needsRevision.length,
+      societies: getSocietyNames(needsRevision),
+    },
+    pendingReview: {
+      count: pendingReview.length,
+      societies: getSocietyNames(pendingReview),
+    },
+  }
 }
 

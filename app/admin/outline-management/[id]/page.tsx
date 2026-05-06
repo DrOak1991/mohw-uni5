@@ -105,26 +105,6 @@ export default function OutlineEditorPage({
     setOutline((prev) => renumber(moveItem(prev, itemId, 1)))
   }
 
-  // ---- add child ----
-  function addChild(parentId: string) {
-    setOutline((prev) =>
-      renumber(
-        applyDeep(prev, parentId, (it) => ({
-          ...it,
-          children: [
-            ...(it.children || []),
-            {
-              id: nextId(),
-              number: "",
-              title: "\u65B0\u9805\u76EE",
-              description: "\u8ACB\u8F38\u5165\u8AAA\u660E",
-            },
-          ],
-        })),
-      ),
-    )
-  }
-
   // ---- delete ----
   function deleteItem(itemId: string) {
     setOutline((prev) => renumber(removeDeep(prev, itemId)))
@@ -184,12 +164,7 @@ export default function OutlineEditorPage({
                 onCancelEdit={cancelEdit}
                 onMoveUp={() => moveUp(null, section.id)}
                 onMoveDown={() => moveDown(null, section.id)}
-                onAddChild={() => addChild(section.id)}
                 onDelete={() => deleteItem(section.id)}
-                onChildMoveUp={(childId) => moveUp(null, childId)}
-                onChildMoveDown={(childId) => moveDown(null, childId)}
-                onChildDelete={(childId) => deleteItem(childId)}
-                onChildStartEdit={(child) => startEdit(child)}
               />
             ))}
           </div>
@@ -287,12 +262,7 @@ function SectionBlock({
   onCancelEdit,
   onMoveUp,
   onMoveDown,
-  onAddChild,
   onDelete,
-  onChildMoveUp,
-  onChildMoveDown,
-  onChildDelete,
-  onChildStartEdit,
 }: {
   item: OutlineItem
   isFirst: boolean
@@ -307,15 +277,9 @@ function SectionBlock({
   onCancelEdit: () => void
   onMoveUp: () => void
   onMoveDown: () => void
-  onAddChild: () => void
   onDelete: () => void
-  onChildMoveUp: (id: string) => void
-  onChildMoveDown: (id: string) => void
-  onChildDelete: (id: string) => void
-  onChildStartEdit: (child: OutlineItem) => void
 }) {
   const isEditing = editingId === item.id
-  const children = item.children || []
 
   return (
     <div>
@@ -396,105 +360,7 @@ function SectionBlock({
         )}
       </div>
 
-      {/* children */}
-      {children.length > 0 && (
-        <div className="ml-8 mt-3 space-y-2">
-          {children.map((child, cIdx) => {
-            const isChildEditing = editingId === child.id
-            return (
-              <div
-                key={child.id}
-                className="border border-gray-200 rounded-lg px-4 py-3 flex items-start gap-3"
-              >
-                <div className="flex-1 min-w-0">
-                  {isChildEditing ? (
-                    <div className="space-y-2">
-                      <Input
-                        value={editTitle}
-                        onChange={(e) => onEditTitleChange(e.target.value)}
-                        className="font-medium"
-                      />
-                      <Input
-                        value={editDescription}
-                        onChange={(e) => onEditDescriptionChange(e.target.value)}
-                      />
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" onClick={onConfirmEdit}>
-                          儲存
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={onCancelEdit}>
-                          取消
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">
-                        {child.number} {child.title}
-                      </h4>
-                      <p className="text-sm text-gray-500">{child.description}</p>
-                    </div>
-                  )}
-                </div>
-
-                {!isChildEditing && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => onChildStartEdit(child)}
-                      aria-label="編輯項目"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      disabled={cIdx === 0}
-                      onClick={() => onChildMoveUp(child.id)}
-                      aria-label="上移"
-                    >
-                      <ArrowUp className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      disabled={cIdx === children.length - 1}
-                      onClick={() => onChildMoveDown(child.id)}
-                      aria-label="下移"
-                    >
-                      <ArrowDown className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => onChildDelete(child.id)}
-                      aria-label="刪除項目"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* add child link */}
-      <div className="ml-8 mt-2">
-        <button
-          onClick={onAddChild}
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-        >
-          <Plus className="w-4 h-4" />
-          新增子項目
-        </button>
-      </div>
+      {/* children section removed - outline now only supports single level */}
     </div>
   )
 }

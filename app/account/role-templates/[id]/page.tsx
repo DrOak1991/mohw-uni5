@@ -1,4 +1,3 @@
-import { SimpleNav } from "@/components/account/simple-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,18 +22,18 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <SimpleNav />
-
       <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* 返回連結 */}
+        <Link
+          href="/account/role-templates"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          返回角色模板管理
+        </Link>
+
         {/* 頁面標題 */}
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/account/role-templates">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                返回列表
-              </Button>
-            </Link>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold text-foreground">編輯角色模板</h1>
