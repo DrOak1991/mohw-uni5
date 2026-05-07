@@ -80,7 +80,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <Link href="/announcement-management">
@@ -202,7 +202,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm text-gray-600 mb-1">
-                    點擊上傳或拖��檔案至此區域
+                    點擊上傳或拖���檔案至此區域
                   </p>
                   <p className="text-sm text-gray-500">支援格式：PDF、Word、Excel 等</p>
                 </label>

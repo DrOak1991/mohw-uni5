@@ -26,7 +26,7 @@ export default function AnnouncementDetailPage({
   }
 
   return (
-    <div className="container mx-auto py-6 px-3 sm:py-8 sm:px-4 max-w-5xl">
+    <div className="container mx-auto py-6 px-4 sm:py-8 max-w-6xl">
       {/* 返回按鈕 */}
       <div className="mb-4 sm:mb-6">
         <Link href="/announcements">

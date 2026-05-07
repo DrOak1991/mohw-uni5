@@ -8,7 +8,7 @@ import Link from "next/link"
 export default function PersonalSettingsPage() {
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* 頁面標題 */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">個人設定</h1>

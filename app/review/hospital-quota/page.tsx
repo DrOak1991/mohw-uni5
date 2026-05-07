@@ -132,11 +132,11 @@ export default function HospitalQuotaReviewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">醫院容額分配審查</h1>
-            <p className="text-sm text-gray-500 mt-1">審查各醫學會提交的醫院訓練容額分配申請</p>
+            <p className="text-base text-gray-500 mt-1">審查各醫學會提交的醫院訓練容額分配申請</p>
             <div className="flex items-center gap-3 mt-3">
               <span className="text-sm text-gray-600">目前階段：</span>
               <Badge className={`${stageConfig[activeTab as keyof typeof stageConfig]?.color || "bg-gray-100 text-gray-800"} text-sm px-3 py-1`}>

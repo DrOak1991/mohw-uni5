@@ -31,7 +31,7 @@ export default function HospitalQuotaDetailPage({
     return (
       <div className="min-h-screen bg-gray-50">
         <ReviewSimpleNav />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-20">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">找不到該醫學會</h2>
             <Button asChild>

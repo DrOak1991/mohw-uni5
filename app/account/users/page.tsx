@@ -162,11 +162,11 @@ export default function UsersManagementPage() {
                   {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{user.email}</TableCell>
+                      <TableCell className="text-muted-foreground">{user.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={levelColors[user.level]}>{user.level}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{user.organization}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-[200px] truncate">{user.organization}</TableCell>
                       <TableCell>
                         {user.status === "active" ? (
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
@@ -178,7 +178,7 @@ export default function UsersManagementPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{user.lastLogin}</TableCell>
+                      <TableCell className="text-muted-foreground">{user.lastLogin}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -208,7 +208,7 @@ export default function UsersManagementPage() {
 
             {/* 分頁 */}
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 顯示 1-{users.length} 筆，共 {users.length} 筆
               </p>
               <div className="flex gap-2">

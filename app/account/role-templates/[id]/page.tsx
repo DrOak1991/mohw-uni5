@@ -22,7 +22,7 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* 返回連結 */}
         <Link
           href="/account/role-templates"

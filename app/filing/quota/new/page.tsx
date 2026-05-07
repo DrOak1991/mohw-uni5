@@ -99,7 +99,7 @@ export default function NewQuotaPage() {
       </div>
 
       <div className="container mx-auto px-6 pb-8">
-        <div className="max-w-4xl space-y-6">
+        <div className="max-w-6xl space-y-6">
           <div className="bg-card rounded-lg p-6 shadow-sm">
             <h2 className="font-semibold text-foreground mb-4">申請方式</h2>
             <div className="grid grid-cols-2 gap-4">

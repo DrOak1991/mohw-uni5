@@ -96,7 +96,7 @@ export default function CreateAnnouncementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <Link href="/announcement-management">
@@ -106,7 +106,7 @@ export default function CreateAnnouncementPage() {
             </Button>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">新增公告</h1>
-          <p className="text-sm text-gray-600">填寫公告資訊並上傳相關附件</p>
+          <p className="text-base text-gray-600">填寫公告資訊並上傳相關附件</p>
         </div>
 
         <Form {...form}>
