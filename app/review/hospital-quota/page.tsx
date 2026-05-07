@@ -75,10 +75,10 @@ export default function HospitalQuotaReviewPage() {
 
   const renderReviewResultBadge = (result: string) => {
     if (result === "approved")
-      return <Badge className="bg-green-100 text-green-700 text-xs">審查通過</Badge>
+      return <Badge className="bg-green-100 text-green-700 text-sm">審查通過</Badge>
     if (result === "needs-revision")
-      return <Badge className="bg-orange-100 text-orange-700 text-xs">需補件</Badge>
-    return <Badge className="bg-gray-100 text-gray-600 text-xs">待審查</Badge>
+      return <Badge className="bg-orange-100 text-orange-700 text-sm">需補件</Badge>
+    return <Badge className="bg-gray-100 text-gray-600 text-sm">待審查</Badge>
   }
 
   const renderTable = (stage: string) => {
@@ -102,7 +102,7 @@ export default function HospitalQuotaReviewPage() {
                   <TableRow key={society.id}>
                     <TableCell className="font-medium">{society.name}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">{society.year}</Badge>
+                      <Badge variant="outline" className="text-sm">{society.year}</Badge>
                     </TableCell>
                     <TableCell className="text-sm text-gray-500">{society.submittedDate}</TableCell>
                     <TableCell>{renderReviewResultBadge(society.reviewResult)}</TableCell>
@@ -213,15 +213,15 @@ export default function HospitalQuotaReviewPage() {
               {/* 審查狀態統計 */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 text-center">
-                  <p className="text-xs text-green-600 mb-0.5">審查通過</p>
+                  <p className="text-sm text-green-600 mb-0.5">審查通過</p>
                   <p className="text-lg font-bold text-green-700">{advanceStats.approved.count}</p>
                 </div>
                 <div className={`border rounded-lg p-2.5 text-center ${advanceStats.needsRevision.count > 0 ? "bg-orange-50 border-orange-200" : "bg-gray-50 border-gray-200"}`}>
-                  <p className={`text-xs mb-0.5 ${advanceStats.needsRevision.count > 0 ? "text-orange-600" : "text-gray-500"}`}>需補件</p>
+                  <p className={`text-sm mb-0.5 ${advanceStats.needsRevision.count > 0 ? "text-orange-600" : "text-gray-500"}`}>需補件</p>
                   <p className={`text-lg font-bold ${advanceStats.needsRevision.count > 0 ? "text-orange-700" : "text-gray-400"}`}>{advanceStats.needsRevision.count}</p>
                 </div>
                 <div className={`border rounded-lg p-2.5 text-center ${advanceStats.pendingReview.count > 0 ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-200"}`}>
-                  <p className={`text-xs mb-0.5 ${advanceStats.pendingReview.count > 0 ? "text-amber-600" : "text-gray-500"}`}>尚未審查</p>
+                  <p className={`text-sm mb-0.5 ${advanceStats.pendingReview.count > 0 ? "text-amber-600" : "text-gray-500"}`}>尚未審查</p>
                   <p className={`text-lg font-bold ${advanceStats.pendingReview.count > 0 ? "text-amber-700" : "text-gray-400"}`}>{advanceStats.pendingReview.count}</p>
                 </div>
               </div>
@@ -259,13 +259,13 @@ export default function HospitalQuotaReviewPage() {
                       </div>
                       <div className="shrink-0">
                         {society.reviewResult === "approved" && (
-                          <Badge className="bg-green-100 text-green-700 text-xs">審查通過</Badge>
+                          <Badge className="bg-green-100 text-green-700 text-sm">審查通過</Badge>
                         )}
                         {society.reviewResult === "needs-revision" && (
-                          <Badge className="bg-orange-100 text-orange-700 text-xs">需補件</Badge>
+                          <Badge className="bg-orange-100 text-orange-700 text-sm">需補件</Badge>
                         )}
                         {society.reviewResult === "pending" && (
-                          <Badge className="bg-gray-100 text-gray-600 text-xs">待審查</Badge>
+                          <Badge className="bg-gray-100 text-gray-600 text-sm">待審查</Badge>
                         )}
                       </div>
                     </div>
@@ -281,7 +281,7 @@ export default function HospitalQuotaReviewPage() {
                 return s && s.reviewResult !== "approved"
               }) && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-xs text-amber-700">
+                  <p className="text-sm text-amber-700">
                     <AlertCircle className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />
                     您選擇了尚未完成審查的醫學會，推進後這些案件將一併進入下一階段。
                   </p>

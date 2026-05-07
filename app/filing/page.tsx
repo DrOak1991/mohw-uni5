@@ -118,16 +118,6 @@ export default function FilingPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
-      <div className="container mx-auto px-6 pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center text-primary hover:underline text-sm"
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          返回首頁
-        </Link>
-      </div>
-
       <div className="container mx-auto px-6 py-4">
         <h1 className="text-2xl font-bold text-foreground">填報專區</h1>
         <p className="text-muted-foreground mt-1">內科醫學會 - 2025年度</p>
