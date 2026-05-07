@@ -1,61 +1,13 @@
-export const mockHospitalQuotaSocieties = [
-  {
-    id: "1",
-    name: "台灣內科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-15",
-    stage: "pending" as const,
-    reviewResult: "pending" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "2",
-    name: "台灣外科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-18",
-    stage: "pending" as const,
-    reviewResult: "approved" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "3",
-    name: "台灣小兒科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-20",
-    stage: "pending" as const,
-    reviewResult: "needs-revision" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "4",
-    name: "台灣婦產科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-10",
-    stage: "group-review" as const,
-    reviewResult: "approved" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "5",
-    name: "台灣骨科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-12",
-    stage: "group-review" as const,
-    reviewResult: "pending" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "6",
-    name: "台灣神經科醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-08",
-    stage: "main-review" as const,
-    reviewResult: "approved" as "pending" | "approved" | "needs-revision",
-  },
-  {
-    id: "7",
-    name: "台灣精神醫學會",
-    year: "115 年度",
-    submittedDate: "2025-01-05",
-    stage: "upload-pending" as const,
-    reviewResult: "approved" as "pending" | "approved" | "needs-revision",
-  },
-]
+import { allSocieties } from "@/lib/data/societies"
+
+export const mockHospitalQuotaSocieties = allSocieties.slice(0, 7).map((society, index) => ({
+  id: society.id,
+  name: society.name,
+  year: "115 年度",
+  submittedDate: `2025-01-${String(5 + index).padStart(2, "0")}`,
+  stage: (["pending", "pending", "pending", "group-review", "group-review", "main-review", "upload-pending"][index]) as "pending" | "group-review" | "main-review" | "upload-pending",
+  reviewResult: (["pending", "approved", "needs-revision", "approved", "pending", "approved", "approved"][index]) as "pending" | "approved" | "needs-revision",
+}))
 
 export const hospitalQuotaStageConfig = {
   pending: { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "待審查" },
@@ -71,8 +23,6 @@ export const hospitalQuotaStages = [
   { value: "main-review", label: "RRC 大會審核" },
   { value: "upload-pending", label: "待公告" },
 ]
-
-// 詳細的醫院容額資料
 export const mockHospitalQuotaDetails: Record<string, {
   society: typeof mockHospitalQuotaSocieties[0];
   hospitals: Array<{

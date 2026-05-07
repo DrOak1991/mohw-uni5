@@ -1,3 +1,5 @@
+import { allSocieties } from "@/lib/data/societies"
+
 export const documentTypes = [
   { id: "hospital-accreditation", name: "專科醫師訓練計畫認定基準", shortName: "計畫認定基準" },
   { id: "training-curriculum", name: "訓練課程基準", shortName: "訓練課程基準" },
@@ -48,32 +50,6 @@ export const stagesByDocumentType: Record<string, Array<{ value: string; label: 
   ],
 }
 
-export const mockSocieties = [
-  { id: "1", name: "台灣內科醫學會" },
-  { id: "2", name: "台灣外科醫學會" },
-  { id: "3", name: "台灣小兒科醫學會" },
-  { id: "4", name: "台灣婦產科醫學會" },
-  { id: "5", name: "台灣骨科醫學會" },
-  { id: "6", name: "台灣眼科醫學會" },
-  { id: "7", name: "台灣耳鼻喉科醫學會" },
-  { id: "8", name: "台灣皮膚科醫學會" },
-  { id: "9", name: "台灣泌尿科醫學會" },
-  { id: "10", name: "台灣神經科醫學會" },
-  { id: "11", name: "台灣精神醫學會" },
-  { id: "12", name: "台灣復健醫學會" },
-  { id: "13", name: "台灣麻醉醫學會" },
-  { id: "14", name: "台灣急診醫學會" },
-  { id: "15", name: "台灣家庭醫學會" },
-  { id: "16", name: "台灣病理學會" },
-  { id: "17", name: "台灣放射線醫學會" },
-  { id: "18", name: "台灣核醫學會" },
-  { id: "19", name: "台灣整形外科醫學會" },
-  { id: "20", name: "台灣職業醫學會" },
-  { id: "21", name: "台灣老年醫學會" },
-  { id: "22", name: "台灣安寧緩和醫學會" },
-  { id: "23", name: "台灣重症醫學會" },
-]
-
 // 學會層級的目前階段管理（按文件類型）
 // 為了 demo 展示，各文件類型設定不同階段
 // 注意：必須在 generateMockSubmissionsForDocType 之前定義
@@ -91,7 +67,7 @@ const generateMockSubmissionsForDocType = (documentTypeId: string) => {
   // 取得該文件類型目前所在階段
   const currentStage = societyCurrentStages[documentTypeId] ?? "pending-review"
   
-  return mockSocieties.map((society, index) => {
+  return allSocieties.map((society, index) => {
     // 未送件的案件（少數）
     if (index % 8 === 0) {
       return {
@@ -164,7 +140,7 @@ export function getDocumentSubmissions(documentTypeId: string) {
 }
 
 export function getSocieties() {
-  return mockSocieties
+  return allSocieties.map((s) => ({ id: s.id, name: s.name }))
 }
 
 export function getStageColors() {
