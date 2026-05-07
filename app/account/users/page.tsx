@@ -83,21 +83,12 @@ export default function UsersManagementPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-8">
-        {/* 返回連結 */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          返回首頁
-        </Link>
-
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* 頁面標題 */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">使用者管理</h1>
-            <p className="text-sm text-muted-foreground mt-1">管理系統使用者帳號與權限設定</p>
+            <p className="text-base text-muted-foreground mt-1">管理系統使用者帳號與權限設定</p>
           </div>
           <Link href="/account/role-templates">
             <Button variant="outline" className="gap-2">

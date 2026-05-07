@@ -253,7 +253,7 @@ export default function NewQuotaPage() {
                   min={1}
                   max={50}
                 />
-                <p className="text-xs text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
+                <p className="text-sm text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
               </div>
 
               <div>
@@ -268,7 +268,7 @@ export default function NewQuotaPage() {
                   min={1}
                   max={50}
                 />
-                <p className="text-xs text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
+                <p className="text-sm text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
               </div>
             </div>
           </div>

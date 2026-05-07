@@ -138,7 +138,7 @@ function PermissionLevelSelector({
       <div className="flex items-center justify-between">
         <div>
           <Label className="text-sm font-medium">{moduleName}</Label>
-          {moduleDescription && <p className="text-xs text-muted-foreground mt-0.5">{moduleDescription}</p>}
+          {moduleDescription && <p className="text-sm text-muted-foreground mt-0.5">{moduleDescription}</p>}
         </div>
       </div>
       <RadioGroup defaultValue={defaultLevel} className="grid grid-cols-3 gap-3">
@@ -192,7 +192,7 @@ function ExportPermissionSelector({
           </Label>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground pl-6">根據權限設定，使用者可匯出不同格式的統計報表與文件</p>
+      <p className="text-sm text-muted-foreground pl-6">根據權限設定，使用者可匯出不同格式的統計報表與文件</p>
     </div>
   )
 }
@@ -260,7 +260,7 @@ export default function UserPermissionPage({ params }: { params: { id: string } 
               <div className="flex-1 space-y-3">
                 <div>
                   <p className="text-sm font-medium text-blue-900">快速套用角色模板</p>
-                  <p className="text-xs text-blue-700 mt-1">選擇預設角色模板，系統將自動配置對應的權限設定</p>
+                  <p className="text-sm text-blue-700 mt-1">選擇預設角色模板，系統將自動配置對應的權限設定</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Select defaultValue={user.role}>
@@ -303,7 +303,7 @@ export default function UserPermissionPage({ params }: { params: { id: string } 
                 <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="space-y-2 text-sm">
                   <p className="font-medium text-blue-900">權限層級說明</p>
-                  <ul className="text-blue-700 space-y-1 text-xs">
+                  <ul className="text-blue-700 space-y-1 text-sm">
                     <li>
                       <span className="font-medium">無權限</span>：無法存取此功能
                     </li>
@@ -375,8 +375,8 @@ export default function UserPermissionPage({ params }: { params: { id: string } 
             {permissionHistory.map((record, index) => (
               <div key={index} className="space-y-1 pb-4 border-b last:border-0 last:pb-0">
                 <p className="text-sm font-medium">{record.action}</p>
-                <p className="text-xs text-muted-foreground">
-                  {record.date} �� {record.operator}
+                <p className="text-sm text-muted-foreground">
+                  {record.date} ���� {record.operator}
                 </p>
               </div>
             ))}

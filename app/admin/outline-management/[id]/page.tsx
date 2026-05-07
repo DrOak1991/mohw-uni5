@@ -190,7 +190,7 @@ export default function OutlineEditorPage({
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900">{v.version}</span>
                       {v.isCurrent && (
-                        <Badge className="bg-amber-500 text-white border-0 text-xs">
+                        <Badge className="bg-amber-500 text-white border-0 text-sm">
                           編輯中
                         </Badge>
                       )}

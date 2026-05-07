@@ -284,7 +284,7 @@ export default function ReviewDetailPage({
             </div>
             <div className="flex items-center gap-3">
               <div>
-                <p className="text-xs text-gray-500 mb-1">審查結果</p>
+                <p className="text-sm text-gray-500 mb-1">審查結果</p>
                 <Badge
                   className={`${
                     reviewResult === "approved"
@@ -369,7 +369,7 @@ export default function ReviewDetailPage({
               </div>
               <div>
                 <h3 className="font-medium text-pink-900">RRC 大會審核階段</h3>
-                <p className="text-sm text-pink-700">此案件已通過分組會議審查，請參考分組會議審查資料進行最終審核。</p>
+                <p className="text-sm text-pink-700">此案件已通過分組會議審查，請參考分組會議審查資料��行最終審核。</p>
               </div>
             </div>
           </div>
@@ -436,7 +436,7 @@ export default function ReviewDetailPage({
                             {/* Diff Display */}
                             {hasChanges && (
                               <div className="p-4 bg-muted/30 rounded-lg border">
-                                <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                <div className="text-sm text-muted-foreground mb-2 flex items-center gap-4">
                                   <span>變更比對：</span>
                                   <span className="flex items-center gap-1">
                                     <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
@@ -457,7 +457,7 @@ export default function ReviewDetailPage({
                             {/* Revision Note (from filing) */}
                             {section.revisionNote && (
                               <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                <p className="text-xs font-medium text-blue-700 mb-1">
+                                <p className="text-sm font-medium text-blue-700 mb-1">
                                   醫學會修訂說明
                                 </p>
                                 <p className="text-sm text-blue-900 whitespace-pre-wrap">
@@ -527,7 +527,7 @@ export default function ReviewDetailPage({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 選擇審查結果，文件會在批次推進時統一進入下一階段。
               </p>
             </div>
@@ -536,7 +536,7 @@ export default function ReviewDetailPage({
             {showGroupReviewFiles && (
               <div className="bg-white rounded-lg border shadow-sm p-4">
                 <Label className="text-sm font-medium">分組會議審查資料</Label>
-                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                <p className="text-sm text-muted-foreground mt-1 mb-3">
                   以下為分組會議審查階段通過時上傳之相關文件
                 </p>
                 <div className="space-y-2">
@@ -548,7 +548,7 @@ export default function ReviewDetailPage({
                       <FileText className="h-4 w-4 text-purple-600 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {formatFileSize(file.size)} | {file.date}
                         </p>
                       </div>
@@ -602,7 +602,7 @@ export default function ReviewDetailPage({
                       <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {formatFileSize(file.size)} | {file.date}
                         </p>
                       </div>
@@ -642,7 +642,7 @@ export default function ReviewDetailPage({
                     </span>
                   </Button>
                 </label>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   支援 PDF、Word、Excel 格式
                 </p>
               </div>

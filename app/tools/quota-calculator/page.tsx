@@ -255,10 +255,10 @@ export default function QuotaCalculatorPage() {
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: region.color }} />
                           <span className="font-medium text-sm">{region.name}</span>
-                          <span className="text-xs text-gray-500">({region.hospitals.length} 家)</span>
+                          <span className="text-sm text-gray-500">({region.hospitals.length} 家)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold" style={{ color: region.color }}>
+                          <span className="text-sm font-semibold" style={{ color: region.color }}>
                             {regionTotals[regionKey]} 人 ({regionPercentages[regionKey].toFixed(1)}%)
                           </span>
                           {expandedRegions[regionKey] ? (
@@ -286,7 +286,7 @@ export default function QuotaCalculatorPage() {
                                   onChange={(e) => updateHospitalQuota(regionKey, hospital.id, e.target.value)}
                                   className="w-16 h-7 text-right text-sm"
                                 />
-                                <span className="text-xs text-gray-500 w-4">人</span>
+                                <span className="text-sm text-gray-500 w-4">人</span>
                               </div>
                             </div>
                           ))}
@@ -310,11 +310,11 @@ export default function QuotaCalculatorPage() {
                       <div key={regionKey} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: region.color }} />
-                          <span className="text-xs font-medium">{region.name}</span>
+                          <span className="text-sm font-medium">{region.name}</span>
                         </div>
                         <div className="text-right">
                           <div className="text-sm font-semibold">{regionTotals[regionKey]} 人</div>
-                          <div className="text-xs text-gray-500">{regionPercentages[regionKey].toFixed(1)}%</div>
+                          <div className="text-sm text-gray-500">{regionPercentages[regionKey].toFixed(1)}%</div>
                         </div>
                       </div>
                     ),
@@ -367,7 +367,7 @@ export default function QuotaCalculatorPage() {
                         >
                           <div className="text-center text-white">
                             <div className="font-bold text-base leading-none">{regionTotals[regionKey]}</div>
-                            <div className="text-xs opacity-90">{regionPercentages[regionKey].toFixed(0)}%</div>
+                            <div className="text-sm opacity-90">{regionPercentages[regionKey].toFixed(0)}%</div>
                           </div>
                         </div>
                       )
@@ -376,13 +376,13 @@ export default function QuotaCalculatorPage() {
 
                   {/* 圖例 */}
                   <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-lg p-2 shadow-sm">
-                    <div className="text-xs font-medium text-gray-700 mb-1">圖例</div>
+                    <div className="text-sm font-medium text-gray-700 mb-1">圖例</div>
                     <div className="space-y-0.5">
                       {(Object.entries(hospitalData) as [RegionKey, typeof hospitalData.north][]).map(
                         ([regionKey, region]) => (
                           <div key={regionKey} className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: region.color }} />
-                            <span className="text-xs text-gray-600">{region.name}</span>
+                            <span className="text-sm text-gray-600">{region.name}</span>
                           </div>
                         ),
                       )}
@@ -391,14 +391,14 @@ export default function QuotaCalculatorPage() {
 
                   {/* 總計標籤 */}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1.5 shadow-sm">
-                    <div className="text-xs text-gray-500">全國總計</div>
+                    <div className="text-sm text-gray-500">全國總計</div>
                     <div className="text-lg font-bold text-gray-900">{grandTotal} 人</div>
                   </div>
                 </div>
 
                 {/* 比例長條圖 - 固定在底部 */}
                 <div className="mt-3 pt-3 border-t flex-shrink-0">
-                  <div className="text-xs font-medium text-gray-700 mb-1.5">分區比例</div>
+                  <div className="text-sm font-medium text-gray-700 mb-1.5">分區比例</div>
                   <div className="flex h-5 rounded-full overflow-hidden">
                     {(Object.entries(hospitalData) as [RegionKey, typeof hospitalData.north][]).map(
                       ([regionKey, region]) => (
@@ -412,7 +412,7 @@ export default function QuotaCalculatorPage() {
                           }}
                         >
                           {regionPercentages[regionKey] >= 10 && (
-                            <span className="text-xs text-white font-medium">
+                            <span className="text-sm text-white font-medium">
                               {regionPercentages[regionKey].toFixed(0)}%
                             </span>
                           )}
@@ -425,7 +425,7 @@ export default function QuotaCalculatorPage() {
                       ([regionKey, region]) => (
                         <div key={regionKey} className="flex items-center gap-1">
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: region.color }} />
-                          <span className="text-xs text-gray-600">{region.name}</span>
+                          <span className="text-sm text-gray-600">{region.name}</span>
                         </div>
                       ),
                     )}

@@ -334,7 +334,7 @@ export default function FilingDetailPage({
           {isReadOnly && !isReviewInProgress && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-700">
-                <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
+                <span className="h-5 w-5 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">
                   V
                 </span>
                 <span className="font-medium">
@@ -397,7 +397,7 @@ export default function FilingDetailPage({
                   >
                     套用統一修訂說明到所有修訂處
                   </label>
-                  <p className="text-xs text-blue-600 mt-0.5">
+                  <p className="text-sm text-blue-600 mt-0.5">
                     勾選後，下方所有修訂項目將使用相同的說明文字
                   </p>
                   {applyUnifiedNote && (
@@ -484,11 +484,11 @@ export default function FilingDetailPage({
                                 )}
                                 <span className="font-medium">{section.title}</span>
                                 {hasChanges ? (
-                                  <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
+                                  <span className="ml-2 px-2 py-0.5 text-sm bg-amber-100 text-amber-700 rounded">
                                     已修訂
                                   </span>
                                 ) : documentMethod === "change" && !isReadOnly ? (
-                                  <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded">
+                                  <span className="ml-2 px-2 py-0.5 text-sm bg-gray-100 text-gray-500 rounded">
                                     未修正
                                   </span>
                                 ) : null}
@@ -524,7 +524,7 @@ export default function FilingDetailPage({
                                   {/* Diff Display */}
                                   {hasChanges && (
                                     <div className="p-4 bg-muted/30 rounded-lg border">
-                                      <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                      <div className="text-sm text-muted-foreground mb-2 flex items-center gap-4">
                                         <span>變更預覽：</span>
                                         <span className="flex items-center gap-1">
                                           <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
@@ -547,7 +547,7 @@ export default function FilingDetailPage({
                                 {hasChanges && !isReadOnly && documentMethod === "change" && (
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-xs font-medium text-muted-foreground">
+                                      <span className="text-sm font-medium text-muted-foreground">
                                         修訂說明
                                       </span>
                                       {!applyUnifiedNote && (
@@ -560,7 +560,7 @@ export default function FilingDetailPage({
                                     </div>
                                     {applyUnifiedNote ? (
                                       <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-800">
-                                        <p className="text-xs text-blue-600 mb-1">使用統一說明：</p>
+                                        <p className="text-sm text-blue-600 mb-1">使用統一說明：</p>
                                         {unifiedNote || <span className="text-blue-400">（尚未填寫）</span>}
                                       </div>
                                     ) : (
@@ -574,7 +574,7 @@ export default function FilingDetailPage({
                                       />
                                     )}
                                     {!applyUnifiedNote && !noteIsFilled && (
-                                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                                      <p className="text-sm text-amber-600 flex items-center gap-1">
                                         <AlertCircle className="h-3 w-3" />
                                         此處修訂尚未填寫說明
                                       </p>

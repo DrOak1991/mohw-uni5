@@ -104,7 +104,7 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
             {/* 填報專區 */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-foreground border-b pb-2">填報專區</h3>
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">各類規範的填報功能</p>
+              <p className="text-sm text-muted-foreground -mt-2 mb-2">各類規範的填報功能</p>
               {[
                 {
                   id: "submission-general",
@@ -119,7 +119,7 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <Label className="text-sm font-medium">{item.name}</Label>
-                      {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                      {item.description && <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>}
                     </div>
                   </div>
                   <RadioGroup defaultValue={item.defaultValue} className="flex gap-4">
@@ -149,7 +149,7 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
             {/* 審查專區 */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-foreground border-b pb-2">審查專區</h3>
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">各類填報案件的審查與核定功能</p>
+              <p className="text-sm text-muted-foreground -mt-2 mb-2">各類填報案件的審查與核定功能</p>
               {[
                 {
                   id: "review-general",
@@ -164,7 +164,7 @@ export default function EditRoleTemplatePage({ params }: { params: { id: string 
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <Label className="text-sm font-medium">{item.name}</Label>
-                      {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                      {item.description && <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>}
                     </div>
                   </div>
                   <RadioGroup defaultValue={item.defaultValue} className="flex gap-4">

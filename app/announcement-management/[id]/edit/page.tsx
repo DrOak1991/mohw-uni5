@@ -202,9 +202,9 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm text-gray-600 mb-1">
-                    點擊上傳或拖曳檔案至此區域
+                    點擊上傳或拖��檔案至此區域
                   </p>
-                  <p className="text-xs text-gray-500">支援格式：PDF、Word、Excel 等</p>
+                  <p className="text-sm text-gray-500">支援格式：PDF、Word、Excel 等</p>
                 </label>
               </div>
 
@@ -219,7 +219,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
                         <FileText className="w-5 h-5 text-blue-600" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>

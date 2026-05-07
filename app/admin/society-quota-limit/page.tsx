@@ -83,10 +83,10 @@ export default function SocietyQuotaLimitPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-8">#</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">專科醫學會</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-44">容額申請總上限</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-36">上次更新</th>
+                <th className="text-left px-5 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-8">#</th>
+                <th className="text-left px-5 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">專科醫學會</th>
+                <th className="text-center px-5 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-44">容額申請總上限</th>
+                <th className="text-left px-5 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-36">上次更新</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -102,7 +102,7 @@ export default function SocietyQuotaLimitPage() {
                     <td className="px-5 py-3">
                       <span className="text-sm font-medium text-gray-900">{society.societyName}</span>
                       {isUnset && (
-                        <Badge className="ml-2 bg-amber-100 text-amber-700 border-amber-200 text-xs">未設定</Badge>
+                        <Badge className="ml-2 bg-amber-100 text-amber-700 border-amber-200 text-sm">未設定</Badge>
                       )}
                     </td>
                     <td className="px-5 py-3">
@@ -120,11 +120,11 @@ export default function SocietyQuotaLimitPage() {
                     <td className="px-5 py-3">
                       {society.updatedAt ? (
                         <div>
-                          <p className="text-xs text-gray-600">{society.updatedAt}</p>
-                          <p className="text-xs text-gray-400">{society.updatedBy}</p>
+                          <p className="text-sm text-gray-600">{society.updatedAt}</p>
+                          <p className="text-sm text-gray-400">{society.updatedBy}</p>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">—</span>
+                        <span className="text-sm text-gray-400">—</span>
                       )}
                     </td>
                   </tr>

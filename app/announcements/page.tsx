@@ -101,16 +101,16 @@ export default function AnnouncementsPage() {
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           {announcement.isNew && (
-                            <Badge variant="destructive" className="text-xs">
+                            <Badge variant="destructive" className="text-sm">
                               NEW
                             </Badge>
                           )}
                           {announcement.isPinned && (
-                            <Badge className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200">置頂</Badge>
+                            <Badge className="text-sm bg-amber-100 text-amber-700 hover:bg-amber-200">置頂</Badge>
                           )}
                         </div>
-                        <CardDescription className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-wrap">
-                          <Badge variant="outline" className="text-xs">
+                        <CardDescription className="flex items-center gap-2 sm:gap-3 text-sm sm:text-sm flex-wrap">
+                          <Badge variant="outline" className="text-sm">
                             {categoryConfig[announcement.category as keyof typeof categoryConfig].label}
                           </Badge>
                           <span className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export default function AnnouncementsPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{announcement.excerpt}</p>
+                    <p className="text-sm sm:text-sm text-muted-foreground line-clamp-2">{announcement.excerpt}</p>
                   </CardContent>
                 </Card>
               </Link>

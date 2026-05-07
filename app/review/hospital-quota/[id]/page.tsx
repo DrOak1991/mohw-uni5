@@ -119,7 +119,7 @@ export default function HospitalQuotaDetailPage({
                   </Button>
                 </div>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-500">
                 檔案：{groupReviewData.meetingRecord}
               </p>
             </CardContent>
@@ -164,7 +164,7 @@ export default function HospitalQuotaDetailPage({
                         {hospital.groupId && !hospital.isSubRow ? (
                           <div className="space-y-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-xs bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded font-medium">主訓</span>
+                              <span className="text-sm bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded font-medium">主訓</span>
                               {(hospital.mainHospitalCodes ?? [hospital.code]).map((code, i) => {
                                 const h = hospitals.find(hh => hh.code === code)
                                 return (
@@ -176,7 +176,7 @@ export default function HospitalQuotaDetailPage({
                             </div>
                             {(hospital.partnerHospitalCodes ?? []).length > 0 && (
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">合作</span>
+                                <span className="text-sm bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">合作</span>
                                 {(hospital.partnerHospitalCodes ?? []).map((code, i) => {
                                   const h = hospitals.find(hh => hh.code === code)
                                   return (
@@ -274,7 +274,7 @@ export default function HospitalQuotaDetailPage({
                 <p className="text-sm text-muted-foreground">
                   點擊或拖曳檔案至此處上傳
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   支援 PDF、DOC、DOCX 格式
                 </p>
               </div>
@@ -296,7 +296,7 @@ export default function HospitalQuotaDetailPage({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 審查結果記錄後，由列表頁統一批次推進至下一階段。
               </p>
             </div>

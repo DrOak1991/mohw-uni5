@@ -39,7 +39,7 @@ export default function AdditionalQuotaReviewPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-lg font-semibold text-gray-900">{app.hospitalName}</h3>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-sm">
                 {app.year}
               </Badge>
               <Badge className={statusConfig[app.status].color}>{statusConfig[app.status].label}</Badge>

@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { ReviewSimpleNav } from "@/components/review/simple-nav"
+import {
   getDocumentSubmissions,
   getDocumentTypes,
   getSocieties,
@@ -83,7 +83,7 @@ export default function SubmissionsReviewPage() {
         <div className="mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">填報審查</h1>
-            <p className="text-sm text-gray-500 mt-1">以文件類型為單位檢視各醫學會的填報狀態並進行審查</p>
+            <p className="text-base text-gray-500 mt-1">以文件類型為單位檢視各醫學會的填報狀態並進行審查</p>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ export default function SubmissionsReviewPage() {
                       </Badge>
                     </div>
                     {advanceStats.notUploaded.count > 0 && (
-                      <p className="text-xs text-orange-600 mt-1 line-clamp-2">
+                      <p className="text-sm text-orange-600 mt-1 line-clamp-2">
                         {advanceStats.notUploaded.societies.slice(0, 3).join("、")}
                         {advanceStats.notUploaded.societies.length > 3 && `...等 ${advanceStats.notUploaded.societies.length} 間`}
                       </p>
@@ -266,7 +266,7 @@ export default function SubmissionsReviewPage() {
                     <div>
                       <span className={`text-sm ${advanceStats.needsRevision.count > 0 ? "text-orange-700" : "text-gray-600"}`}>需補件</span>
                       {advanceStats.needsRevision.count > 0 && (
-                        <p className="text-xs text-orange-600 mt-0.5">
+                        <p className="text-sm text-orange-600 mt-0.5">
                           {advanceStats.needsRevision.societies.slice(0, 3).join("、")}
                           {advanceStats.needsRevision.societies.length > 3 && `...等`}
                         </p>
@@ -280,7 +280,7 @@ export default function SubmissionsReviewPage() {
                     <div>
                       <span className={`text-sm ${advanceStats.pendingReview.count > 0 ? "text-amber-700" : "text-gray-600"}`}>尚未審查</span>
                       {advanceStats.pendingReview.count > 0 && (
-                        <p className="text-xs text-amber-600 mt-0.5">
+                        <p className="text-sm text-amber-600 mt-0.5">
                           {advanceStats.pendingReview.societies.slice(0, 3).join("、")}
                           {advanceStats.pendingReview.societies.length > 3 && `...等`}
                         </p>
@@ -296,7 +296,7 @@ export default function SubmissionsReviewPage() {
               {/* 警告提示 */}
               {(advanceStats.notUploaded.count > 0 || advanceStats.pendingReview.count > 0) && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-xs text-amber-700">
+                  <p className="text-sm text-amber-700">
                     <AlertCircle className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />
                     有 {advanceStats.notUploaded.count + advanceStats.pendingReview.count} 件案件尚未完成送件或審查，推進後這些案件將一併進入下一階段。
                   </p>

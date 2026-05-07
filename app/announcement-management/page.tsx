@@ -241,10 +241,10 @@ export default function AnnouncementManagementPage() {
                                   <h4 className="font-medium text-sm text-gray-900 mb-1 leading-tight">
                                     {pendingCase.title}
                                   </h4>
-                                  <div className="flex flex-col gap-1 text-xs text-gray-600">
+                                  <div className="flex flex-col gap-1 text-sm text-gray-600">
                                     <span className="flex items-center gap-1">
                                       來源：
-                                      <Badge variant="outline" className="text-xs">
+                                      <Badge variant="outline" className="text-sm">
                                         {pendingCase.source}
                                       </Badge>
                                     </span>
@@ -269,7 +269,7 @@ export default function AnnouncementManagementPage() {
                                 href={`/announcement-management/create?caseId=${pendingCase.id}`}
                                 onClick={() => setPopoverOpen(false)}
                               >
-                                <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700">
+                                <Button size="sm" className="h-7 text-sm bg-amber-600 hover:bg-amber-700">
                                   <Plus className="w-3 h-3 mr-1" />
                                   建立公告
                                 </Button>
@@ -284,7 +284,7 @@ export default function AnnouncementManagementPage() {
                                 }
                                 onClick={() => setPopoverOpen(false)}
                               >
-                                <Button variant="outline" size="sm" className="h-7 text-xs bg-transparent">
+                                <Button variant="outline" size="sm" className="h-7 text-sm bg-transparent">
                                   <ExternalLink className="w-3 h-3 mr-1" />
                                   查看審查
                                 </Button>
