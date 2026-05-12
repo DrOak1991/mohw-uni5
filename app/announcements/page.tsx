@@ -38,10 +38,10 @@ export default function AnnouncementsPage() {
     })
 
   return (
-    <div className="container mx-auto py-6 px-3 sm:py-8 sm:px-4 max-w-7xl">
+    <div className="container mx-auto py-6 px-4 sm:py-8 max-w-6xl">
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">公告欄</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">瀏覽專科訓練認定、外加容額及甄審等相關公告與函釋</p>
+        <p className="text-base text-muted-foreground">瀏覽專科訓練認定、外加容額及甄審等相關公告與函釋</p>
       </div>
 
       {/* 搜尋列 */}
@@ -74,12 +74,12 @@ export default function AnnouncementsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="space-y-3 sm:space-y-4">
+        <TabsContent value={activeTab} className="space-y-4">
           {filteredAnnouncements.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">目前沒有相關公告</p>
+                <p className="text-base text-muted-foreground">目前沒有相關公告</p>
               </CardContent>
             </Card>
           ) : (
@@ -90,37 +90,37 @@ export default function AnnouncementsPage() {
                     announcement.isPinned ? "border-l-4 border-l-amber-500 bg-amber-50/30" : ""
                   }`}
                 >
-                  <CardHeader className="p-4 sm:p-6">
+                  <CardHeader className="p-5 pb-3">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-start gap-2 flex-wrap">
                           {announcement.isPinned && (
-                            <Pin className="h-4 w-4 text-amber-600 fill-amber-600 flex-shrink-0 mt-0.5" />
+                            <Pin className="h-4 w-4 text-amber-600 fill-amber-600 flex-shrink-0 mt-1" />
                           )}
-                          <CardTitle className="text-base sm:text-xl flex-1">{announcement.title}</CardTitle>
+                          <CardTitle className="text-lg sm:text-xl flex-1">{announcement.title}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           {announcement.isNew && (
-                            <Badge variant="destructive" className="text-xs">
+                            <Badge variant="destructive" className="text-sm">
                               NEW
                             </Badge>
                           )}
                           {announcement.isPinned && (
-                            <Badge className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200">置頂</Badge>
+                            <Badge className="text-sm bg-amber-100 text-amber-700 hover:bg-amber-200">置頂</Badge>
                           )}
                         </div>
-                        <CardDescription className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-wrap">
-                          <Badge variant="outline" className="text-xs">
+                        <CardDescription className="flex items-center gap-3 text-base flex-wrap">
+                          <Badge variant="outline" className="text-sm">
                             {categoryConfig[announcement.category as keyof typeof categoryConfig].label}
                           </Badge>
                           <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="h-4 w-4" />
                             {announcement.publishDate}
                           </span>
                           <span className="hidden sm:inline">發布單位：{announcement.publisher}</span>
                           {announcement.hasAttachments && (
                             <span className="flex items-center gap-1 text-blue-600">
-                              <FileText className="h-3 w-3" />
+                              <FileText className="h-4 w-4" />
                               附件 ({announcement.attachmentCount})
                             </span>
                           )}
@@ -128,8 +128,8 @@ export default function AnnouncementsPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{announcement.excerpt}</p>
+                  <CardContent className="px-5 pb-5 pt-0">
+                    <p className="text-base text-muted-foreground line-clamp-2">{announcement.excerpt}</p>
                   </CardContent>
                 </Card>
               </Link>

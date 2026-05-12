@@ -11,7 +11,7 @@ import Link from "next/link"
 export default function NewRoleTemplatePage() {
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* 返回連結 */}
         <Link
           href="/account/role-templates"
@@ -69,7 +69,7 @@ export default function NewRoleTemplatePage() {
             {/* 填報專區 */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-foreground border-b pb-2">填報專區</h3>
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">各類規範的填報功能</p>
+              <p className="text-sm text-muted-foreground -mt-2 mb-2">各類規範的填報功能</p>
               {[
                 {
                   id: "submission-general",
@@ -83,7 +83,7 @@ export default function NewRoleTemplatePage() {
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <Label className="text-sm font-medium">{item.name}</Label>
-                      {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                      {item.description && <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>}
                     </div>
                   </div>
                   <RadioGroup defaultValue="none" className="flex gap-4">
@@ -113,7 +113,7 @@ export default function NewRoleTemplatePage() {
             {/* 審查專區 */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold text-foreground border-b pb-2">審查專區</h3>
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">各類填報案件的審查與核定功能</p>
+              <p className="text-sm text-muted-foreground -mt-2 mb-2">各類填報案件的審查與核定功能</p>
               {[
                 {
                   id: "review-general",
@@ -127,7 +127,7 @@ export default function NewRoleTemplatePage() {
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <Label className="text-sm font-medium">{item.name}</Label>
-                      {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                      {item.description && <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>}
                     </div>
                   </div>
                   <RadioGroup defaultValue="none" className="flex gap-4">

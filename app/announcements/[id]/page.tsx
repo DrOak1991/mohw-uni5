@@ -26,7 +26,7 @@ export default function AnnouncementDetailPage({
   }
 
   return (
-    <div className="container mx-auto py-6 px-3 sm:py-8 sm:px-4 max-w-5xl">
+    <div className="container mx-auto py-6 px-4 sm:py-8 max-w-6xl">
       {/* 返回按鈕 */}
       <div className="mb-4 sm:mb-6">
         <Link href="/announcements">
@@ -42,7 +42,7 @@ export default function AnnouncementDetailPage({
       <Card className="mb-4 sm:mb-6">
         <CardHeader className="p-4 sm:p-6">
           <div className="space-y-3 sm:space-y-4">
-            <Badge variant="outline" className="w-fit text-xs sm:text-sm">
+            <Badge variant="outline" className="w-fit text-sm sm:text-sm">
               {categoryConfig[announcement.category].label}
             </Badge>
             <CardTitle className="text-xl sm:text-3xl leading-tight">{announcement.title}</CardTitle>
@@ -98,7 +98,7 @@ export default function AnnouncementDetailPage({
                     <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="font-medium truncate text-sm sm:text-base">{attachment.name}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
+                      <p className="text-sm sm:text-sm text-muted-foreground">
                         {attachment.size} · 上傳日期：{attachment.uploadDate}
                       </p>
                     </div>
@@ -133,7 +133,7 @@ export default function AnnouncementDetailPage({
                       <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
                       <span className="font-medium text-sm sm:text-base">{related.title}</span>
                     </div>
-                    <span className="text-xs sm:text-sm text-muted-foreground sm:flex-shrink-0 ml-7 sm:ml-0">
+                    <span className="text-sm sm:text-sm text-muted-foreground sm:flex-shrink-0 ml-7 sm:ml-0">
                       {related.date}
                     </span>
                   </div>

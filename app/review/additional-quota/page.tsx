@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ReviewSimpleNav } from "@/components/review/simple-nav"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -40,7 +39,7 @@ export default function AdditionalQuotaReviewPage() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-lg font-semibold text-gray-900">{app.hospitalName}</h3>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-sm">
                 {app.year}
               </Badge>
               <Badge className={statusConfig[app.status].color}>{statusConfig[app.status].label}</Badge>
@@ -82,13 +81,11 @@ export default function AdditionalQuotaReviewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <ReviewSimpleNav />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">外加容額審查</h1>
-            <p className="text-sm text-gray-500 mt-1">審查各醫院提交的外加容額申請</p>
+            <p className="text-base text-gray-500 mt-1">審查各醫院提交的外加容額申請</p>
           </div>
 
           <Button

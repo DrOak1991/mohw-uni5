@@ -25,7 +25,7 @@ export default function FilingItemManagementPage() {
   }
 
   const getFilingPeriod = (item: FilingItemConfig) => {
-    if (!item.openingDate) return "尚未設定"
+    if (!item.openingDate) return "未開放"
     const startDate = item.openingDate.split(" ")[0]
     const endDate = item.closingDate?.split(" ")[0]
     return `${startDate} ~ ${endDate}`
@@ -38,17 +38,10 @@ export default function FilingItemManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            返回首頁
-          </Link>
           <h1 className="text-2xl font-bold text-gray-900">填報項目管理</h1>
-          <p className="text-sm text-gray-500 mt-1">設定各填報項目的開放時間和狀態</p>
+          <p className="text-base text-gray-500 mt-1">設定各填報項目的開放時間和狀態</p>
         </div>
 
         {/* 文件填報管理 */}
@@ -58,10 +51,10 @@ export default function FilingItemManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">文件名稱</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
-                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">文件名稱</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
+                  <th className="text-right px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -85,12 +78,12 @@ export default function FilingItemManagementPage() {
                           onClick={() => handleSettingsClick(item)}
                         >
                           <Settings2 className="w-3.5 h-3.5" />
-                          <span className="text-xs">開放設定</span>
+                          <span className="text-sm">開放設定</span>
                         </Button>
                         <Button asChild variant="ghost" size="sm" className="gap-1.5 h-8">
                           <Link href={`/admin/outline-management/${item.id}`}>
                             <Pencil className="w-3.5 h-3.5" />
-                            <span className="text-xs">編輯大綱</span>
+                            <span className="text-sm">編輯大綱</span>
                           </Link>
                         </Button>
                       </div>
@@ -109,10 +102,10 @@ export default function FilingItemManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">項目名稱</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
-                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">項目名稱</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-28">狀態</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">填報期間</th>
+                  <th className="text-right px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wide w-40">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,7 +120,7 @@ export default function FilingItemManagementPage() {
                     <span className="text-sm text-gray-500">{getFilingPeriod(quotaFilingConfig)}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end">
+                    <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -135,7 +128,13 @@ export default function FilingItemManagementPage() {
                         onClick={() => handleSettingsClick(quotaFilingConfig)}
                       >
                         <Settings2 className="w-3.5 h-3.5" />
-                        <span className="text-xs">開放設定</span>
+                        <span className="text-sm">開放設定</span>
+                      </Button>
+                      <Button asChild variant="ghost" size="sm" className="gap-1.5 h-8">
+                        <Link href="/admin/society-quota-limit">
+                          <Pencil className="w-3.5 h-3.5" />
+                          <span className="text-sm">容額上限設定</span>
+                        </Link>
                       </Button>
                     </div>
                   </td>

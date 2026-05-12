@@ -185,13 +185,13 @@ export default function AnnouncementManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">公告管理</h1>
-              <p className="text-sm text-gray-600">管理系統公告的新增、編輯、發布與下架</p>
+              <p className="text-base text-gray-600">管理系統公告的新增、編輯、發布與下架</p>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/announcement-management/create">
@@ -241,10 +241,10 @@ export default function AnnouncementManagementPage() {
                                   <h4 className="font-medium text-sm text-gray-900 mb-1 leading-tight">
                                     {pendingCase.title}
                                   </h4>
-                                  <div className="flex flex-col gap-1 text-xs text-gray-600">
+                                  <div className="flex flex-col gap-1 text-sm text-gray-600">
                                     <span className="flex items-center gap-1">
                                       來源：
-                                      <Badge variant="outline" className="text-xs">
+                                      <Badge variant="outline" className="text-sm">
                                         {pendingCase.source}
                                       </Badge>
                                     </span>
@@ -269,7 +269,7 @@ export default function AnnouncementManagementPage() {
                                 href={`/announcement-management/create?caseId=${pendingCase.id}`}
                                 onClick={() => setPopoverOpen(false)}
                               >
-                                <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700">
+                                <Button size="sm" className="h-7 text-sm bg-amber-600 hover:bg-amber-700">
                                   <Plus className="w-3 h-3 mr-1" />
                                   建立公告
                                 </Button>
@@ -284,7 +284,7 @@ export default function AnnouncementManagementPage() {
                                 }
                                 onClick={() => setPopoverOpen(false)}
                               >
-                                <Button variant="outline" size="sm" className="h-7 text-xs bg-transparent">
+                                <Button variant="outline" size="sm" className="h-7 text-sm bg-transparent">
                                   <ExternalLink className="w-3 h-3 mr-1" />
                                   查看審查
                                 </Button>

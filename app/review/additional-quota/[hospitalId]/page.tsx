@@ -172,7 +172,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
     <div className="min-h-screen bg-gray-50">
       <ReviewSimpleNav />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild className="mb-4">
@@ -208,21 +208,21 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <Label className="text-xs font-medium text-gray-500">已核定容額</Label>
+                  <Label className="text-sm font-medium text-gray-500">已核定容額</Label>
                   <p className="mt-1 text-2xl font-bold text-gray-900">
                     {mockApplication.currentYearQuota.approved} 名
                   </p>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <Label className="text-xs font-medium text-gray-500">容額上限</Label>
+                  <Label className="text-sm font-medium text-gray-500">容額上限</Label>
                   <p className="mt-1 text-2xl font-bold text-gray-900">{mockApplication.currentYearQuota.limit} 名</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <Label className="text-xs font-medium text-gray-500">本次申請數</Label>
+                  <Label className="text-sm font-medium text-gray-500">本次申請數</Label>
                   <p className="mt-1 text-2xl font-bold text-blue-600">+{mockApplication.requestedQuota} 名</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <Label className="text-xs font-medium text-gray-500">核定後總容額</Label>
+                  <Label className="text-sm font-medium text-gray-500">核定後總容額</Label>
                   <p className={`mt-1 text-2xl font-bold ${exceedsLimit ? "text-red-600" : "text-green-600"}`}>
                     {totalAfterApproval} 名
                   </p>
@@ -282,7 +282,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
                         <FileText className="w-5 h-5 text-gray-400" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                          <p className="text-xs text-gray-500">{file.size}</p>
+                          <p className="text-sm text-gray-500">{file.size}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm">
@@ -328,7 +328,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
                         <FileText className="w-5 h-5 text-gray-400" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                          <p className="text-xs text-gray-500">{file.size}</p>
+                          <p className="text-sm text-gray-500">{file.size}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm">
@@ -346,7 +346,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
                     <FileText className="w-5 h-5 text-gray-400" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">{mockApplication.previousPeriod.report.name}</p>
-                      <p className="text-xs text-gray-500">{mockApplication.previousPeriod.report.size}</p>
+                      <p className="text-sm text-gray-500">{mockApplication.previousPeriod.report.size}</p>
                     </div>
                   </div>
                   <Button variant="ghost" size="sm">
@@ -371,7 +371,7 @@ export default function AdditionalQuotaReviewDetailPage({ params }: { params: { 
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="reviewComment">審查紀錄 *</Label>
+                <Label htmlFor="reviewComment">審���紀錄 *</Label>
                 <Textarea
                   id="reviewComment"
                   placeholder="請輸入審查紀錄..."

@@ -118,16 +118,6 @@ export default function FilingPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
-      <div className="container mx-auto px-6 pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center text-primary hover:underline text-sm"
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          返回首頁
-        </Link>
-      </div>
-
       <div className="container mx-auto px-6 py-4">
         <h1 className="text-2xl font-bold text-foreground">填報專區</h1>
         <p className="text-muted-foreground mt-1">內科醫學會 - 2025年度</p>
@@ -230,7 +220,7 @@ export default function FilingPage() {
               <Send className="h-4 w-4" />
               送件
               {submittableDocs.length > 0 && (
-                <span className="ml-1 bg-white/20 text-white text-xs px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 bg-white/20 text-white text-sm px-1.5 py-0.5 rounded-full">
                   {submittableDocs.length}
                 </span>
               )}
@@ -270,7 +260,7 @@ export default function FilingPage() {
                     />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{doc.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-sm text-muted-foreground mt-0.5">
                         送件期限：{doc.deadline}　狀態：
                         <span className={getStatusStyle(doc.status)}>{doc.status}</span>
                       </p>
@@ -319,7 +309,7 @@ export default function FilingPage() {
                 <p className="text-sm text-muted-foreground">
                   點擊或拖曳檔案至此處上傳
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   支援 .xlsx, .xls 格式
                 </p>
                 <Input
@@ -358,7 +348,7 @@ function QuotaFilingSection({
       id: 1,
       code: "0401180014",
       name: "台大醫院",
-      county: "台北市",
+      county: "台北���",
       district: "中山區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
@@ -529,7 +519,7 @@ function QuotaFilingSection({
                   <td className="px-4 py-4 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
                   <td className="px-4 py-4 font-medium whitespace-nowrap">
                     {hospital.groupId && (
-                      <span className="text-xs text-muted-foreground mr-1">[聯合]</span>
+                      <span className="text-sm text-muted-foreground mr-1">[聯合]</span>
                     )}
                     {hospital.name}
                   </td>
@@ -538,7 +528,7 @@ function QuotaFilingSection({
                       <div>
                         <span className="text-sm text-foreground">{hospital.county}</span>
                         {hospital.district && (
-                          <span className="text-xs text-muted-foreground ml-1">{hospital.district}</span>
+                          <span className="text-sm text-muted-foreground ml-1">{hospital.district}</span>
                         )}
                       </div>
                     ) : (
@@ -548,7 +538,7 @@ function QuotaFilingSection({
                   <td className="px-4 py-4 text-center whitespace-nowrap">
                     {hospital.status && (
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${hospital.statusColor}`}
+                        className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${hospital.statusColor}`}
                       >
                         {hospital.status}
                       </span>

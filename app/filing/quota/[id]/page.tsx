@@ -169,7 +169,7 @@ export default function QuotaEditPage({
                 }`}
               >
                 <div className="font-medium text-foreground">單一機構申請</div>
-                <div className="text-xs text-muted-foreground mt-1">僅由一間醫院申請</div>
+                <div className="text-sm text-muted-foreground mt-1">僅由一間醫院申請</div>
               </button>
               <button
                 type="button"
@@ -181,7 +181,7 @@ export default function QuotaEditPage({
                 }`}
               >
                 <div className="font-medium text-foreground">聯合申請</div>
-                <div className="text-xs text-muted-foreground mt-1">主訓與合作醫院聯合</div>
+                <div className="text-sm text-muted-foreground mt-1">主訓與合作醫院聯合</div>
               </button>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function QuotaEditPage({
                 min={1}
                 max={50}
               />
-              <p className="text-xs text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
+              <p className="text-sm text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
             </div>
 
             <div>
@@ -325,7 +325,7 @@ export default function QuotaEditPage({
                 min={1}
                 max={50}
               />
-              <p className="text-xs text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
+              <p className="text-sm text-muted-foreground mt-2">請輸入 1 ~ 50 之間的數值</p>
             </div>
           </div>
 

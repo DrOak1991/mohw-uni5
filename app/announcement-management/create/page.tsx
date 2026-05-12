@@ -96,7 +96,7 @@ export default function CreateAnnouncementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <Link href="/announcement-management">
@@ -106,7 +106,7 @@ export default function CreateAnnouncementPage() {
             </Button>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">新增公告</h1>
-          <p className="text-sm text-gray-600">填寫公告資訊並上傳相關附件</p>
+          <p className="text-base text-gray-600">填寫公告資訊並上傳相關附件</p>
         </div>
 
         <Form {...form}>
@@ -132,7 +132,7 @@ export default function CreateAnnouncementPage() {
                           {...field}
                         />
                       </FormControl>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         建議使用清楚說明年份與主題的標題，例如「115 年度專科醫師訓練計畫甄審原則修訂公告」。
                       </p>
                       <FormMessage />
@@ -287,7 +287,7 @@ export default function CreateAnnouncementPage() {
                   <p className="text-sm text-gray-600 mb-1">
                     點擊上傳或拖曳檔案至此區域
                   </p>
-                  <p className="text-xs text-gray-500">支援格式：PDF、Word、Excel 等</p>
+                  <p className="text-sm text-gray-500">支援格式：PDF、Word、Excel 等</p>
                 </label>
               </div>
 
@@ -302,7 +302,7 @@ export default function CreateAnnouncementPage() {
                         <FileText className="w-5 h-5 text-blue-600" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>

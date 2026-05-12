@@ -169,7 +169,7 @@ export default function RoleTemplatesPage() {
           <CardContent className="pt-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-yellow-900">角色模板管理提醒</p>
-              <ul className="text-xs text-yellow-700 space-y-1 list-disc list-inside">
+              <ul className="text-sm text-yellow-700 space-y-1 list-disc list-inside">
                 <li>系統預設模板無法刪除，但可以修改權限設定</li>
                 <li>修改模板權限不會影響已套用該模板的使用者</li>
                 <li>刪除自訂模板前，請確認沒有使用者正在使用</li>

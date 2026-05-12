@@ -112,7 +112,7 @@ export default function OutlineEditorPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* breadcrumb */}
         <Link
           href="/admin/outline-management"
@@ -190,7 +190,7 @@ export default function OutlineEditorPage({
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900">{v.version}</span>
                       {v.isCurrent && (
-                        <Badge className="bg-amber-500 text-white border-0 text-xs">
+                        <Badge className="bg-amber-500 text-white border-0 text-sm">
                           編輯中
                         </Badge>
                       )}

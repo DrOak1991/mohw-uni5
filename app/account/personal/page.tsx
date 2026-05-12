@@ -8,20 +8,11 @@ import Link from "next/link"
 export default function PersonalSettingsPage() {
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* 返回連結 */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          返回首頁
-        </Link>
-
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* 頁面標題 */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">個人設定</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理您的個人資料與密碼</p>
+          <p className="text-base text-muted-foreground mt-1">管理您的個人資料與密碼</p>
         </div>
 
         <div className="space-y-6">
@@ -74,7 +65,7 @@ export default function PersonalSettingsPage() {
                   新密碼 <span className="text-destructive">*</span>
                 </Label>
                 <Input id="new-password" type="password" placeholder="請輸入新密碼" />
-                <p className="text-xs text-muted-foreground">密碼需至少 8 個字元，包含大小寫字母與數字</p>
+                <p className="text-sm text-muted-foreground">密碼需至少 8 個字元，包含大小寫字母與數字</p>
               </div>
 
               <div className="space-y-2">

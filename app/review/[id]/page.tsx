@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, use } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -45,6 +46,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 
 import { TextDiffDisplay } from "@/components/filing/text-diff-display"
+import { getDocumentTypes, getStagesForDocumentType, getSocieties } from "@/lib/mock/review-submissions"
 
 // Mock data - this would come from the filing submission
 const previousYearData = [
@@ -126,24 +128,39 @@ const mockGroupReviewFiles = [
   { name: "分組審查意見彙整.docx", size: 512000, date: "2025-02-20" },
 ]
 
-const documentInfo = {
-  society: "內科醫學會",
-  documentType: "計畫認定基準", // Change this to test different document types
-  year: "114",
-  submittedDate: "2025-03-01",
-  currentStage: "rrc-review", // Change this to test different stages
-}
-
 export default function ReviewDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
+  
+  // 從 URL query params 取得文件類型和階段
+  const docTypeId = searchParams.get("docType") || "screening-principle"
+  const stage = searchParams.get("stage") || "pending-review"
+  
+  // 取得文件類型和階段的標籤
+  const documentTypes = getDocumentTypes()
+  const societies = getSocieties()
+  const docType = documentTypes.find((d) => d.id === docTypeId)
+  const stages = getStagesForDocumentType(docTypeId)
+  const stageInfo = stages.find((s) => s.value === stage)
+  const society = societies.find((s) => s.id === id)
+  
+  // Document info derived from query params
+  const documentInfo = {
+    society: society?.name || "內科醫學會",
+    documentType: docType?.shortName || "計畫認定基準",
+    year: "114",
+    submittedDate: "2025-03-01",
+    currentStage: stage,
+  }
 
   // Determine if this document has two-stage review
   const hasTwoStageReview = twoStageDocuments.includes(documentInfo.documentType)
-  const isRRCReviewStage = documentInfo.currentStage === "rrc-review"
+  const isRRCReviewStage = stage === "rrc-meeting"
+  const isGroupReviewStage = stage === "group-meeting"
   const showGroupReviewFiles = hasTwoStageReview && isRRCReviewStage
 
   const [expandedSections, setExpandedSections] = useState<string[]>(
@@ -246,17 +263,28 @@ export default function ReviewDetailPage({
               </Link>
               <div className="h-6 w-px bg-gray-200" />
               <div>
-                <h1 className="text-lg font-semibold">
-                  {documentInfo.society} - {documentInfo.documentType}
-                </h1>
-                <p className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-lg font-semibold">
+                    {documentInfo.society} - {documentInfo.documentType}
+                  </h1>
+                  <Badge className={`${
+                    stage === "pending-review" ? "bg-blue-100 text-blue-800" :
+                    stage === "group-meeting" ? "bg-purple-100 text-purple-800" :
+                    stage === "rrc-meeting" ? "bg-pink-100 text-pink-800" :
+                    stage === "pending-announcement" ? "bg-amber-100 text-amber-800" :
+                    "bg-green-100 text-green-800"
+                  }`}>
+                    {stageInfo?.label || stage}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
                   {documentInfo.year} 年度 | 提交日期：{documentInfo.submittedDate}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div>
-                <p className="text-xs text-gray-500 mb-1">審查結果</p>
+                <p className="text-sm text-gray-500 mb-1">審查結果</p>
                 <Badge
                   className={`${
                     reviewResult === "approved"
@@ -319,6 +347,47 @@ export default function ReviewDetailPage({
       </div>
 
       <div className="container mx-auto px-6 py-6">
+        {/* Stage-specific info banner */}
+        {isGroupReviewStage && (
+          <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-purple-900">分組會議審查階段</h3>
+                <p className="text-sm text-purple-700">請審閱醫學會提交的文件內容，並於右側記錄審查結果與評語。</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {isRRCReviewStage && (
+          <div className="mb-6 p-4 bg-pink-50 border border-pink-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-pink-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-pink-900">RRC 大會審核階段</h3>
+                <p className="text-sm text-pink-700">此案件已通過分組會議審查，請參考分組會議審查資料��行最終審核。</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {stage === "pending-announcement" && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-amber-900">待公告階段</h3>
+                <p className="text-sm text-amber-700">此案件已通過所有審查，等待正式公告。</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-4">
@@ -367,7 +436,7 @@ export default function ReviewDetailPage({
                             {/* Diff Display */}
                             {hasChanges && (
                               <div className="p-4 bg-muted/30 rounded-lg border">
-                                <div className="text-xs text-muted-foreground mb-2 flex items-center gap-4">
+                                <div className="text-sm text-muted-foreground mb-2 flex items-center gap-4">
                                   <span>變更比對：</span>
                                   <span className="flex items-center gap-1">
                                     <span className="inline-block w-3 h-3 bg-red-100 border border-red-200 rounded-sm" />
@@ -388,7 +457,7 @@ export default function ReviewDetailPage({
                             {/* Revision Note (from filing) */}
                             {section.revisionNote && (
                               <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                <p className="text-xs font-medium text-blue-700 mb-1">
+                                <p className="text-sm font-medium text-blue-700 mb-1">
                                   醫學會修訂說明
                                 </p>
                                 <p className="text-sm text-blue-900 whitespace-pre-wrap">
@@ -458,7 +527,7 @@ export default function ReviewDetailPage({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 選擇審查結果，文件會在批次推進時統一進入下一階段。
               </p>
             </div>
@@ -467,7 +536,7 @@ export default function ReviewDetailPage({
             {showGroupReviewFiles && (
               <div className="bg-white rounded-lg border shadow-sm p-4">
                 <Label className="text-sm font-medium">分組會議審查資料</Label>
-                <p className="text-xs text-muted-foreground mt-1 mb-3">
+                <p className="text-sm text-muted-foreground mt-1 mb-3">
                   以下為分組會議審查階段通過時上傳之相關文件
                 </p>
                 <div className="space-y-2">
@@ -479,7 +548,7 @@ export default function ReviewDetailPage({
                       <FileText className="h-4 w-4 text-purple-600 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {formatFileSize(file.size)} | {file.date}
                         </p>
                       </div>
@@ -519,7 +588,7 @@ export default function ReviewDetailPage({
             {/* Meeting Minutes Upload */}
             <div className="bg-white rounded-lg border shadow-sm p-4">
               <Label className="text-sm font-medium">
-                {isRRCReviewStage ? "RRC 大會會議記錄" : "會議記錄檔案"}
+                {isRRCReviewStage ? "RRC 大會會議記錄" : isGroupReviewStage ? "分組會議記錄" : "會議記錄檔案"}
               </Label>
               
               {/* Uploaded Files List */}
@@ -533,7 +602,7 @@ export default function ReviewDetailPage({
                       <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {formatFileSize(file.size)} | {file.date}
                         </p>
                       </div>
@@ -573,7 +642,7 @@ export default function ReviewDetailPage({
                     </span>
                   </Button>
                 </label>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   支援 PDF、Word、Excel 格式
                 </p>
               </div>
