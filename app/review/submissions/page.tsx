@@ -141,27 +141,27 @@ export default function SubmissionsReviewPage() {
                 <Card>
                   <CardContent className="p-6">
                     {/* 標題與目前階段 */}
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-900">{doc.name}</h2>
-                        <div className="flex items-center gap-3 mt-2">
+                    <div className="mb-6">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-2">{doc.name}</h2>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
                           <span className="text-base text-gray-600">目前階段：</span>
                           <Badge className={`${getStageColors()[docStage] || "bg-gray-100 text-gray-800"} text-base px-3 py-1`}>
                             {docStageLabel}
                           </Badge>
                         </div>
+                        {docHasNextStage && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={handleOpenAdvanceDialog}
+                          >
+                            <ArrowRight className="h-4 w-4" />
+                            推進至{docNextStageLabel}
+                          </Button>
+                        )}
                       </div>
-                      {docHasNextStage && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5"
-                          onClick={handleOpenAdvanceDialog}
-                        >
-                          <ArrowRight className="h-4 w-4" />
-                          推進至{docNextStageLabel}
-                        </Button>
-                      )}
                     </div>
 
                     {/* 案件列表 */}
@@ -272,7 +272,7 @@ export default function SubmissionsReviewPage() {
 
               {/* 勾選列表 */}
               {advanceStats.uploadedSocieties.length > 0 ? (
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-lg overflow-hidden max-h-64 overflow-y-auto">
                   {/* 全選 */}
                   <div
                     className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b cursor-pointer"
