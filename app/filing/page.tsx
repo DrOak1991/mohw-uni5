@@ -374,6 +374,28 @@ function QuotaFilingSection({
   const [selectedDisqualifiedHospital, setSelectedDisqualifiedHospital] = useState<string[]>([])
   const [disqualifiedReason, setDisqualifiedReason] = useState("")
 
+  // 新增未申請醫院 Dialog state
+  const [showAddNotAppliedDialog, setShowAddNotAppliedDialog] = useState(false)
+  const [selectedNotAppliedHospital, setSelectedNotAppliedHospital] = useState<string[]>([])
+  const [notAppliedPrevQualification, setNotAppliedPrevQualification] = useState("")
+  const [notAppliedReason, setNotAppliedReason] = useState("")
+  const [notAppliedHospitals, setNotAppliedHospitals] = useState([
+    {
+      id: 1,
+      code: "0401180021",
+      name: "仁愛醫院",
+      prevQualification: "具訓練資格",
+      reason: "人力異動，暫停訓練計畫申請",
+    },
+    {
+      id: 2,
+      code: "0401180022",
+      name: "和平醫院",
+      prevQualification: "具訓練資格",
+      reason: "機構評鑑期間，暫緩申請",
+    },
+  ])
+
   // 送件確認 Dialog state
   const [showSubmitConfirmDialog, setShowSubmitConfirmDialog] = useState(false)
 
@@ -498,7 +520,7 @@ function QuotaFilingSection({
   const totalApplied = mainRows.length
   const disqualifiedCount = disqualifiedHospitals.length
   const qualifiedCount = totalApplied - disqualifiedCount
-  const notAppliedCount = 0 // 未申請家數（mock 資料暫無此欄位）
+  const notAppliedCount = notAppliedHospitals.length
 
   // 合計（只計主列，不計子列）
   const mainHospitals = hospitals.filter((h) => !h.isSubRow)
@@ -767,7 +789,194 @@ function QuotaFilingSection({
         </div>
       </div>
 
-      {/* ���註區塊 */}
+      {/* 未申請醫院名單 */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-foreground">未申請醫院名單</h3>
+          <div className="flex items-center gap-3">
+            <Button
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              onClick={() => setShowAddNotAppliedDialog(true)}
+            >
+              <Plus className="h-4 w-4" />
+              新增未申請醫院
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={onOpenImport}
+            >
+              <Upload className="h-4 w-4" />
+              匯入名單
+            </Button>
+          </div>
+        </div>
+
+        {/* 新增未申請醫院 Dialog */}
+        <Dialog open={showAddNotAppliedDialog} onOpenChange={setShowAddNotAppliedDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>新增未申請醫院</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  選擇醫院 <span className="text-destructive">*</span>
+                </Label>
+                <HospitalMultiSelect
+                  hospitals={availableHospitals as Hospital[]}
+                  selected={selectedNotAppliedHospital}
+                  onSelect={setSelectedNotAppliedHospital}
+                  mode="single"
+                  triggerLabel="請選擇未申請醫院"
+                />
+                {selectedNotAppliedHospital.length > 0 && (
+                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      已選擇：<span className="font-medium text-foreground">
+                        {availableHospitals.find((h) => h.code === selectedNotAppliedHospital[0])?.name}
+                      </span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      醫事機構代碼：{selectedNotAppliedHospital[0]}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  前一年度訓練資格 <span className="text-destructive">*</span>
+                </Label>
+                <Select value={notAppliedPrevQualification} onValueChange={setNotAppliedPrevQualification}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="請選擇前一年度訓練資格" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="具訓練資格">具訓練資格</SelectItem>
+                    <SelectItem value="不具訓練資格">不具訓練資格</SelectItem>
+                    <SelectItem value="初次申請">初次申請</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  未申請原因 <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  value={notAppliedReason}
+                  onChange={(e) => setNotAppliedReason(e.target.value)}
+                  placeholder="請輸入未申請原因說明..."
+                  className="min-h-[120px]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddNotAppliedDialog(false)
+                  setSelectedNotAppliedHospital([])
+                  setNotAppliedPrevQualification("")
+                  setNotAppliedReason("")
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                className="bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                disabled={
+                  selectedNotAppliedHospital.length === 0 ||
+                  !notAppliedPrevQualification ||
+                  !notAppliedReason.trim()
+                }
+                onClick={() => {
+                  const hospital = availableHospitals.find(
+                    (h) => h.code === selectedNotAppliedHospital[0]
+                  )
+                  if (!hospital) return
+                  setNotAppliedHospitals((prev) => [
+                    ...prev,
+                    {
+                      id: prev.length + 1,
+                      code: hospital.code,
+                      name: hospital.name,
+                      prevQualification: notAppliedPrevQualification,
+                      reason: notAppliedReason,
+                    },
+                  ])
+                  setShowAddNotAppliedDialog(false)
+                  setSelectedNotAppliedHospital([])
+                  setNotAppliedPrevQualification("")
+                  setNotAppliedReason("")
+                }}
+              >
+                確認新增
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
+                <th className="px-4 py-3 text-left">序號</th>
+                <th className="px-4 py-3 text-left">醫事機構代碼</th>
+                <th className="px-4 py-3 text-left">訓練醫院全銜</th>
+                <th className="px-4 py-3 text-left">前一年度訓練資格</th>
+                <th className="px-4 py-3 text-left">未申請原因</th>
+                <th className="px-4 py-3 text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {notAppliedHospitals.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                    尚無未申請醫院資料，請點選「新增未申請醫院」或「匯入名單」
+                  </td>
+                </tr>
+              ) : (
+                notAppliedHospitals.map((hospital) => (
+                  <tr key={hospital.id}>
+                    <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
+                    <td className="px-4 py-4 text-muted-foreground">{hospital.code}</td>
+                    <td className="px-4 py-4 font-medium">{hospital.name}</td>
+                    <td className="px-4 py-4">
+                      <span className={`text-sm px-2 py-1 rounded-full ${
+                        hospital.prevQualification === "具訓練資格"
+                          ? "bg-green-50 text-green-700"
+                          : hospital.prevQualification === "不具訓練資格"
+                          ? "bg-red-50 text-red-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        {hospital.prevQualification}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
+                    <td className="px-4 py-4 text-center">
+                      <Button
+                        variant="link"
+                        className="text-destructive p-0 h-auto hover:text-destructive/80"
+                        onClick={() =>
+                          setNotAppliedHospitals((prev) =>
+                            prev
+                              .filter((h) => h.id !== hospital.id)
+                              .map((h, i) => ({ ...h, id: i + 1 }))
+                          )
+                        }
+                      >
+                        刪除
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 備註區塊 */}
       {(() => {
         // 自動備註：從 store 中有備註的非子列醫院
         const autoNotes = hospitals
