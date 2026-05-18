@@ -4,5 +4,9 @@
  */
 export const quotaNotesStore = {
   /** key = hospital id (string)，value = 備註內容 */
-  hospitalNotes: {} as Record<string, string>,
+  hospitalNotes: {
+    // Demo 資料：展示自動帶入備註的效果
+    "1": "台大醫院本年度申請新增合作醫院，實際容額上限請依最新核定公文為準。",
+    "4": "馬偕紀念醫院主訓醫師異動，已補件說明，請審查時參照補充文件。",
+  } as Record<string, string>,
 }

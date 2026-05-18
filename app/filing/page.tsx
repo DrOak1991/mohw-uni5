@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -95,7 +96,21 @@ const availableHospitals = [
 ]
 
 export default function FilingPage() {
-  const [activeTab, setActiveTab] = useState<string>("documents")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const tabParam = searchParams.get("tab")
+  const [activeTab, setActiveTab] = useState<string>(
+    tabParam === "quota" ? "quota" : "documents"
+  )
+
+  // 切換 tab 時同步更新 URL query string
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    const params = new URLSearchParams(Array.from(searchParams.entries()))
+    params.set("tab", value)
+    router.replace(`/filing?${params.toString()}`, { scroll: false })
+  }
+
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [selectedSubmitIds, setSelectedSubmitIds] = useState<string[]>([])
@@ -130,7 +145,7 @@ export default function FilingPage() {
       </div>
 
       <div className="container mx-auto px-6 pb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="mb-6 h-11">
             <TabsTrigger value="documents" className="text-base px-6">文件填報</TabsTrigger>
             <TabsTrigger value="quota" className="text-base px-6">容額填報</TabsTrigger>
@@ -395,7 +410,7 @@ function QuotaFilingSection({
       name: "長庚醫院",
       county: "台北市",
       district: "內湖區",
-      status: "效期屆滿",
+      status: "效��屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2024/7/31",
       extension: "4 年 (至 2028/7/31)",
@@ -785,10 +800,15 @@ function QuotaFilingSection({
                   )}
 
                   {/* 自動備註（來自醫院編輯頁） */}
+                  {autoNotes.length > 0 && (
+                    <div className="px-6 py-2 bg-blue-50 border-t border-blue-100 flex items-center gap-2">
+                      <span className="text-xs font-medium text-blue-500 uppercase tracking-wide">自動帶入（來自訓練醫院備註）</span>
+                    </div>
+                  )}
                   {autoNotes.map((item, idx) => (
-                    <div key={item.hospitalId} className="flex items-start gap-4 px-6 py-4 bg-blue-50/40">
-                      <span className="text-base font-medium text-muted-foreground w-6 shrink-0 pt-0.5">
-                        {manualNotes.length + (isAddingNote ? 0 : 0) + idx + 1}.
+                    <div key={item.hospitalId} className="flex items-start gap-4 px-6 py-4 bg-blue-50/30 border-l-2 border-blue-300">
+                      <span className="text-base font-medium text-blue-400 w-6 shrink-0 pt-0.5">
+                        {manualNotes.length + idx + 1}.
                       </span>
                       <p className="flex-1 text-base text-foreground whitespace-pre-wrap">{item.content}</p>
                       <Link
@@ -798,7 +818,7 @@ function QuotaFilingSection({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="gap-1.5 text-muted-foreground hover:text-foreground"
+                          className="gap-1.5 text-blue-400 hover:text-blue-700"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           前往編輯
