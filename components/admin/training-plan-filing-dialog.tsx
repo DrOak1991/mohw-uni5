@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -172,7 +172,7 @@ export function TrainingPlanFilingDialog({
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           {/* Global Period Section */}
           <div className="space-y-4 p-5 bg-blue-50 rounded-lg border border-blue-100">
-            <h3 className="font-semibold text-gray-900">全域填報期間</h3>
+            <h3 className="font-semibold text-gray-900">統一填報期間</h3>
             <p className="text-sm text-gray-600">
               以下未另行設定的醫學會，將套用此期間
             </p>
@@ -369,11 +369,12 @@ export function TrainingPlanFilingDialog({
                                   ) : (
                                     <Badge
                                       variant="outline"
-                                      className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50 shrink-0"
+                                      className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50 shrink-0 gap-1.5"
                                       onClick={() =>
                                         handleStartEditOverride(config.societyId)
                                       }
                                     >
+                                      <Pencil className="w-3 h-3" />
                                       統一填報期間
                                     </Badge>
                                   )}
