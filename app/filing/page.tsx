@@ -369,16 +369,32 @@ function QuotaFilingSection({
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingText, setEditingText] = useState("")
 
+  // 不合格醫院清單 state
+  const [disqualifiedHospitals, setDisqualifiedHospitals] = useState([
+    {
+      id: 1,
+      code: "0401180020",
+      name: "新光醫院",
+      reason: "未符合訓練醫院認證基準第3條：專任主治醫師人數不足",
+    },
+  ])
   // 新增不合格醫院 Dialog state
   const [showAddDisqualifiedDialog, setShowAddDisqualifiedDialog] = useState(false)
   const [selectedDisqualifiedHospital, setSelectedDisqualifiedHospital] = useState<string[]>([])
   const [disqualifiedReason, setDisqualifiedReason] = useState("")
+  // 編輯不合格醫院 Dialog state
+  const [editingDisqualifiedId, setEditingDisqualifiedId] = useState<number | null>(null)
+  const [editDisqualifiedReason, setEditDisqualifiedReason] = useState("")
 
   // 新增未申請醫院 Dialog state
   const [showAddNotAppliedDialog, setShowAddNotAppliedDialog] = useState(false)
   const [selectedNotAppliedHospital, setSelectedNotAppliedHospital] = useState<string[]>([])
   const [notAppliedPrevQualification, setNotAppliedPrevQualification] = useState("")
   const [notAppliedReason, setNotAppliedReason] = useState("")
+  // 編輯未申請醫院 Dialog state
+  const [editingNotAppliedId, setEditingNotAppliedId] = useState<number | null>(null)
+  const [editNotAppliedPrevQualification, setEditNotAppliedPrevQualification] = useState("")
+  const [editNotAppliedReason, setEditNotAppliedReason] = useState("")
   const [notAppliedHospitals, setNotAppliedHospitals] = useState([
     {
       id: 1,
@@ -401,7 +417,7 @@ function QuotaFilingSection({
 
   // groupId: null = 單獨申請，string = 聯合申請組合識別碼
   // 未來新增聯合申請組合只需指定相同 groupId 即可
-  const hospitals = [
+  const [hospitals, setHospitals] = useState([
     {
       id: 1,
       code: "0401180014",
@@ -486,7 +502,7 @@ function QuotaFilingSection({
       groupId: "group-a",
       isSubRow: true,
     },
-  ]
+  ])
 
   // 為每個不重複的 groupId 分配一個顏色，方便日後擴充多組聯合申請
   const groupColors: Record<string, string> = {}
@@ -503,15 +519,6 @@ function QuotaFilingSection({
       colorIndex++
     }
   }
-
-  const disqualifiedHospitals = [
-    {
-      id: 1,
-      code: "0401180020",
-      name: "新光醫院",
-      reason: "未符合訓練醫院認證基準第3條：專任主治醫師人數不足",
-    },
-  ]
 
   // 統計數字計算
   const mainRows = hospitals.filter((h) => !h.isSubRow)
@@ -641,13 +648,32 @@ function QuotaFilingSection({
                   <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.prevQuota}</td>
                   <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.currentQuota}</td>
                   <td className="px-4 py-4 text-center whitespace-nowrap">
-                    {!("isSubRow" in hospital && hospital.isSubRow) && (
-                      <Link href={`/filing/quota/${hospital.id}`}>
-                        <Button variant="link" className="text-primary p-0 h-auto">
-                          編輯
-                        </Button>
-                      </Link>
-                    )}
+                    <div className="flex items-center justify-center gap-3">
+                      {!("isSubRow" in hospital && hospital.isSubRow) && (
+                        <Link href={`/filing/quota/${hospital.id}`}>
+                          <Button variant="link" className="text-primary p-0 h-auto">
+                            編輯
+                          </Button>
+                        </Link>
+                      )}
+                      <Button
+                        variant="link"
+                        className="text-destructive p-0 h-auto hover:text-destructive/80"
+                        onClick={() => {
+                          setHospitals((prev) => {
+                            // 刪除此列；若為聯合申請主列，一併移除同 groupId 的子列
+                            const target = prev.find((h) => h.id === hospital.id)
+                            const groupId = target?.groupId
+                            return prev.filter((h) =>
+                              h.id !== hospital.id &&
+                              !(groupId && h.groupId === groupId && h.isSubRow)
+                            )
+                          })
+                        }}
+                      >
+                        刪除
+                      </Button>
+                    </div>
                   </td>
                 </tr>
                 )
@@ -759,6 +785,74 @@ function QuotaFilingSection({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* 編輯不合格醫院 Dialog */}
+        <Dialog
+          open={editingDisqualifiedId !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingDisqualifiedId(null)
+              setEditDisqualifiedReason("")
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>編輯不合格醫院</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {editingDisqualifiedId !== null && (() => {
+                const h = disqualifiedHospitals.find((h) => h.id === editingDisqualifiedId)
+                if (!h) return null
+                return (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium text-foreground">{h.name}</p>
+                    <p className="text-sm text-muted-foreground">醫事機構代碼：{h.code}</p>
+                  </div>
+                )
+              })()}
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  不合格原因 <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  value={editDisqualifiedReason}
+                  onChange={(e) => setEditDisqualifiedReason(e.target.value)}
+                  placeholder="請輸入不合格原因說明..."
+                  className="min-h-[120px]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingDisqualifiedId(null)
+                  setEditDisqualifiedReason("")
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                className="bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                disabled={!editDisqualifiedReason.trim()}
+                onClick={() => {
+                  setDisqualifiedHospitals((prev) =>
+                    prev.map((h) =>
+                      h.id === editingDisqualifiedId
+                        ? { ...h, reason: editDisqualifiedReason }
+                        : h
+                    )
+                  )
+                  setEditingDisqualifiedId(null)
+                  setEditDisqualifiedReason("")
+                }}
+              >
+                儲存
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="bg-card rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
             <thead>
@@ -778,9 +872,31 @@ function QuotaFilingSection({
                   <td className="px-4 py-4 font-medium">{hospital.name}</td>
                   <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
                   <td className="px-4 py-4 text-center">
-                    <Button variant="link" className="text-primary p-0 h-auto">
-                      編輯
-                    </Button>
+                    <div className="flex items-center justify-center gap-3">
+                      <Button
+                        variant="link"
+                        className="text-primary p-0 h-auto"
+                        onClick={() => {
+                          setEditingDisqualifiedId(hospital.id)
+                          setEditDisqualifiedReason(hospital.reason)
+                        }}
+                      >
+                        編輯
+                      </Button>
+                      <Button
+                        variant="link"
+                        className="text-destructive p-0 h-auto hover:text-destructive/80"
+                        onClick={() =>
+                          setDisqualifiedHospitals((prev) =>
+                            prev
+                              .filter((h) => h.id !== hospital.id)
+                              .map((h, i) => ({ ...h, id: i + 1 }))
+                          )
+                        }
+                      >
+                        刪除
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -916,6 +1032,99 @@ function QuotaFilingSection({
           </DialogContent>
         </Dialog>
 
+        {/* 編輯未申請醫院 Dialog */}
+        <Dialog
+          open={editingNotAppliedId !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingNotAppliedId(null)
+              setEditNotAppliedPrevQualification("")
+              setEditNotAppliedReason("")
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>編輯未申請醫院</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {editingNotAppliedId !== null && (() => {
+                const h = notAppliedHospitals.find((h) => h.id === editingNotAppliedId)
+                if (!h) return null
+                return (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium text-foreground">{h.name}</p>
+                    <p className="text-sm text-muted-foreground">醫事機構代碼：{h.code}</p>
+                  </div>
+                )
+              })()}
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  前一年度訓練資格 <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={editNotAppliedPrevQualification}
+                  onValueChange={setEditNotAppliedPrevQualification}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="請選擇前一年度訓練資格" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="具訓練資格">具訓練資格</SelectItem>
+                    <SelectItem value="不具訓練資格">不具訓練資格</SelectItem>
+                    <SelectItem value="初次申請">初次申請</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  未申請原因 <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  value={editNotAppliedReason}
+                  onChange={(e) => setEditNotAppliedReason(e.target.value)}
+                  placeholder="請輸入未申請原因說明..."
+                  className="min-h-[120px]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingNotAppliedId(null)
+                  setEditNotAppliedPrevQualification("")
+                  setEditNotAppliedReason("")
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                className="bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                disabled={!editNotAppliedPrevQualification || !editNotAppliedReason.trim()}
+                onClick={() => {
+                  setNotAppliedHospitals((prev) =>
+                    prev.map((h) =>
+                      h.id === editingNotAppliedId
+                        ? {
+                            ...h,
+                            prevQualification: editNotAppliedPrevQualification,
+                            reason: editNotAppliedReason,
+                          }
+                        : h
+                    )
+                  )
+                  setEditingNotAppliedId(null)
+                  setEditNotAppliedPrevQualification("")
+                  setEditNotAppliedReason("")
+                }}
+              >
+                儲存
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="bg-card rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
             <thead>
@@ -954,19 +1163,32 @@ function QuotaFilingSection({
                     </td>
                     <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
                     <td className="px-4 py-4 text-center">
-                      <Button
-                        variant="link"
-                        className="text-destructive p-0 h-auto hover:text-destructive/80"
-                        onClick={() =>
-                          setNotAppliedHospitals((prev) =>
-                            prev
-                              .filter((h) => h.id !== hospital.id)
-                              .map((h, i) => ({ ...h, id: i + 1 }))
-                          )
-                        }
-                      >
-                        刪除
-                      </Button>
+                      <div className="flex items-center justify-center gap-3">
+                        <Button
+                          variant="link"
+                          className="text-primary p-0 h-auto"
+                          onClick={() => {
+                            setEditingNotAppliedId(hospital.id)
+                            setEditNotAppliedPrevQualification(hospital.prevQualification)
+                            setEditNotAppliedReason(hospital.reason)
+                          }}
+                        >
+                          編輯
+                        </Button>
+                        <Button
+                          variant="link"
+                          className="text-destructive p-0 h-auto hover:text-destructive/80"
+                          onClick={() =>
+                            setNotAppliedHospitals((prev) =>
+                              prev
+                                .filter((h) => h.id !== hospital.id)
+                                .map((h, i) => ({ ...h, id: i + 1 }))
+                            )
+                          }
+                        >
+                          刪除
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
