@@ -657,24 +657,10 @@ export default function FilingDetailPage({
           <div className="flex items-center justify-end gap-3 pt-4">
             <Button variant="outline">返回</Button>
             {!isPreviousYearOnly && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-1">
-                    匯出檔案
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <FileText className="h-4 w-4 mr-2" />
-                    匯出 Word 檔
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileText className="h-4 w-4 mr-2" />
-                    匯出 PDF 檔
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" className="gap-1.5">
+                <FileText className="h-4 w-4" />
+                匯出 PDF
+              </Button>
             )}
             {!isReadOnly && !isPreviousYearOnly && (
               <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">
