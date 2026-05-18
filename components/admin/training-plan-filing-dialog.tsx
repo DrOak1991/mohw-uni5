@@ -352,39 +352,30 @@ export function TrainingPlanFilingDialog({
                                   </Button>
                                 </div>
                               ) : (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className={`text-sm ${hasOverride ? "text-gray-900" : "text-gray-400"}`}>
+                                    {period.start} ~ {period.end}
+                                  </span>
                                   {hasOverride ? (
-                                    <>
-                                      <span className="text-sm text-gray-900">
-                                        {period.start} ~ {period.end}
-                                      </span>
-                                      <Badge
-                                        variant="secondary"
-                                        className="text-xs cursor-pointer hover:bg-gray-200"
-                                        onClick={() =>
-                                          handleClearOverride(config.societyId)
-                                        }
-                                      >
-                                        個別設定 ✕
-                                      </Badge>
-                                    </>
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs cursor-pointer hover:bg-gray-200 shrink-0"
+                                      onClick={() =>
+                                        handleClearOverride(config.societyId)
+                                      }
+                                    >
+                                      個別設定 ✕
+                                    </Badge>
                                   ) : (
-                                    <>
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50"
-                                        onClick={() =>
-                                          handleStartEditOverride(
-                                            config.societyId
-                                          )
-                                        }
-                                      >
-                                        套用全域
-                                      </Badge>
-                                      <span className="text-xs text-gray-400">
-                                        {period.start} ~ {period.end}
-                                      </span>
-                                    </>
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50 shrink-0"
+                                      onClick={() =>
+                                        handleStartEditOverride(config.societyId)
+                                      }
+                                    >
+                                      統一填報期間
+                                    </Badge>
                                   )}
                                 </div>
                               )}
