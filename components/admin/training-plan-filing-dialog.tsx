@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -13,23 +14,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
+import { Label } from "@/components/ui/label"
 import { allSocieties } from "@/lib/data/societies"
-import { mockSocietyFilingConfigs } from "@/lib/mock/review-outline"
-import type { SocietyFilingConfig } from "@/lib/mock/review-outline"
+import { mockSocietyFilingConfigs, type SocietyFilingConfig } from "@/lib/mock/review-outline"
 
-interface TrainingPlanFilingDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface FilingPeriodOverride {
+  startDate?: string
+  endDate?: string
 }
 
-type SortField = "id" | "lastAnnouncedDate"
-type SortDir = "asc" | "desc"
+interface TrainingPlanState {
+  configs: SocietyFilingConfig[]
+  overrides: Record<string, FilingPeriodOverride>
+}
 
 const FOUR_YEARS_MS = 4 * 365 * 24 * 60 * 60 * 1000
 
 function isOverFourYears(dateStr: string | null): boolean {
-  if (!dateStr) return true
+  if (!dateStr) return false
   const parts = dateStr.split("/")
   const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
   return Date.now() - date.getTime() > FOUR_YEARS_MS
@@ -38,16 +40,63 @@ function isOverFourYears(dateStr: string | null): boolean {
 export function TrainingPlanFilingDialog({
   open,
   onOpenChange,
-}: TrainingPlanFilingDialogProps) {
-  const [configs, setConfigs] = useState<SocietyFilingConfig[]>(
-    () => JSON.parse(JSON.stringify(mockSocietyFilingConfigs))
-  )
-  const [search, setSearch] = useState("")
-  const [sortField, setSortField] = useState<SortField>("id")
-  const [sortDir, setSortDir] = useState<SortDir>("asc")
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  // Global period
+  const [globalStartDate, setGlobalStartDate] = useState("2025-09-03")
+  const [globalEndDate, setGlobalEndDate] = useState("2025-10-15")
 
-  // Toggle individual society
-  function toggleSociety(societyId: string) {
+  // Societies state
+  const [configs, setConfigs] = useState<SocietyFilingConfig[]>(() =>
+    JSON.parse(JSON.stringify(mockSocietyFilingConfigs))
+  )
+  const [overrides, setOverrides] = useState<Record<string, FilingPeriodOverride>>({})
+
+  // UI state
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<"id" | "announcedDate">("id")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+  const [editingOverride, setEditingOverride] = useState<string | null>(null)
+  const [tempOverrideStart, setTempOverrideStart] = useState("")
+  const [tempOverrideEnd, setTempOverrideEnd] = useState("")
+
+  // Get society name by id
+  const getSocietyName = (societyId: string) => {
+    return allSocieties.find((s) => s.id === societyId)?.name || societyId
+  }
+
+  // Filter and sort
+  const filteredConfigs = useMemo(() => {
+    let result = configs.filter((config) => {
+      const societyName = getSocietyName(config.societyId).toLowerCase()
+      return societyName.includes(searchTerm.toLowerCase())
+    })
+
+    result.sort((a, b) => {
+      let compareVal = 0
+      if (sortBy === "id") {
+        compareVal = Number(a.societyId) - Number(b.societyId)
+      } else {
+        const dateA = a.lastAnnouncedDate
+          ? new Date(a.lastAnnouncedDate).getTime()
+          : 0
+        const dateB = b.lastAnnouncedDate
+          ? new Date(b.lastAnnouncedDate).getTime()
+          : 0
+        compareVal = dateA - dateB
+      }
+      return sortOrder === "asc" ? compareVal : -compareVal
+    })
+
+    return result
+  }, [configs, searchTerm, sortBy, sortOrder])
+
+  const openCount = configs.filter((c) => c.isOpen).length
+
+  // Handlers
+  const handleToggleSociety = (societyId: string) => {
     setConfigs((prev) =>
       prev.map((c) =>
         c.societyId === societyId ? { ...c, isOpen: !c.isOpen } : c
@@ -55,213 +104,315 @@ export function TrainingPlanFilingDialog({
     )
   }
 
-  // Select all / deselect all (filtered)
-  function setAllFiltered(value: boolean) {
-    const filteredIds = new Set(filtered.map((r) => r.society.id))
-    setConfigs((prev) =>
-      prev.map((c) => (filteredIds.has(c.societyId) ? { ...c, isOpen: value } : c))
-    )
-  }
-
-  // Sort handler
-  function handleSort(field: SortField) {
-    if (sortField === field) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+  const handleToggleSort = (field: "id" | "announcedDate") => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field)
-      setSortDir("asc")
+      setSortBy(field)
+      setSortOrder("asc")
     }
   }
 
-  // Merge societies + configs
-  const rows = useMemo(() => {
-    return allSocieties.map((society) => {
-      const config = configs.find((c) => c.societyId === society.id)!
-      return { society, config }
-    })
-  }, [configs])
-
-  // Filter by search
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return rows.filter(
-      (r) =>
-        !q ||
-        r.society.name.toLowerCase().includes(q) ||
-        r.society.specialty.toLowerCase().includes(q)
-    )
-  }, [rows, search])
-
-  // Sort
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      let cmp = 0
-      if (sortField === "id") {
-        cmp = Number(a.society.id) - Number(b.society.id)
-      } else {
-        const da = a.config.lastAnnouncedDate
-        const db = b.config.lastAnnouncedDate
-        if (!da && !db) cmp = 0
-        else if (!da) cmp = 1
-        else if (!db) cmp = -1
-        else cmp = da < db ? -1 : da > db ? 1 : 0
-      }
-      return sortDir === "asc" ? cmp : -cmp
-    })
-  }, [filtered, sortField, sortDir])
-
-  const openCount = filtered.filter((r) => r.config.isOpen).length
-  const allOpen = openCount === filtered.length && filtered.length > 0
-  const allClosed = openCount === 0
-
-  function SortIcon({ field }: { field: SortField }) {
-    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 opacity-40" />
-    return sortDir === "asc"
-      ? <ArrowUp className="w-3.5 h-3.5" />
-      : <ArrowDown className="w-3.5 h-3.5" />
+  const handleSelectAll = (value: boolean) => {
+    setConfigs((prev) => prev.map((c) => ({ ...c, isOpen: value })))
   }
 
-  function handleSave() {
-    onOpenChange(false)
+  const handleStartEditOverride = (societyId: string) => {
+    const current = getPeriod(societyId)
+    setTempOverrideStart(current.start)
+    setTempOverrideEnd(current.end)
+    setEditingOverride(societyId)
+  }
+
+  const handleSaveOverride = (societyId: string) => {
+    setOverrides((prev) => ({
+      ...prev,
+      [societyId]: {
+        startDate: tempOverrideStart,
+        endDate: tempOverrideEnd,
+      },
+    }))
+    setEditingOverride(null)
+  }
+
+  const handleClearOverride = (societyId: string) => {
+    setOverrides((prev) => {
+      const newOverrides = { ...prev }
+      delete newOverrides[societyId]
+      return newOverrides
+    })
+  }
+
+  const getPeriod = (societyId: string) => {
+    const override = overrides[societyId]
+    if (override?.startDate) {
+      return {
+        start: override.startDate,
+        end: override.endDate || globalEndDate,
+        isOverride: true,
+      }
+    }
+    return {
+      start: globalStartDate,
+      end: globalEndDate,
+      isOverride: false,
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col gap-0 p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>訓練計畫認定基準——開放設定</DialogTitle>
           <DialogDescription>
-            針對各醫學會分別設定是否開放填報，可參考前次公告時間進行判斷
+            設定全域填報期間，並針對各醫學會分別設定是否開放填報
           </DialogDescription>
         </DialogHeader>
 
-        {/* Toolbar */}
-        <div className="px-6 py-3 border-b bg-gray-50 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="搜尋醫學會名稱或專科..."
-                className="pl-9 h-9 text-sm"
-              />
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          {/* Global Period Section */}
+          <div className="space-y-4 p-5 bg-blue-50 rounded-lg border border-blue-100">
+            <h3 className="font-semibold text-gray-900">全域填報期間</h3>
+            <p className="text-sm text-gray-600">
+              以下未另行設定的醫學會，將套用此期間
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  開始日期
+                </Label>
+                <Input
+                  type="date"
+                  value={globalStartDate}
+                  onChange={(e) => setGlobalStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  結束日期
+                </Label>
+                <Input
+                  type="date"
+                  value={globalEndDate}
+                  onChange={(e) => setGlobalEndDate(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+          </div>
+
+          {/* Societies Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-gray-900">醫學會開放設定</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  已開放 {openCount} / {configs.length} 個醫學會
+                </p>
+              </div>
+            </div>
+
+            {/* Search and quick actions */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="搜尋醫學會..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 text-sm"
-                disabled={allOpen}
-                onClick={() => setAllFiltered(true)}
+                onClick={() => handleSelectAll(true)}
               >
                 全選開放
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 text-sm"
-                disabled={allClosed}
-                onClick={() => setAllFiltered(false)}
+                onClick={() => handleSelectAll(false)}
               >
                 全選關閉
               </Button>
             </div>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-sm text-muted-foreground">
-              已開放 <span className="font-semibold text-foreground">{openCount}</span> / {filtered.length} 個醫學會
-              {search && <span className="ml-1">（搜尋結果）</span>}
-            </span>
+
+            {/* Legend */}
             <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
               橘色標示：距前次公告已超過 4 年
+            </div>
+
+            {/* Table */}
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="w-12 px-5 py-3 text-left font-semibold text-gray-700">
+                      開放
+                    </th>
+                    <th className="px-5 py-3 text-left font-semibold text-gray-700">
+                      醫學會名稱
+                    </th>
+                    <th
+                      className="px-5 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleToggleSort("announcedDate")}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>前次公告時間</span>
+                        {sortBy === "announcedDate" && (
+                          sortOrder === "asc" ? (
+                            <ArrowUp className="w-4 h-4" />
+                          ) : (
+                            <ArrowDown className="w-4 h-4" />
+                          )
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-5 py-3 text-left font-semibold text-gray-700">
+                      填報期間
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredConfigs.map((config) => {
+                    const isOld = isOverFourYears(config.lastAnnouncedDate)
+                    const period = getPeriod(config.societyId)
+                    const hasOverride = !!overrides[config.societyId]
+                    const isEditing = editingOverride === config.societyId
+
+                    return (
+                      <tr
+                        key={config.societyId}
+                        className={`border-t ${
+                          isOld ? "bg-amber-50" : ""
+                        } ${hasOverride ? "bg-blue-50/30" : ""}`}
+                      >
+                        <td className="px-5 py-3">
+                          <Switch
+                            checked={config.isOpen}
+                            onCheckedChange={() =>
+                              handleToggleSociety(config.societyId)
+                            }
+                          />
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className="font-medium text-gray-900">
+                            {getSocietyName(config.societyId)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          {config.lastAnnouncedDate ? (
+                            <span
+                              className={
+                                isOld
+                                  ? "text-amber-700 font-medium"
+                                  : "text-gray-600"
+                              }
+                            >
+                              {config.lastAnnouncedDate}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground italic">
+                              從未公告
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3">
+                          {config.isOpen ? (
+                            <div>
+                              {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="date"
+                                    value={tempOverrideStart}
+                                    onChange={(e) =>
+                                      setTempOverrideStart(e.target.value)
+                                    }
+                                    className="h-8 text-sm flex-1"
+                                  />
+                                  <span className="text-gray-400">~</span>
+                                  <Input
+                                    type="date"
+                                    value={tempOverrideEnd}
+                                    onChange={(e) =>
+                                      setTempOverrideEnd(e.target.value)
+                                    }
+                                    className="h-8 text-sm flex-1"
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleSaveOverride(config.societyId)
+                                    }
+                                    className="text-xs h-8"
+                                  >
+                                    完成
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  {hasOverride ? (
+                                    <>
+                                      <span className="text-sm text-gray-900">
+                                        {period.start} ~ {period.end}
+                                      </span>
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs cursor-pointer hover:bg-gray-200"
+                                        onClick={() =>
+                                          handleClearOverride(config.societyId)
+                                        }
+                                      >
+                                        個別設定 ✕
+                                      </Badge>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50"
+                                        onClick={() =>
+                                          handleStartEditOverride(
+                                            config.societyId
+                                          )
+                                        }
+                                      >
+                                        套用全域
+                                      </Badge>
+                                      <span className="text-xs text-gray-400">
+                                        {period.start} ~ {period.end}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-y-auto">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-white border-b">
-              <tr>
-                <th className="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wide text-xs w-10">
-                  <button
-                    onClick={() => handleSort("id")}
-                    className="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                  >
-                    #
-                    <SortIcon field="id" />
-                  </button>
-                </th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wide text-xs">
-                  醫學會名稱
-                </th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wide text-xs w-40">
-                  <button
-                    onClick={() => handleSort("lastAnnouncedDate")}
-                    className="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                  >
-                    前次公告時間
-                    <SortIcon field="lastAnnouncedDate" />
-                  </button>
-                </th>
-                <th className="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wide text-xs w-28">
-                  開放狀態
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sorted.map(({ society, config }) => {
-                const stale = isOverFourYears(config.lastAnnouncedDate)
-                return (
-                  <tr
-                    key={society.id}
-                    className={stale ? "bg-amber-50 hover:bg-amber-100/70" : "hover:bg-gray-50"}
-                  >
-                    <td className="px-5 py-3 text-gray-400 text-xs">{society.id}</td>
-                    <td className="px-5 py-3">
-                      <div className="font-medium text-gray-900">{society.name}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{society.specialty}</div>
-                    </td>
-                    <td className="px-5 py-3">
-                      {config.lastAnnouncedDate ? (
-                        <span className={stale ? "text-amber-700 font-medium" : "text-gray-600"}>
-                          {config.lastAnnouncedDate}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground italic">從未公告</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <Switch
-                          checked={config.isOpen}
-                          onCheckedChange={() => toggleSociety(society.id)}
-                          aria-label={`${society.name} 開放狀態`}
-                        />
-                        <Badge
-                          className={
-                            config.isOpen
-                              ? "bg-green-100 text-green-800 border-green-200 text-xs"
-                              : "bg-gray-100 text-gray-500 border-gray-200 text-xs"
-                          }
-                        >
-                          {config.isOpen ? "開放" : "關閉"}
-                        </Badge>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <DialogFooter className="px-6 py-4 border-t bg-gray-50 shrink-0">
+        <DialogFooter className="px-6 py-4 border-t bg-gray-50">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button onClick={handleSave} className="bg-primary">
+          <Button
+            className="bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+            onClick={() => {
+              // TODO: Save settings (globalStartDate, globalEndDate, configs, overrides)
+              onOpenChange(false)
+            }}
+          >
             儲存設定
           </Button>
         </DialogFooter>
