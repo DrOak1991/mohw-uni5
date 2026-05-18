@@ -85,7 +85,7 @@ export default function HospitalQuotaDetailPage({
               <Badge className={stageConfig[society.stage].color}>
                 {stageConfig[society.stage].label}
               </Badge>
-              <span className="text-sm text-gray-500">送件日期：{society.submittedDate}</span>
+              <span className="text-base text-gray-500">送件日期：{society.submittedDate}</span>
             </div>
           </div>
         </div>
@@ -101,10 +101,10 @@ export default function HospitalQuotaDetailPage({
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-base text-gray-600">
                     會議日期：<span className="font-medium text-gray-900">{groupReviewData.meetingDate}</span>
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-base text-gray-600">
                     審查決議：<Badge variant="outline" className="ml-1 bg-green-50 text-green-700 border-green-200">{groupReviewData.decision}</Badge>
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export default function HospitalQuotaDetailPage({
                   </Button>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-base text-gray-500">
                 檔案：{groupReviewData.meetingRecord}
               </p>
             </CardContent>
@@ -157,7 +157,7 @@ export default function HospitalQuotaDetailPage({
                       <TableCell className="text-muted-foreground whitespace-nowrap">
                         {!hospital.isSubRow ? hospital.id : ""}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                      <TableCell className="text-muted-foreground whitespace-nowrap">
                         {hospital.code}
                       </TableCell>
                       <TableCell className="font-medium">
@@ -199,8 +199,8 @@ export default function HospitalQuotaDetailPage({
                           <Badge className={hospital.statusColor}>{hospital.status}</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{hospital.expiry}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{hospital.extension}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">{hospital.expiry}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">{hospital.extension}</TableCell>
                       <TableCell className="text-center font-medium">
                         {hospital.limit !== null ? hospital.limit : "-"}
                       </TableCell>
@@ -238,7 +238,7 @@ export default function HospitalQuotaDetailPage({
                   {disqualifiedHospitals.map((hospital) => (
                     <TableRow key={hospital.id}>
                       <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{hospital.code}</TableCell>
+                      <TableCell className="text-muted-foreground">{hospital.code}</TableCell>
                       <TableCell className="font-medium">{hospital.name}</TableCell>
                       <TableCell className="text-muted-foreground">{hospital.reason}</TableCell>
                     </TableRow>
@@ -271,10 +271,10 @@ export default function HospitalQuotaDetailPage({
               <Label>上傳會議記錄</Label>
               <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer">
                 <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   點擊或拖曳檔案至此處上傳
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-base text-muted-foreground mt-1">
                   支援 PDF、DOC、DOCX 格式
                 </p>
               </div>

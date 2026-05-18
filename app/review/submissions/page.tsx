@@ -92,9 +92,9 @@ export default function SubmissionsReviewPage() {
           onValueChange={setActiveDocumentType}
           className="w-full"
         >
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 h-11">
             {documentTypes.map((doc) => (
-              <TabsTrigger key={doc.id} value={doc.id}>
+              <TabsTrigger key={doc.id} value={doc.id} className="text-base px-5">
                 {doc.shortName}
               </TabsTrigger>
             ))}
@@ -117,8 +117,8 @@ export default function SubmissionsReviewPage() {
                       <div>
                         <h2 className="text-lg font-semibold text-gray-900">{doc.name}</h2>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-sm text-gray-600">目前階段：</span>
-                          <Badge className={`${getStageColors()[docStage] || "bg-gray-100 text-gray-800"} text-sm px-3 py-1`}>
+                          <span className="text-base text-gray-600">目前階段：</span>
+                          <Badge className={`${getStageColors()[docStage] || "bg-gray-100 text-gray-800"} text-base px-3 py-1`}>
                             {docStageLabel}
                           </Badge>
                         </div>
@@ -170,24 +170,24 @@ export default function SubmissionsReviewPage() {
                                 </TableCell>
                                 <TableCell>
                                   {submission.uploaded ? (
-                                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1 text-base text-gray-600">
                                       <Clock className="w-4 h-4" />
                                       {submission.uploadedDate}
                                     </div>
                                   ) : (
-                                    <span className="text-sm text-gray-400">未上傳</span>
+                                    <span className="text-base text-gray-400">未上傳</span>
                                   )}
                                 </TableCell>
                                 <TableCell>
                                   {submission.uploaded ? (
                                     getReviewResultBadge(submission.reviewResult, submission.uploaded)
                                   ) : (
-                                    <span className="text-sm text-gray-400">-</span>
+                                    <span className="text-base text-gray-400">-</span>
                                   )}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   {submission.uploaded ? (
-                                    <Button asChild size="sm">
+                                    <Button asChild>
                                       <Link
                                         href={`/review/${submission.societyId}?docType=${activeDocumentType}&stage=${currentDocumentStage}`}
                                         className="flex items-center gap-2"
@@ -197,7 +197,7 @@ export default function SubmissionsReviewPage() {
                                       </Link>
                                     </Button>
                                   ) : (
-                                    <span className="text-sm text-gray-400">等待醫學會上傳</span>
+                                    <span className="text-base text-gray-400">等待醫學會上傳</span>
                                   )}
                                 </TableCell>
                               </TableRow>
@@ -221,7 +221,7 @@ export default function SubmissionsReviewPage() {
             </DialogHeader>
             <div className="py-2 space-y-4">
               <div>
-                <p className="text-sm text-gray-600">
+                <p className="text-base text-gray-600">
                   即將推進 <span className="font-medium">{documentTypes.find((d) => d.id === activeDocumentType)?.name}</span> 至{" "}
                   <span className="font-medium">{nextStageLabel}</span>
                 </p>
@@ -229,7 +229,7 @@ export default function SubmissionsReviewPage() {
 
               {/* 送件狀態統計 */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700">送件狀態</p>
+                <p className="text-base font-medium text-gray-700">送件狀態</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
@@ -256,17 +256,17 @@ export default function SubmissionsReviewPage() {
 
               {/* 審查狀態統計 */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700">審查狀態</p>
+                <p className="text-base font-medium text-gray-700">審查狀態</p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <span className="text-sm text-green-700">已審查通過</span>
+                    <span className="text-base text-green-700">已審查通過</span>
                     <Badge className="bg-green-100 text-green-700">{advanceStats.approved.count} 件</Badge>
                   </div>
                   <div className={`flex items-center justify-between p-3 border rounded-lg ${advanceStats.needsRevision.count > 0 ? "bg-orange-50 border-orange-200" : "bg-gray-50 border-gray-200"}`}>
                     <div>
-                      <span className={`text-sm ${advanceStats.needsRevision.count > 0 ? "text-orange-700" : "text-gray-600"}`}>需補件</span>
+                      <span className={`text-base ${advanceStats.needsRevision.count > 0 ? "text-orange-700" : "text-gray-600"}`}>需補件</span>
                       {advanceStats.needsRevision.count > 0 && (
-                        <p className="text-sm text-orange-600 mt-0.5">
+                        <p className="text-base text-orange-600 mt-0.5">
                           {advanceStats.needsRevision.societies.slice(0, 3).join("、")}
                           {advanceStats.needsRevision.societies.length > 3 && `...等`}
                         </p>
@@ -278,9 +278,9 @@ export default function SubmissionsReviewPage() {
                   </div>
                   <div className={`flex items-center justify-between p-3 border rounded-lg ${advanceStats.pendingReview.count > 0 ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-200"}`}>
                     <div>
-                      <span className={`text-sm ${advanceStats.pendingReview.count > 0 ? "text-amber-700" : "text-gray-600"}`}>尚未審查</span>
+                      <span className={`text-base ${advanceStats.pendingReview.count > 0 ? "text-amber-700" : "text-gray-600"}`}>尚未審查</span>
                       {advanceStats.pendingReview.count > 0 && (
-                        <p className="text-sm text-amber-600 mt-0.5">
+                        <p className="text-base text-amber-600 mt-0.5">
                           {advanceStats.pendingReview.societies.slice(0, 3).join("、")}
                           {advanceStats.pendingReview.societies.length > 3 && `...等`}
                         </p>
@@ -296,8 +296,8 @@ export default function SubmissionsReviewPage() {
               {/* 警告提示 */}
               {(advanceStats.notUploaded.count > 0 || advanceStats.pendingReview.count > 0) && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-sm text-amber-700">
-                    <AlertCircle className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />
+                  <p className="text-base text-amber-700">
+                    <AlertCircle className="h-4 w-4 inline-block mr-1 -mt-0.5" />
                     有 {advanceStats.notUploaded.count + advanceStats.pendingReview.count} 件案件尚未完成送件或審查，推進後這些案件將一併進入下一階段。
                   </p>
                 </div>
