@@ -22,12 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   FileText,
   Edit3,
   Send,
@@ -35,7 +29,6 @@ import {
   Upload,
   Download,
   Plus,
-  ChevronDown,
   Pencil,
   Trash2,
   Check,
@@ -369,6 +362,15 @@ function QuotaFilingSection({
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingText, setEditingText] = useState("")
 
+  // 新增不合格醫院 Dialog state
+  const [showAddDisqualifiedDialog, setShowAddDisqualifiedDialog] = useState(false)
+  const [disqualifiedHospitalCode, setDisqualifiedHospitalCode] = useState("")
+  const [disqualifiedHospitalName, setDisqualifiedHospitalName] = useState("")
+  const [disqualifiedReason, setDisqualifiedReason] = useState("")
+
+  // 送件確認 Dialog state
+  const [showSubmitConfirmDialog, setShowSubmitConfirmDialog] = useState(false)
+
   // groupId: null = 單獨申請，string = 聯合申請組合識別碼
   // 未來新增聯合申請組合只需指定相同 groupId 即可
   const hospitals = [
@@ -376,7 +378,7 @@ function QuotaFilingSection({
       id: 1,
       code: "0401180014",
       name: "台大醫院",
-      county: "台北���",
+      county: "台北市",
       district: "中山區",
       status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
@@ -410,7 +412,7 @@ function QuotaFilingSection({
       name: "長庚醫院",
       county: "台北市",
       district: "內湖區",
-      status: "效��屆滿",
+      status: "效期屆滿",
       statusColor: "bg-yellow-100 text-yellow-700",
       expiry: "有效至 2024/7/31",
       extension: "4 年 (至 2028/7/31)",
@@ -495,8 +497,54 @@ function QuotaFilingSection({
     },
   ]
 
+  // 統計數字計算
+  const mainRows = hospitals.filter((h) => !h.isSubRow)
+  const mainTrainingCount = mainRows.filter((h) => !h.groupId).length
+  const cooperationCount = mainRows.reduce((acc, h) => acc + (h.partnerHospitalCodes?.length ?? 0), 0)
+  const totalApplied = mainRows.length
+  const disqualifiedCount = disqualifiedHospitals.length
+  const qualifiedCount = totalApplied - disqualifiedCount
+  const notAppliedCount = 0 // 未申請家數（mock 資料暫無此欄位）
+
   return (
     <div className="space-y-8">
+      {/* 訓練醫院申請家數統計 */}
+      <div className="bg-card rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-bold text-foreground mb-4">訓練醫院申請家數</h3>
+        <div className="grid grid-cols-3 gap-4">
+          {/* 申請家數 */}
+          <div className="rounded-lg border border-blue-200 overflow-hidden bg-blue-50">
+            <div className="px-5 py-4">
+              <p className="text-sm text-blue-600 mb-1">申請家數</p>
+              <p className="text-3xl font-bold text-blue-700">{totalApplied}</p>
+              <p className="text-sm text-blue-600/70 mt-1.5">
+                {mainTrainingCount} 家主訓、{cooperationCount} 家合作
+              </p>
+            </div>
+            {/* 合格 / 不合格 子分類 */}
+            <div className="grid grid-cols-2 divide-x divide-blue-200 border-t border-blue-200">
+              <div className="px-4 py-3 bg-green-50/80">
+                <p className="text-sm text-green-600 mb-0.5">合格</p>
+                <p className="text-xl font-bold text-green-700">{qualifiedCount}</p>
+              </div>
+              <div className={`px-4 py-3 ${disqualifiedCount > 0 ? "bg-red-50/80" : "bg-gray-50/60"}`}>
+                <p className={`text-sm mb-0.5 ${disqualifiedCount > 0 ? "text-red-600" : "text-gray-500"}`}>不合格</p>
+                <p className={`text-xl font-bold ${disqualifiedCount > 0 ? "text-red-700" : "text-gray-400"}`}>{disqualifiedCount}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 未申請家數 */}
+          <div className={`rounded-lg border px-5 py-4 flex flex-col justify-center ${notAppliedCount > 0 ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-100"}`}>
+            <p className={`text-sm mb-1 ${notAppliedCount > 0 ? "text-amber-600" : "text-gray-500"}`}>未申請家數</p>
+            <p className={`text-3xl font-bold ${notAppliedCount > 0 ? "text-amber-700" : "text-gray-400"}`}>{notAppliedCount}</p>
+          </div>
+
+          {/* 佔位 - 保持三欄對齊 */}
+          <div></div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">訓練醫院名單與容額分配</h2>
         <div className="flex items-center gap-3">
@@ -600,7 +648,10 @@ function QuotaFilingSection({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
           <div className="flex items-center gap-3">
-            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+            <Button
+              className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+              onClick={() => setShowAddDisqualifiedDialog(true)}
+            >
               <Plus className="h-4 w-4" />
               新增不合格醫院
             </Button>
@@ -614,6 +665,93 @@ function QuotaFilingSection({
             </Button>
           </div>
         </div>
+
+        {/* 新增不合格醫院 Dialog */}
+        <Dialog open={showAddDisqualifiedDialog} onOpenChange={setShowAddDisqualifiedDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>新增不合格醫院</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-muted-foreground mb-2 block">
+                    醫事機構代碼 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    value={disqualifiedHospitalCode}
+                    onChange={(e) => setDisqualifiedHospitalCode(e.target.value)}
+                    placeholder="輸入醫事機構代碼"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm text-muted-foreground mb-2 block">
+                    訓練醫院全銜 <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    value={disqualifiedHospitalName}
+                    onChange={(e) => setDisqualifiedHospitalName(e.target.value)}
+                    placeholder="輸入醫院名稱"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-2 block">
+                  不合格原因 <span className="text-destructive">*</span>
+                </Label>
+                <Select value={disqualifiedReason} onValueChange={setDisqualifiedReason}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇不合格原因" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="未符合訓練醫院認證基準第1條：未具有衛生福利部教學醫院評鑑合格">
+                      未符合訓練醫院認證基準第1條：未具有衛生福利部教學醫院評鑑合格
+                    </SelectItem>
+                    <SelectItem value="未符合訓練醫院認證基準第2條：主訓練醫院未通過基準二專科專任主治醫師人數">
+                      未符合訓練醫院認證基準第2條：主訓練醫院未通過基準二專科專任主治醫師人數
+                    </SelectItem>
+                    <SelectItem value="未符合訓練醫院認證基準第3條：專任主治醫師人數不足">
+                      未符合訓練醫院認證基準第3條：專任主治醫師人數不足
+                    </SelectItem>
+                    <SelectItem value="未符合訓練醫院認證基準第4條：訓練設施或設備不符規定">
+                      未符合訓練醫院認證基準第4條：訓練設施或設備不符規定
+                    </SelectItem>
+                    <SelectItem value="未符合訓練醫院認證基準第5條：訓練計畫內容不符規定">
+                      未符合訓練醫院認證基準第5條：訓練計畫內容不符規定
+                    </SelectItem>
+                    <SelectItem value="其他">其他</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddDisqualifiedDialog(false)
+                  setDisqualifiedHospitalCode("")
+                  setDisqualifiedHospitalName("")
+                  setDisqualifiedReason("")
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                className="bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                disabled={!disqualifiedHospitalCode || !disqualifiedHospitalName || !disqualifiedReason}
+                onClick={() => {
+                  // TODO: 實際新增邏輯
+                  setShowAddDisqualifiedDialog(false)
+                  setDisqualifiedHospitalCode("")
+                  setDisqualifiedHospitalName("")
+                  setDisqualifiedReason("")
+                }}
+              >
+                確認新增
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <div className="bg-card rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
             <thead>
@@ -833,27 +971,65 @@ function QuotaFilingSection({
         )
       })()}
 
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              匯出檔案
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <FileText className="h-4 w-4 mr-2" />
-              匯出 Word 檔
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FileText className="h-4 w-4 mr-2" />
-              匯出 PDF 檔
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="flex justify-end gap-3">
+        <Button variant="outline" className="gap-2">
+          <Download className="h-4 w-4" />
+          匯出 PDF
+        </Button>
+        <Button variant="outline" className="gap-2">
+          暫時儲存
+        </Button>
+        <Button
+          className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+          onClick={() => setShowSubmitConfirmDialog(true)}
+        >
+          <Send className="h-4 w-4" />
+          儲存並送件
+        </Button>
       </div>
+
+      {/* 送件確認 Dialog */}
+      <Dialog open={showSubmitConfirmDialog} onOpenChange={setShowSubmitConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>確認送件</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-base text-muted-foreground">
+              送件後，容額填報資料將進入審查流程，在審查結果公告前將無法進行修改。
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-base text-amber-700 font-medium mb-2">送件內容確認</p>
+              <ul className="text-base text-amber-700 space-y-1">
+                <li>申請家數：{totalApplied} 家</li>
+                <li>不合格家數：{disqualifiedCount} 家</li>
+                <li>備註：{manualNotes.length + hospitals.filter((h) => !h.isSubRow && quotaNotesStore.hospitalNotes[String(h.id)]).length} 則</li>
+              </ul>
+            </div>
+            <p className="text-base text-muted-foreground">
+              請確認以上資料無誤後，點擊「確認送件」完成提交。
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSubmitConfirmDialog(false)}
+            >
+              取消
+            </Button>
+            <Button
+              className="bg-[#2d3a8c] hover:bg-[#252f73] text-white gap-2"
+              onClick={() => {
+                // TODO: 實際送件邏輯
+                setShowSubmitConfirmDialog(false)
+              }}
+            >
+              <Send className="h-4 w-4" />
+              確認送件
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
