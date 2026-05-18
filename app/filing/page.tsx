@@ -1200,13 +1200,30 @@ function QuotaFilingSection({
 
       {/* 備註區塊 */}
       {(() => {
-        // 自動備註：從 store 中有備註的非子列醫院
-        const autoNotes = hospitals
+        // 自動備註 1：從 store 中有備註的非子列醫院
+        const hospitalAutoNotes = hospitals
           .filter((h) => !h.isSubRow && quotaNotesStore.hospitalNotes[String(h.id)])
           .map((h) => ({
+            type: "hospital" as const,
             hospitalId: String(h.id),
             content: quotaNotesStore.hospitalNotes[String(h.id)],
           }))
+
+        // 自動備註 2：不合格醫院名單 — 每筆產生一則「{醫院名}{不合格原因}」
+        const disqualifiedAutoNotes = disqualifiedHospitals.map((h) => ({
+          type: "disqualified" as const,
+          hospitalId: String(h.id),
+          content: `${h.name}${h.reason}`,
+        }))
+
+        // 自動備註 3：未申請醫院名單 — 每筆產生一則「{醫院名}未申請原因：{reason}」
+        const notAppliedAutoNotes = notAppliedHospitals.map((h) => ({
+          type: "notApplied" as const,
+          hospitalId: String(h.id),
+          content: `${h.name}未申請原因：${h.reason}`,
+        }))
+
+        const autoNotes = [...hospitalAutoNotes, ...disqualifiedAutoNotes, ...notAppliedAutoNotes]
 
         const handleAddNote = () => {
           if (!newNoteText.trim()) return
@@ -1353,33 +1370,37 @@ function QuotaFilingSection({
                     </div>
                   )}
 
-                  {/* 自動備註（來自醫院編輯頁） */}
+                  {/* 自動備註（來自各名單自動合併） */}
                   {autoNotes.length > 0 && (
                     <div className="px-6 py-2 bg-blue-50 border-t border-blue-100 flex items-center gap-2">
-                      <span className="text-xs font-medium text-blue-500 uppercase tracking-wide">自動帶入（來自訓練醫院備註）</span>
+                      <span className="text-xs font-medium text-blue-500 uppercase tracking-wide">自動帶入</span>
                     </div>
                   )}
-                  {autoNotes.map((item, idx) => (
-                    <div key={item.hospitalId} className="flex items-start gap-4 px-6 py-4 bg-blue-50/30 border-l-2 border-blue-300">
-                      <span className="text-base font-medium text-blue-400 w-6 shrink-0 pt-0.5">
-                        {manualNotes.length + idx + 1}.
-                      </span>
-                      <p className="flex-1 text-base text-foreground whitespace-pre-wrap">{item.content}</p>
-                      <Link
-                        href={`/filing/quota/${item.hospitalId}`}
-                        className="shrink-0"
-                      >
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1.5 text-blue-400 hover:text-blue-700"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                          前往編輯
-                        </Button>
-                      </Link>
-                    </div>
-                  ))}
+                  {autoNotes.map((item, idx) => {
+                    const sourceLabel =
+                      item.type === "hospital" ? "訓練醫院備註" :
+                      item.type === "disqualified" ? "不合格醫院名單" :
+                      "未申請醫院名單"
+                    return (
+                      <div key={`${item.type}-${item.hospitalId}`} className="flex items-start gap-4 px-6 py-4 bg-blue-50/30 border-l-2 border-blue-300">
+                        <span className="text-base font-medium text-blue-400 w-6 shrink-0 pt-0.5">
+                          {manualNotes.length + idx + 1}.
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base text-foreground whitespace-pre-wrap">{item.content}</p>
+                          <span className="text-xs text-blue-400 mt-0.5 block">{sourceLabel}</span>
+                        </div>
+                        {item.type === "hospital" && (
+                          <Link href={`/filing/quota/${item.hospitalId}`} className="shrink-0">
+                            <Button variant="ghost" size="sm" className="gap-1.5 text-blue-400 hover:text-blue-700">
+                              <Pencil className="h-3.5 w-3.5" />
+                              前往編輯
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -1419,7 +1440,7 @@ function QuotaFilingSection({
               <ul className="text-base text-amber-700 space-y-1">
                 <li>申請家數：{totalApplied} 家</li>
                 <li>不合格家數：{disqualifiedCount} 家</li>
-                <li>備註：{manualNotes.length + hospitals.filter((h) => !h.isSubRow && quotaNotesStore.hospitalNotes[String(h.id)]).length} 則</li>
+                <li>備註：{manualNotes.length + hospitals.filter((h) => !h.isSubRow && quotaNotesStore.hospitalNotes[String(h.id)]).length + disqualifiedHospitals.length + notAppliedHospitals.length} 則</li>
               </ul>
             </div>
             <p className="text-base text-muted-foreground">
