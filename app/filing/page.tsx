@@ -694,7 +694,7 @@ function QuotaFilingSection({
         </div>
       </div>
 
-      <div>
+      <div id="disqualified-section">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
           <div className="flex items-center gap-3">
@@ -906,9 +906,9 @@ function QuotaFilingSection({
       </div>
 
       {/* 未申請醫院名單 */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-foreground">未申請醫院名單</h3>
+      <div id="not-applied-section">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-foreground">未申請醫院名單</h3>
           <div className="flex items-center gap-3">
             <Button
               className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
@@ -1332,7 +1332,7 @@ function QuotaFilingSection({
                     </div>
                   ))}
 
-                  {/* 新增輸入列 */}
+                  {/* 新增輸入列：序號跟在最後一筆手動備註後 */}
                   {isAddingNote && (
                     <div className="flex items-start gap-4 px-6 py-4 bg-muted/20">
                       <span className="text-base font-medium text-muted-foreground w-6 shrink-0 pt-0.5">
@@ -1370,7 +1370,8 @@ function QuotaFilingSection({
                     </div>
                   )}
 
-                  {/* 自動備註（來自各名單自動合併） */}
+                  {/* 自動備註（來自各名單自動合併）
+                      序號基底 = 手動備註數，不計入 isAddingNote 佔位 */}
                   {autoNotes.length > 0 && (
                     <div className="px-6 py-2 bg-blue-50 border-t border-blue-100 flex items-center gap-2">
                       <span className="text-xs font-medium text-blue-500 uppercase tracking-wide">自動帶入</span>
@@ -1381,6 +1382,10 @@ function QuotaFilingSection({
                       item.type === "hospital" ? "訓練醫院備註" :
                       item.type === "disqualified" ? "不合格醫院名單" :
                       "未申請醫院名單"
+                    const editHref =
+                      item.type === "hospital" ? `/filing/quota/${item.hospitalId}` :
+                      item.type === "disqualified" ? `#disqualified-${item.hospitalId}` :
+                      `#not-applied-${item.hospitalId}`
                     return (
                       <div key={`${item.type}-${item.hospitalId}`} className="flex items-start gap-4 px-6 py-4 bg-blue-50/30 border-l-2 border-blue-300">
                         <span className="text-base font-medium text-blue-400 w-6 shrink-0 pt-0.5">
@@ -1390,13 +1395,41 @@ function QuotaFilingSection({
                           <p className="text-base text-foreground whitespace-pre-wrap">{item.content}</p>
                           <span className="text-xs text-blue-400 mt-0.5 block">{sourceLabel}</span>
                         </div>
-                        {item.type === "hospital" && (
-                          <Link href={`/filing/quota/${item.hospitalId}`} className="shrink-0">
+                        {item.type === "hospital" ? (
+                          <Link href={editHref} className="shrink-0">
                             <Button variant="ghost" size="sm" className="gap-1.5 text-blue-400 hover:text-blue-700">
                               <Pencil className="h-3.5 w-3.5" />
                               前往編輯
                             </Button>
                           </Link>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-blue-400 hover:text-blue-700 shrink-0"
+                            onClick={() => {
+                              const el = document.getElementById(
+                                item.type === "disqualified"
+                                  ? `disqualified-section`
+                                  : `not-applied-section`
+                              )
+                              el?.scrollIntoView({ behavior: "smooth" })
+                              if (item.type === "disqualified") {
+                                setEditingDisqualifiedId(Number(item.hospitalId))
+                                setEditDisqualifiedReason(
+                                  disqualifiedHospitals.find((h) => String(h.id) === item.hospitalId)?.reason ?? ""
+                                )
+                              } else {
+                                const h = notAppliedHospitals.find((h) => String(h.id) === item.hospitalId)
+                                setEditingNotAppliedId(Number(item.hospitalId))
+                                setEditNotAppliedPrevQualification(h?.prevQualification ?? "")
+                                setEditNotAppliedReason(h?.reason ?? "")
+                              }
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            前往編輯
+                          </Button>
                         )}
                       </div>
                     )
