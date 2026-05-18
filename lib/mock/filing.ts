@@ -11,6 +11,7 @@ export interface HospitalQuotaRow {
   id: number | string
   code: string
   name: string
+  county?: string
   status: string
   statusColor: string
   expiry: string
@@ -19,6 +20,7 @@ export interface HospitalQuotaRow {
   prevQuota: number | null
   currentQuota: number | null
   isSubRow?: boolean
+  note?: string
 }
 
 export interface DisqualifiedHospitalRow {

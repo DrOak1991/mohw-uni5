@@ -35,9 +35,15 @@ import {
   Download,
   Plus,
   ChevronDown,
+  Pencil,
+  Trash2,
+  Check,
+  X as XIcon,
 } from "lucide-react"
 import Link from "next/link"
+import { Textarea } from "@/components/ui/textarea"
 import { filingItemsConfig } from "@/lib/mock/review-outline"
+import { quotaNotesStore } from "@/lib/stores/quota-notes-store"
 
 // 從 filingItemsConfig 建立開放狀態查詢表
 const filingStatusMap = Object.fromEntries(
@@ -341,6 +347,13 @@ function QuotaFilingSection({
   availableHospitals: { code: string; name: string }[]
   onOpenImport: () => void
 }) {
+  // 備註相關 state
+  const [manualNotes, setManualNotes] = useState<string[]>([])
+  const [isAddingNote, setIsAddingNote] = useState(false)
+  const [newNoteText, setNewNoteText] = useState("")
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState("")
+
   // groupId: null = 單獨申請，string = 聯合申請組合識別碼
   // 未來新增聯合申請組合只需指定相同 groupId 即可
   const hospitals = [
@@ -496,8 +509,8 @@ function QuotaFilingSection({
               <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
                 <th className="px-4 py-3 text-left whitespace-nowrap w-12">序號</th>
                 <th className="px-4 py-3 text-left whitespace-nowrap w-36">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left whitespace-nowrap">主訓醫院</th>
-                <th className="px-4 py-3 text-left whitespace-nowrap w-28">縣市 / 行政區</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">訓練醫院全銜</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap w-24">醫院所在地</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-24">狀態</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-36">效期</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap w-40">延長效期</th>
@@ -521,16 +534,14 @@ function QuotaFilingSection({
                     {hospital.groupId && (
                       <span className="text-muted-foreground mr-1">[聯合]</span>
                     )}
+                    {quotaNotesStore.hospitalNotes[String(hospital.id)] && (
+                      <span className="text-destructive mr-0.5" title="此醫院有備註">*</span>
+                    )}
                     {hospital.name}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     {hospital.county ? (
-                      <div>
-                        <span className="text-foreground">{hospital.county}</span>
-                        {hospital.district && (
-                          <span className="text-muted-foreground ml-1">{hospital.district}</span>
-                        )}
-                      </div>
+                      <span className="text-foreground">{hospital.county}</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
@@ -594,7 +605,7 @@ function QuotaFilingSection({
               <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
                 <th className="px-4 py-3 text-left">序號</th>
                 <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left">主訓醫院</th>
+                <th className="px-4 py-3 text-left">訓練醫院全銜</th>
                 <th className="px-4 py-3 text-left">不合格原因</th>
                 <th className="px-4 py-3 text-center">操作</th>
               </tr>
@@ -617,6 +628,190 @@ function QuotaFilingSection({
           </table>
         </div>
       </div>
+
+      {/* 備註區塊 */}
+      {(() => {
+        // 自動備註：從 store 中有備註的非子列醫院
+        const autoNotes = hospitals
+          .filter((h) => !h.isSubRow && quotaNotesStore.hospitalNotes[String(h.id)])
+          .map((h) => ({
+            hospitalId: String(h.id),
+            content: quotaNotesStore.hospitalNotes[String(h.id)],
+          }))
+
+        const handleAddNote = () => {
+          if (!newNoteText.trim()) return
+          const updated = [...manualNotes, newNoteText.trim()]
+          setManualNotes(updated)
+          setNewNoteText("")
+          setIsAddingNote(false)
+        }
+
+        const handleDeleteManual = (idx: number) => {
+          setManualNotes((prev) => prev.filter((_, i) => i !== idx))
+        }
+
+        const handleSaveEdit = (idx: number) => {
+          if (!editingText.trim()) return
+          setManualNotes((prev) => prev.map((n, i) => (i === idx ? editingText.trim() : n)))
+          setEditingIndex(null)
+          setEditingText("")
+        }
+
+        const totalCount = manualNotes.length + autoNotes.length
+
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-foreground">備註</h3>
+              {!isAddingNote && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => setIsAddingNote(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  新增備註
+                </Button>
+              )}
+            </div>
+
+            <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+              {totalCount === 0 && !isAddingNote ? (
+                <div className="px-6 py-10 text-center text-base text-muted-foreground">
+                  目前沒有備註，點擊「新增備註」手動加入，或在訓練醫院編輯頁面填寫備註後自動帶入。
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {/* 手動備註 */}
+                  {manualNotes.map((note, idx) => (
+                    <div key={idx} className="flex items-start gap-4 px-6 py-4">
+                      <span className="text-base font-medium text-muted-foreground w-6 shrink-0 pt-0.5">
+                        {idx + 1}.
+                      </span>
+                      {editingIndex === idx ? (
+                        <div className="flex-1 space-y-2">
+                          <Textarea
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            className="text-base min-h-[72px]"
+                            autoFocus
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => { setEditingIndex(null); setEditingText("") }}
+                            >
+                              <XIcon className="h-3.5 w-3.5" />
+                              取消
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="gap-1 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                              onClick={() => handleSaveEdit(idx)}
+                              disabled={!editingText.trim()}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              儲存
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="flex-1 text-base text-foreground whitespace-pre-wrap">{note}</p>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1.5 text-muted-foreground hover:text-foreground"
+                              onClick={() => { setEditingIndex(idx); setEditingText(note) }}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              編輯
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-1.5 text-muted-foreground hover:text-destructive"
+                              onClick={() => handleDeleteManual(idx)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              刪除
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* 新增輸入列 */}
+                  {isAddingNote && (
+                    <div className="flex items-start gap-4 px-6 py-4 bg-muted/20">
+                      <span className="text-base font-medium text-muted-foreground w-6 shrink-0 pt-0.5">
+                        {manualNotes.length + 1}.
+                      </span>
+                      <div className="flex-1 space-y-2">
+                        <Textarea
+                          value={newNoteText}
+                          onChange={(e) => setNewNoteText(e.target.value)}
+                          placeholder="輸入備註內容..."
+                          className="text-base min-h-[72px]"
+                          autoFocus
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1"
+                            onClick={() => { setIsAddingNote(false); setNewNoteText("") }}
+                          >
+                            <XIcon className="h-3.5 w-3.5" />
+                            取消
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="gap-1 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                            onClick={handleAddNote}
+                            disabled={!newNoteText.trim()}
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                            確認
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 自動備註（來自醫院編輯頁） */}
+                  {autoNotes.map((item, idx) => (
+                    <div key={item.hospitalId} className="flex items-start gap-4 px-6 py-4 bg-blue-50/40">
+                      <span className="text-base font-medium text-muted-foreground w-6 shrink-0 pt-0.5">
+                        {manualNotes.length + (isAddingNote ? 0 : 0) + idx + 1}.
+                      </span>
+                      <p className="flex-1 text-base text-foreground whitespace-pre-wrap">{item.content}</p>
+                      <Link
+                        href={`/filing/quota/${item.hospitalId}`}
+                        className="shrink-0"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 text-muted-foreground hover:text-foreground"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          前往編輯
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       <div className="flex justify-end">
         <DropdownMenu>

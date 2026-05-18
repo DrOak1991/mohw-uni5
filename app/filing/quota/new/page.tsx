@@ -14,6 +14,7 @@ import {
 import { ChevronLeft, X, Save } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Textarea } from "@/components/ui/textarea"
 import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital-multi-select"
 
 const availableHospitals: Hospital[] = [
@@ -44,6 +45,7 @@ export default function NewQuotaPage() {
   const [extensionYears, setExtensionYears] = useState("0")
   const [quotaLimit, setQuotaLimit] = useState("")
   const [currentQuota, setCurrentQuota] = useState("")
+  const [note, setNote] = useState("")
 
   const removeMainHospital = (hospitalCode: string) => {
     setSelectedMainHospitals((prev) => prev.filter((code) => code !== hospitalCode))
@@ -270,6 +272,21 @@ export default function NewQuotaPage() {
                 />
                 <p className="text-sm text-muted-foreground mt-1">請輸入 1 ~ 50 之間的數值</p>
               </div>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-lg p-6 shadow-sm">
+            <h2 className="font-semibold text-foreground mb-4">備註</h2>
+            <div>
+              <Label className="text-sm text-muted-foreground mb-2 block">
+                備註內容（選填）
+              </Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="輸入此訓練醫院的特殊說明，將自動彙整至填報頁面備註區塊"
+                className="text-base min-h-[100px]"
+              />
             </div>
           </div>
 
