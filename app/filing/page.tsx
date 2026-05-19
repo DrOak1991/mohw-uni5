@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -90,6 +90,14 @@ const availableHospitals = [
 ]
 
 export default function FilingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f7fa] p-8 text-center text-muted-foreground">載入中...</div>}>
+      <FilingPageContent />
+    </Suspense>
+  )
+}
+
+function FilingPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get("tab")
