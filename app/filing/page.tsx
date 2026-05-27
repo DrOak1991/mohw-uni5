@@ -622,7 +622,7 @@ function QuotaFilingSection({
       </div>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-foreground">訓練醫院認定合格名單及訓練容額</h2>
+        <h2 className="text-xl font-bold text-foreground">專科醫師訓練醫院認定合格名冊及訓練容量</h2>
         <div className="flex items-center gap-3">
           <Link href={variant ? `/filing/quota/new?variant=${variant}` : "/filing/quota/new"}>
             <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
@@ -641,24 +641,26 @@ function QuotaFilingSection({
         </div>
       </div>
 
-      <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
+        {/* 右側漸層陰影提示可橫向滑動 */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-card to-transparent z-10" />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px]">
+          <table className="w-full min-w-[900px]">
             <thead>
-              <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
-                <th className="px-4 py-3 text-left whitespace-nowrap w-12">編號</th>
-                <th className="px-4 py-3 text-left whitespace-nowrap w-36">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left whitespace-nowrap">醫院名稱</th>
-                <th className="px-4 py-3 text-left whitespace-nowrap w-24">醫院所在地</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-36">資格效期</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-40">延長效期</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-24">
+              <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
+                {/* 固定首兩欄：編號 + 醫院名稱 */}
+                <th className="px-2 py-2.5 text-left whitespace-nowrap w-10 sticky left-0 bg-muted/50 z-20">編號</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap min-w-[120px] sticky left-10 bg-muted/50 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">醫院名稱</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">醫事機構代碼</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">所在地</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">前年度核定</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="inline-flex items-center gap-1 cursor-default">
+                        <span className="inline-flex items-center gap-0.5 cursor-default">
                           可收訓容額
-                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
+                          <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs text-sm" side="top">
@@ -667,61 +669,64 @@ function QuotaFilingSection({
                     </Tooltip>
                   </TooltipProvider>
                 </th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-28">前年度核定容額</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-24">建議分配容額</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap w-16">操作</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">建議分配</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">資格效期</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">延長效期</th>
+                <th className="px-2 py-2.5 text-center whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {hospitals.map((hospital) => {
                 const groupStyle = hospital.groupId ? groupColors[hospital.groupId] : ""
+                // 移除「有效至」前綴
+                const expiryDate = hospital.expiry?.replace("有效至 ", "") || "—"
                 return (
                 <tr
                   key={hospital.id}
                   className={`hover:bg-muted/30 ${groupStyle ? `border-l-4 ${groupStyle}` : ""}`}
                 >
-                  <td className="px-4 py-4 text-muted-foreground whitespace-nowrap">{hospital.id}</td>
-                  <td className="px-4 py-4 text-muted-foreground whitespace-nowrap">{hospital.code}</td>
-                  <td className="px-4 py-4 font-medium whitespace-nowrap">
+                  {/* 固定首兩欄 */}
+                  <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap sticky left-0 bg-card z-10">{hospital.id}</td>
+                  <td className="px-2 py-3 text-sm font-medium whitespace-nowrap sticky left-10 bg-card z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
                     {hospital.groupId && (
-                      <span className="text-muted-foreground mr-1">[聯合]</span>
+                      <span className="text-muted-foreground mr-1">[聯]</span>
                     )}
                     {quotaNotesStore.hospitalNotes[String(hospital.id)] && (
                       <span className="text-destructive mr-0.5" title="此醫院有備註">*</span>
                     )}
                     {hospital.name}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                  <td className="px-2 py-3 text-sm whitespace-nowrap">
                     {hospital.county ? (
                       <span className="text-foreground">{hospital.county}</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-center text-muted-foreground whitespace-nowrap">
-                    {hospital.expiry}
+                  <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.prevQuota}</td>
+                  <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.limit}</td>
+                  <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.currentQuota}</td>
+                  <td className="px-2 py-3 text-sm text-center text-muted-foreground whitespace-nowrap">
+                    {expiryDate}
                   </td>
-                  <td className="px-4 py-4 text-center text-muted-foreground whitespace-nowrap">
+                  <td className="px-2 py-3 text-sm text-center text-muted-foreground whitespace-nowrap">
                     {hospital.extension}
                   </td>
-                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.limit}</td>
-                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.prevQuota}</td>
-                  <td className="px-4 py-4 text-center whitespace-nowrap">{hospital.currentQuota}</td>
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <div className="flex items-center justify-center gap-3">
+                  <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2">
                       {!("isSubRow" in hospital && hospital.isSubRow) && (
                         <Link href={`/filing/quota/${hospital.id}`}>
-                          <Button variant="link" className="text-primary p-0 h-auto">
+                          <Button variant="link" className="text-primary p-0 h-auto text-sm">
                             編輯
                           </Button>
                         </Link>
                       )}
                       <Button
                         variant="link"
-                        className="text-destructive p-0 h-auto hover:text-destructive/80"
+                        className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
                         onClick={() => {
                           setHospitals((prev) => {
-                            // 刪除此列；若為聯合申請主列，一併移除同 groupId 的子列
                             const target = prev.find((h) => h.id === hospital.id)
                             const groupId = target?.groupId
                             return prev.filter((h) =>
@@ -741,12 +746,16 @@ function QuotaFilingSection({
             </tbody>
             <tfoot>
               <tr className="bg-muted/60 border-t-2 border-border">
-                <td colSpan={6} className="px-4 py-3 text-base font-semibold text-foreground">
-                  合計
-                </td>
-                <td className="px-4 py-3 text-center text-base font-bold text-foreground">{totalLimit}</td>
-                <td className="px-4 py-3 text-center text-base font-bold text-foreground">{totalPrevQuota}</td>
-                <td className="px-4 py-3 text-center text-base font-bold text-foreground">{totalCurrentQuota}</td>
+                <td className="px-2 py-2.5 text-sm font-semibold text-foreground sticky left-0 bg-muted/60 z-10">合計</td>
+                <td className="px-2 py-2.5 sticky left-10 bg-muted/60 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"></td>
+                <td className="px-2 py-2.5"></td>
+                <td className="px-2 py-2.5"></td>
+                <td className="px-2 py-2.5 text-sm text-center font-bold text-foreground">{totalPrevQuota}</td>
+                <td className="px-2 py-2.5 text-sm text-center font-bold text-foreground">{totalLimit}</td>
+                <td className="px-2 py-2.5 text-sm text-center font-bold text-foreground">{totalCurrentQuota}</td>
+                <td className="px-2 py-2.5"></td>
+                <td className="px-2 py-2.5"></td>
+                <td className="px-2 py-2.5"></td>
                 <td />
               </tr>
             </tfoot>
@@ -888,96 +897,99 @@ function QuotaFilingSection({
             </DialogContent>
           </Dialog>
 
-          <div className="bg-card rounded-lg shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
-                  <th className="px-4 py-3 text-left">編號</th>
-                  <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                  <th className="px-4 py-3 text-left">醫院名稱</th>
-                  <th className="px-4 py-3 text-center">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex items-center gap-1 cursor-default">
-                            可收訓容額
-                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs text-sm" side="top">
-                          係指醫院實際訓練量能，最大訓練容量之容額數
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </th>
-                  <th className="px-4 py-3 text-center">建議分配容額</th>
-                  <th className="px-4 py-3 text-center">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {tbProgramHospitals.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                      尚無結核病計畫容額資料，請點選「新增醫院」或「匯入名單」
-                    </td>
+          <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10" />
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
+                    <th className="px-2 py-2.5 text-left whitespace-nowrap w-10 sticky left-0 bg-muted/50 z-20">編號</th>
+                    <th className="px-2 py-2.5 text-left whitespace-nowrap min-w-[100px] sticky left-10 bg-muted/50 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">醫院名稱</th>
+                    <th className="px-2 py-2.5 text-left whitespace-nowrap">醫事機構代碼</th>
+                    <th className="px-2 py-2.5 text-center whitespace-nowrap">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-0.5 cursor-default">
+                              可收訓容額
+                              <HelpCircle className="h-3 w-3 text-muted-foreground/70" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs text-sm" side="top">
+                            係指醫院實際訓練量能，最大訓練容量之容額數
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </th>
+                    <th className="px-2 py-2.5 text-center whitespace-nowrap">建議分配</th>
+                    <th className="px-2 py-2.5 text-center whitespace-nowrap">操作</th>
                   </tr>
-                ) : (
-                  tbProgramHospitals.map((hospital) => (
-                    <tr key={hospital.id}>
-                      <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
-                      <td className="px-4 py-4 text-muted-foreground">{hospital.code}</td>
-                      <td className="px-4 py-4 font-medium">{hospital.name}</td>
-                      <td className="px-4 py-4 text-center">{hospital.quotaLimit}</td>
-                      <td className="px-4 py-4 text-center">{hospital.currentQuota}</td>
-                      <td className="px-4 py-4 text-center">
-                        <div className="flex items-center justify-center gap-3">
-                          <Button
-                            variant="link"
-                            className="text-primary p-0 h-auto"
-                            onClick={() => {
-                              // TODO: 編輯功能
-                            }}
-                          >
-                            編輯
-                          </Button>
-                          <Button
-                            variant="link"
-                            className="text-destructive p-0 h-auto hover:text-destructive/80"
-                            onClick={() =>
-                              setTbProgramHospitals((prev) =>
-                                prev
-                                  .filter((h) => h.id !== hospital.id)
-                                  .map((h, i) => ({ ...h, id: i + 1 }))
-                              )
-                            }
-                          >
-                            刪除
-                          </Button>
-                        </div>
+                </thead>
+                <tbody className="divide-y">
+                  {tbProgramHospitals.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                        尚無結核病計畫容額資料，請點選「新增醫院」或「匯入名單」
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-              {tbProgramHospitals.length > 0 && (
-                <tfoot>
-                  <tr className="bg-muted/30 border-t">
-                    <td colSpan={3} className="px-4 py-3 text-right text-base font-bold text-foreground">
-                      合計
-                    </td>
-                    <td className="px-4 py-3 text-center text-base font-bold text-foreground">
-                      {tbProgramHospitals.reduce((sum, h) => sum + h.quotaLimit, 0)}
-                    </td>
-                    <td className="px-4 py-3 text-center text-base font-bold text-foreground">
-                      {tbProgramHospitals.reduce((sum, h) => sum + h.currentQuota, 0)}
-                    </td>
-                    <td />
-                  </tr>
+                  ) : (
+                    tbProgramHospitals.map((hospital) => (
+                      <tr key={hospital.id}>
+                        <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap sticky left-0 bg-card z-10">{hospital.id}</td>
+                        <td className="px-2 py-3 text-sm font-medium whitespace-nowrap sticky left-10 bg-card z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">{hospital.name}</td>
+                        <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                        <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.quotaLimit}</td>
+                        <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.currentQuota}</td>
+                        <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              variant="link"
+                              className="text-primary p-0 h-auto text-sm"
+                              onClick={() => {
+                                // TODO: 編輯功能
+                              }}
+                            >
+                              編輯
+                            </Button>
+                            <Button
+                              variant="link"
+                              className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
+                              onClick={() =>
+                                setTbProgramHospitals((prev) =>
+                                  prev
+                                    .filter((h) => h.id !== hospital.id)
+                                    .map((h, i) => ({ ...h, id: i + 1 }))
+                                )
+                              }
+                            >
+                              刪除
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+                {tbProgramHospitals.length > 0 && (
+                  <tfoot>
+                    <tr className="bg-muted/30 border-t">
+                      <td className="px-2 py-2.5 text-sm font-semibold text-foreground sticky left-0 bg-muted/30 z-10">合計</td>
+                      <td className="px-2 py-2.5 sticky left-10 bg-muted/30 z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"></td>
+                      <td className="px-2 py-2.5"></td>
+                      <td className="px-2 py-2.5 text-sm text-center font-bold text-foreground">
+                        {tbProgramHospitals.reduce((sum, h) => sum + h.quotaLimit, 0)}
+                      </td>
+                      <td className="px-2 py-2.5 text-sm text-center font-bold text-foreground">
+                        {tbProgramHospitals.reduce((sum, h) => sum + h.currentQuota, 0)}
+                      </td>
+                      <td />
+                    </tr>
                 </tfoot>
               )}
             </table>
           </div>
         </div>
+      </div>
       )}
 
       <div id="disqualified-section">
@@ -1139,55 +1151,58 @@ function QuotaFilingSection({
           </DialogContent>
         </Dialog>
 
-        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
-                <th className="px-4 py-3 text-left">編號</th>
-                <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left">醫院名稱</th>
-                <th className="px-4 py-3 text-left">不合格原因</th>
-                <th className="px-4 py-3 text-center">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {disqualifiedHospitals.map((hospital) => (
-                <tr key={hospital.id}>
-                  <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
-                  <td className="px-4 py-4 text-muted-foreground">{hospital.code}</td>
-                  <td className="px-4 py-4 font-medium">{hospital.name}</td>
-                  <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
-                  <td className="px-4 py-4 text-center">
-                    <div className="flex items-center justify-center gap-3">
-                      <Button
-                        variant="link"
-                        className="text-primary p-0 h-auto"
-                        onClick={() => {
-                          setEditingDisqualifiedId(hospital.id)
-                          setEditDisqualifiedReason(hospital.reason)
-                        }}
-                      >
-                        編輯
-                      </Button>
-                      <Button
-                        variant="link"
-                        className="text-destructive p-0 h-auto hover:text-destructive/80"
-                        onClick={() =>
-                          setDisqualifiedHospitals((prev) =>
-                            prev
-                              .filter((h) => h.id !== hospital.id)
-                              .map((h, i) => ({ ...h, id: i + 1 }))
-                          )
-                        }
-                      >
-                        刪除
-                      </Button>
-                    </div>
-                  </td>
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10" />
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap w-10 sticky left-0 bg-muted/50 z-20">編號</th>
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap min-w-[100px] sticky left-10 bg-muted/50 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">醫院名稱</th>
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap">醫事機構代碼</th>
+                  <th className="px-2 py-2.5 text-left">不合格原因</th>
+                  <th className="px-2 py-2.5 text-center whitespace-nowrap">操作</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y">
+                {disqualifiedHospitals.map((hospital) => (
+                  <tr key={hospital.id}>
+                    <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap sticky left-0 bg-card z-10">{hospital.id}</td>
+                    <td className="px-2 py-3 text-sm font-medium whitespace-nowrap sticky left-10 bg-card z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">{hospital.name}</td>
+                    <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                    <td className="px-2 py-3 text-sm text-muted-foreground">{hospital.reason}</td>
+                    <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="link"
+                          className="text-primary p-0 h-auto text-sm"
+                          onClick={() => {
+                            setEditingDisqualifiedId(hospital.id)
+                            setEditDisqualifiedReason(hospital.reason)
+                          }}
+                        >
+                          編輯
+                        </Button>
+                        <Button
+                          variant="link"
+                          className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
+                          onClick={() =>
+                            setDisqualifiedHospitals((prev) =>
+                              prev
+                                .filter((h) => h.id !== hospital.id)
+                                .map((h, i) => ({ ...h, id: i + 1 }))
+                            )
+                          }
+                        >
+                          刪除
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1414,76 +1429,79 @@ function QuotaFilingSection({
           </DialogContent>
         </Dialog>
 
-        <div className="bg-card rounded-lg shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-muted/50 border-b text-base font-medium text-muted-foreground">
-                <th className="px-4 py-3 text-left">編號</th>
-                <th className="px-4 py-3 text-left">醫事機構代碼</th>
-                <th className="px-4 py-3 text-left">醫院名稱</th>
-                <th className="px-4 py-3 text-left">前一年度訓練資格</th>
-                <th className="px-4 py-3 text-left">未申請原因</th>
-                <th className="px-4 py-3 text-center">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {notAppliedHospitals.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    尚無未申請醫院資料，請點選「新增未申請醫院」或「匯入名單」
-                  </td>
+        <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-card to-transparent z-10" />
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b text-sm font-medium text-muted-foreground">
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap w-10 sticky left-0 bg-muted/50 z-20">編號</th>
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap min-w-[100px] sticky left-10 bg-muted/50 z-20 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">醫院名稱</th>
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap">醫事機構代碼</th>
+                  <th className="px-2 py-2.5 text-left whitespace-nowrap">前一年度訓練資格</th>
+                  <th className="px-2 py-2.5 text-left">未申請原因</th>
+                  <th className="px-2 py-2.5 text-center whitespace-nowrap">操作</th>
                 </tr>
-              ) : (
-                notAppliedHospitals.map((hospital) => (
-                  <tr key={hospital.id}>
-                    <td className="px-4 py-4 text-muted-foreground">{hospital.id}</td>
-                    <td className="px-4 py-4 text-muted-foreground">{hospital.code}</td>
-                    <td className="px-4 py-4 font-medium">{hospital.name}</td>
-                    <td className="px-4 py-4">
-                      <span className={`text-sm px-2 py-1 rounded-full ${
-                        hospital.prevQualification === "具訓練資格"
-                          ? "bg-green-50 text-green-700"
-                          : hospital.prevQualification === "不具訓練資格"
-                          ? "bg-red-50 text-red-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
-                        {hospital.prevQualification}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-muted-foreground">{hospital.reason}</td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="flex items-center justify-center gap-3">
-                        <Button
-                          variant="link"
-                          className="text-primary p-0 h-auto"
-                          onClick={() => {
-                            setEditingNotAppliedId(hospital.id)
-                            setEditNotAppliedPrevQualification(hospital.prevQualification)
-                            setEditNotAppliedReason(hospital.reason)
-                          }}
-                        >
-                          編輯
-                        </Button>
-                        <Button
-                          variant="link"
-                          className="text-destructive p-0 h-auto hover:text-destructive/80"
-                          onClick={() =>
-                            setNotAppliedHospitals((prev) =>
-                              prev
-                                .filter((h) => h.id !== hospital.id)
-                                .map((h, i) => ({ ...h, id: i + 1 }))
-                            )
-                          }
-                        >
-                          刪除
-                        </Button>
-                      </div>
+              </thead>
+              <tbody className="divide-y">
+                {notAppliedHospitals.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      尚無未申請醫院資料，請點選「新增未申請醫院」或「匯入名單」
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  notAppliedHospitals.map((hospital) => (
+                    <tr key={hospital.id}>
+                      <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap sticky left-0 bg-card z-10">{hospital.id}</td>
+                      <td className="px-2 py-3 text-sm font-medium whitespace-nowrap sticky left-10 bg-card z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">{hospital.name}</td>
+                      <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap">{hospital.code}</td>
+                      <td className="px-2 py-3 whitespace-nowrap">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          hospital.prevQualification === "具訓練資格"
+                            ? "bg-green-50 text-green-700"
+                            : hospital.prevQualification === "不具訓練資格"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}>
+                          {hospital.prevQualification}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3 text-sm text-muted-foreground">{hospital.reason}</td>
+                      <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="link"
+                            className="text-primary p-0 h-auto text-sm"
+                            onClick={() => {
+                              setEditingNotAppliedId(hospital.id)
+                              setEditNotAppliedPrevQualification(hospital.prevQualification)
+                              setEditNotAppliedReason(hospital.reason)
+                            }}
+                          >
+                            編輯
+                          </Button>
+                          <Button
+                            variant="link"
+                            className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
+                            onClick={() =>
+                              setNotAppliedHospitals((prev) =>
+                                prev
+                                  .filter((h) => h.id !== hospital.id)
+                                  .map((h, i) => ({ ...h, id: i + 1 }))
+                              )
+                            }
+                          >
+                            刪除
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
