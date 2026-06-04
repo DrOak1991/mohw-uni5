@@ -434,8 +434,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "台大醫院",
       county: "台北市",
       district: "中正區",
-      expiry: "115/7/31",
-      extension: "4 年 (至 119/7/31)",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 15,
       prevQuota: 5,
       currentQuota: 5,
@@ -451,8 +451,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "台北榮民總醫院",
       county: "台北市",
       district: "北投區",
-      expiry: "115/7/31",
-      extension: "-",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 12,
       prevQuota: 3,
       currentQuota: 4,
@@ -468,8 +468,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "三軍總醫院",
       county: "台北市",
       district: "內湖區",
-      expiry: "113/7/31",
-      extension: "4 年 (至 117/7/31)",
+      expiryStartYear: "113",
+      expiryEndYear: "115",
       limit: 10,
       prevQuota: 2,
       currentQuota: 3,
@@ -485,8 +485,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "中國醫藥大學附醫",
       county: "台中市",
       district: "北區",
-      expiry: "115/7/31",
-      extension: "4 年 (至 119/7/31)",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 8,
       prevQuota: 2,
       currentQuota: 2,
@@ -503,8 +503,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "林口長庚醫院",
       county: "桃園市",
       district: "龜山區",
-      expiry: "115/7/31",
-      extension: "4 年 (至 119/7/31)",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 15,
       prevQuota: 4,
       currentQuota: 5,
@@ -520,8 +520,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "中山醫學大學附醫",
       county: "台中市",
       district: "南區",
-      expiry: "",
-      extension: "",
+      expiryStartYear: "",
+      expiryEndYear: "",
       limit: null as number | null,
       prevQuota: null as number | null,
       currentQuota: null as number | null,
@@ -537,8 +537,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "萬芳醫院",
       county: "台北市",
       district: "文山區",
-      expiry: "",
-      extension: "",
+      expiryStartYear: "",
+      expiryEndYear: "",
       limit: null as number | null,
       prevQuota: null as number | null,
       currentQuota: null as number | null,
@@ -555,8 +555,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "奇美醫院",
       county: "台南市",
       district: "永康區",
-      expiry: "114/7/31",
-      extension: "2 年 (至 116/7/31)",
+      expiryStartYear: "114",
+      expiryEndYear: "116",
       limit: 9,
       prevQuota: 3,
       currentQuota: 4,
@@ -572,8 +572,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "成大醫院",
       county: "台南市",
       district: "東區",
-      expiry: "",
-      extension: "",
+      expiryStartYear: "",
+      expiryEndYear: "",
       limit: null as number | null,
       prevQuota: null as number | null,
       currentQuota: null as number | null,
@@ -590,8 +590,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "高雄聯合訓練中心",
       county: "高雄市",
       district: "左營區",
-      expiry: "115/7/31",
-      extension: "4 年 (至 119/7/31)",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 18,
       prevQuota: 6,
       currentQuota: 7,
@@ -608,8 +608,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "台中榮民總醫院",
       county: "台中市",
       district: "西屯區",
-      expiry: "115/7/31",
-      extension: "-",
+      expiryStartYear: "115",
+      expiryEndYear: "115",
       limit: 11,
       prevQuota: 4,
       currentQuota: 4,
@@ -625,8 +625,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       name: "高雄醫學大學附醫",
       county: "高雄市",
       district: "三民區",
-      expiry: "114/7/31",
-      extension: "4 年 (至 118/7/31)",
+      expiryStartYear: "114",
+      expiryEndYear: "118",
       limit: 7,
       prevQuota: 2,
       currentQuota: 3,
@@ -759,15 +759,16 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                 </th>
                 <th className="px-2 py-2.5 text-center whitespace-nowrap">建議分配</th>
                 <th className="px-2 py-2.5 text-center whitespace-nowrap">資格效期</th>
-                <th className="px-2 py-2.5 text-center whitespace-nowrap">延長效期</th>
                 <th className="px-2 py-2.5 text-center whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {hospitals.map((hospital) => {
                 const groupStyle = hospital.groupId ? groupColors[hospital.groupId] : ""
-                // 移除「有效至」前綴
-                const expiryDate = hospital.expiry?.replace("有效至 ", "") || "—"
+                // 組合資格效期：起始年度/08/01 - 結束年度/07/31
+                const expiryRange = hospital.expiryStartYear && hospital.expiryEndYear
+                  ? `${hospital.expiryStartYear}/08/01 - ${hospital.expiryEndYear}/07/31`
+                  : "—"
                 return (
                 <tr
                   key={hospital.id}
@@ -796,10 +797,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                   <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.limit}</td>
                   <td className="px-2 py-3 text-sm text-center whitespace-nowrap">{hospital.currentQuota}</td>
                   <td className="px-2 py-3 text-sm text-center text-muted-foreground whitespace-nowrap">
-                    {expiryDate}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-muted-foreground whitespace-nowrap">
-                    {hospital.extension}
+                    {expiryRange}
                   </td>
                   <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
                     <div className="flex items-center justify-center gap-2">

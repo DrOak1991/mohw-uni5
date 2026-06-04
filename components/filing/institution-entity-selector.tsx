@@ -32,9 +32,9 @@ export interface InstitutionEntity {
   // 合併主體
   mergedName?: string
   mergedHospitalCodes?: string[]
-  // 資格效期
-  qualificationExpiry: string
-  extensionYears: string
+  // 效期（ROC 年份）
+  expiryStartYear: string
+  expiryEndYear: string
 }
 
 interface InstitutionEntitySelectorProps {
@@ -64,8 +64,8 @@ export function InstitutionEntitySelector({
   const [selectedCounty, setSelectedCounty] = useState<string>("all")
   const [tempSelected, setTempSelected] = useState<string[]>([])
   const [mergedName, setMergedName] = useState("")
-  const [qualificationExpiry, setQualificationExpiry] = useState("")
-  const [extensionYears, setExtensionYears] = useState("0")
+  const [expiryStartYear, setExpiryStartYear] = useState("")
+  const [expiryEndYear, setExpiryEndYear] = useState("")
   const [editingEntityId, setEditingEntityId] = useState<string | null>(null)
 
   // 提取所有縣市
@@ -125,8 +125,8 @@ export function InstitutionEntitySelector({
     setSelectedCounty("all")
     setTempSelected([])
     setMergedName("")
-    setQualificationExpiry("")
-    setExtensionYears("0")
+    setExpiryStartYear("")
+    setExpiryEndYear("")
     setEditingEntityId(null)
   }
 
@@ -153,8 +153,8 @@ export function InstitutionEntitySelector({
     const newEntity: InstitutionEntity = {
       id: editingEntityId || `entity-${Date.now()}`,
       type: entityType,
-      qualificationExpiry,
-      extensionYears,
+      expiryStartYear,
+      expiryEndYear,
     }
 
     if (entityType === "single") {
@@ -243,33 +243,14 @@ export function InstitutionEntitySelector({
               <div className="pt-3 border-t grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground block mb-1">
-                    資格效期
-                  </Label>
-                  <Input
-                    size="sm"
-                    value={entity.qualificationExpiry}
-                    onChange={(e) => {
-                      const updated = entities.map((ent) =>
-                        ent.id === entity.id
-                          ? { ...ent, qualificationExpiry: e.target.value }
-                          : ent
-                      )
-                      onEntitiesChange(updated)
-                    }}
-                    placeholder="115/7/31"
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground block mb-1">
-                    延長效期
+                    效期起始年度
                   </Label>
                   <Select
-                    value={entity.extensionYears}
+                    value={entity.expiryStartYear}
                     onValueChange={(value) => {
                       const updated = entities.map((ent) =>
                         ent.id === entity.id
-                          ? { ...ent, extensionYears: value }
+                          ? { ...ent, expiryStartYear: value }
                           : ent
                       )
                       onEntitiesChange(updated)
@@ -279,11 +260,38 @@ export function InstitutionEntitySelector({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0">不延長</SelectItem>
-                      <SelectItem value="1">1 年</SelectItem>
-                      <SelectItem value="2">2 年</SelectItem>
-                      <SelectItem value="3">3 年</SelectItem>
-                      <SelectItem value="4">4 年</SelectItem>
+                      {Array.from({ length: 20 }, (_, i) => 108 + i).map((year) => (
+                        <SelectItem key={year} value={String(year)}>
+                          {year} 年
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground block mb-1">
+                    效期結束年度
+                  </Label>
+                  <Select
+                    value={entity.expiryEndYear}
+                    onValueChange={(value) => {
+                      const updated = entities.map((ent) =>
+                        ent.id === entity.id
+                          ? { ...ent, expiryEndYear: value }
+                          : ent
+                      )
+                      onEntitiesChange(updated)
+                    }}
+                  >
+                    <SelectTrigger className="text-sm h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 20 }, (_, i) => 108 + i).map((year) => (
+                        <SelectItem key={year} value={String(year)}>
+                          {year} 年
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -299,8 +307,8 @@ export function InstitutionEntitySelector({
                     setEntityType(entity.type)
                     setMergedName(entity.mergedName || "")
                     setTempSelected(entity.mergedHospitalCodes || [])
-                    setQualificationExpiry(entity.qualificationExpiry)
-                    setExtensionYears(entity.extensionYears)
+                    setExpiryStartYear(entity.expiryStartYear)
+                    setExpiryEndYear(entity.expiryEndYear)
                     setStep("select-hospitals")
                     setIsOpen(true)
                   }}
@@ -483,38 +491,47 @@ export function InstitutionEntitySelector({
                 {/* 資格效期設定 - 保證可見 */}
                 {tempSelected.length > 0 && (entityType === "single" || tempSelected.length >= 2) && (
                   <div className="bg-primary/5 rounded-lg p-4 space-y-3 border border-primary/20">
-                    <p className="text-sm font-medium">設定資格效期</p>
+                    <p className="text-sm font-medium">設定效期</p>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label className="text-xs text-muted-foreground mb-1.5 block">
-                          資格效期
+                          效期起始年度
                         </Label>
-                        <Input
-                          value={qualificationExpiry}
-                          onChange={(e) => setQualificationExpiry(e.target.value)}
-                          placeholder="115/7/31"
-                          className="text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          例如：115/7/31
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground mb-1.5 block">
-                          延長效期
-                        </Label>
-                        <Select value={extensionYears} onValueChange={setExtensionYears}>
+                        <Select value={expiryStartYear} onValueChange={setExpiryStartYear}>
                           <SelectTrigger className="text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="0">不延長</SelectItem>
-                            <SelectItem value="1">1 年</SelectItem>
-                            <SelectItem value="2">2 年</SelectItem>
-                            <SelectItem value="3">3 年</SelectItem>
-                            <SelectItem value="4">4 年</SelectItem>
+                            {Array.from({ length: 20 }, (_, i) => 108 + i).map((year) => (
+                              <SelectItem key={year} value={String(year)}>
+                                {year} 年
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          資格效期起始日固定為 08/01
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground mb-1.5 block">
+                          效期結束年度
+                        </Label>
+                        <Select value={expiryEndYear} onValueChange={setExpiryEndYear}>
+                          <SelectTrigger className="text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 20 }, (_, i) => 108 + i).map((year) => (
+                              <SelectItem key={year} value={String(year)}>
+                                {year} 年
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          資格效期結束日固定為 07/31
+                        </p>
                       </div>
                     </div>
                   </div>
