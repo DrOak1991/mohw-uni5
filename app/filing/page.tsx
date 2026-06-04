@@ -442,7 +442,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -459,7 +459,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -476,7 +476,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -493,7 +493,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     // ── 聯合申請 A 組：林口長庚（主）+ 中山醫大附醫 + 萬芳醫院（合作）──
@@ -511,7 +511,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: "group-a",
       isSubRow: false,
       partnerHospitalCodes: ["0401270023", "0401240020"],
-      applicationType: "joint" as "single" | "joint" | "merged",
+      applicationType: "joint" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -528,7 +528,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: "group-a",
       isSubRow: true,
       partnerHospitalCodes: [] as string[],
-      applicationType: "joint" as "single" | "joint" | "merged",
+      applicationType: "joint" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -545,7 +545,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: "group-a",
       isSubRow: true,
       partnerHospitalCodes: [] as string[],
-      applicationType: "joint" as "single" | "joint" | "merged",
+      applicationType: "joint" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     // ── 聯合申請 B 組：奇美醫院（主）+ 成大醫院（合作）──
@@ -563,7 +563,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: "group-b",
       isSubRow: false,
       partnerHospitalCodes: ["0401310027"],
-      applicationType: "joint" as "single" | "joint" | "merged",
+      applicationType: "joint" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -580,7 +580,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: "group-b",
       isSubRow: true,
       partnerHospitalCodes: [] as string[],
-      applicationType: "joint" as "single" | "joint" | "merged",
+      applicationType: "joint" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     // ── 合併申請：高雄長庚 + 高雄榮總 → 顯示為「高雄聯合訓練中心」──
@@ -598,7 +598,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "merged" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: ["0401320028", "0401330029"],
     },
     // ── 單一機構申請（繼續）──
@@ -616,7 +616,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
     {
@@ -633,7 +633,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       groupId: null as string | null,
       isSubRow: false,
       partnerHospitalCodes: [] as string[],
-      applicationType: "single" as "single" | "joint" | "merged",
+      applicationType: "single" as "single" | "joint",
       mergedHospitalCodes: [] as string[],
     },
   ])
@@ -776,11 +776,8 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                   {/* 固定首兩欄 */}
                   <td className="px-2 py-3 text-sm text-muted-foreground whitespace-nowrap sticky left-0 bg-card z-10">{hospital.id}</td>
                   <td className="px-2 py-3 text-sm font-medium whitespace-nowrap sticky left-10 bg-card z-10 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
-                    {hospital.applicationType === "joint" && (
+                    {hospital.applicationType === "joint" && !hospital.isSubRow && (
                       <span className="text-muted-foreground mr-1">[聯]</span>
-                    )}
-                    {hospital.applicationType === "merged" && (
-                      <span className="text-muted-foreground mr-1">[併]</span>
                     )}
                     {quotaNotesStore.hospitalNotes[String(hospital.id)] && (
                       <span className="text-destructive mr-0.5" title="此醫院有備註">*</span>
