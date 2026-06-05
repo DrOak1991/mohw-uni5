@@ -755,7 +755,7 @@ function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmi
                         </span>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs text-sm" side="top">
-                        係指醫院實際訓練量能，最大訓練容量之容額數
+                        係指醫院實��訓練量能，最大訓練容量之容額數
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -1801,14 +1801,15 @@ function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmi
                           <span className="text-xs text-blue-400 mt-0.5 block">{sourceLabel}</span>
                         </div>
                         {item.type === "hospital" ? (
-                          <Link href={editHref} className="shrink-0">
-                            <Button variant="ghost" size="sm" className="gap-1.5 text-blue-400 hover:text-blue-700">
+                          <Link href={editHref} className={`shrink-0 ${isSubmitted ? "pointer-events-none" : ""}`}>
+                            <Button disabled={isSubmitted} variant="ghost" size="sm" className="gap-1.5 text-blue-400 hover:text-blue-700">
                               <Pencil className="h-3.5 w-3.5" />
                               前往編輯
                             </Button>
                           </Link>
                         ) : (
                           <Button
+                            disabled={isSubmitted}
                             variant="ghost"
                             size="sm"
                             className="gap-1.5 text-blue-400 hover:text-blue-700 shrink-0"
@@ -1851,16 +1852,25 @@ function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmi
           <Download className="h-4 w-4" />
           匯出 PDF
         </Button>
-        <Button variant="outline" className="gap-2">
-          暫時儲存
-        </Button>
-        <Button
-          className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
-          onClick={() => setShowSubmitConfirmDialog(true)}
-        >
-          <Send className="h-4 w-4" />
-          儲存並送件
-        </Button>
+        {!isSubmitted && (
+          <Button variant="outline" className="gap-2">
+            暫時儲存
+          </Button>
+        )}
+        {isSubmitted ? (
+          <Button disabled className="gap-2">
+            <Send className="h-4 w-4" />
+            審查中
+          </Button>
+        ) : (
+          <Button
+            className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+            onClick={() => setShowSubmitConfirmDialog(true)}
+          >
+            <Send className="h-4 w-4" />
+            儲存並送件
+          </Button>
+        )}
       </div>
 
       {/* 送件確認 Dialog */}
