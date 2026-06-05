@@ -104,6 +104,8 @@ function FilingPageContent() {
   const router = useRouter()
   const tabParam = searchParams.get("tab")
   const variant = searchParams.get("variant") || ""
+  const status = searchParams.get("status") || ""
+  const isSubmitted = status === "submitted"
   const [activeTab, setActiveTab] = useState<string>(
     tabParam === "quota" ? "quota" : "documents"
   )
@@ -226,7 +228,7 @@ function FilingPageContent() {
           </TabsContent>
 
           <TabsContent value="quota">
-            <FilingPageQuotaTab variant={variant} />
+            <FilingPageQuotaTab variant={variant} isSubmitted={isSubmitted} />
           </TabsContent>
         </Tabs>
 
@@ -314,7 +316,7 @@ function FilingPageContent() {
           <div className="space-y-6 py-4">
             <div className="bg-muted/50 rounded-lg p-4">
               <p className="text-base text-muted-foreground mb-3">
-                請先下載範例文件，依照格式填寫後再上傳
+                請先下載���例文件，依照格式填寫後再上傳
               </p>
               <Button variant="outline" size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
@@ -341,7 +343,7 @@ function FilingPageContent() {
   )
 }
 
-function FilingPageQuotaTab({ variant }: { variant: string }) {
+function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmitted: boolean }) {
   const router = useRouter()
   const availableHospitals = AVAILABLE_HOSPITALS
   const isInternalMedicine = variant === "internal-medicine"
@@ -712,13 +714,14 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">專科醫師訓練醫院認定合格名冊及訓練容量</h2>
         <div className="flex items-center gap-3">
-          <Link href={variant ? `/filing/quota/new?variant=${variant}` : "/filing/quota/new"}>
-            <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
+          <Link href={variant ? `/filing/quota/new?variant=${variant}` : "/filing/quota/new"} className={isSubmitted ? "pointer-events-none" : ""}>
+            <Button disabled={isSubmitted} className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
               <Plus className="h-4 w-4" />
               新增醫院
             </Button>
           </Link>
           <Button
+            disabled={isSubmitted}
             variant="outline"
             className="gap-2"
             onClick={onOpenImport}
@@ -802,13 +805,14 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                   <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
                     <div className="flex items-center justify-center gap-2">
                       {!("isSubRow" in hospital && hospital.isSubRow) && (
-                        <Link href={`/filing/quota/${hospital.id}`}>
-                          <Button variant="link" className="text-primary p-0 h-auto text-sm">
+                        <Link href={`/filing/quota/${hospital.id}`} className={isSubmitted ? "pointer-events-none" : ""}>
+                          <Button disabled={isSubmitted} variant="link" className="text-primary p-0 h-auto text-sm">
                             編輯
                           </Button>
                         </Link>
                       )}
                       <Button
+                        disabled={isSubmitted}
                         variant="link"
                         className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
                         onClick={() => {
@@ -1083,6 +1087,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
           <h3 className="text-lg font-bold text-foreground">不合格醫院名單</h3>
           <div className="flex items-center gap-3">
             <Button
+              disabled={isSubmitted}
               className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
               onClick={() => setShowAddDisqualifiedDialog(true)}
             >
@@ -1090,6 +1095,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
               新增不合格醫院
             </Button>
             <Button
+              disabled={isSubmitted}
               variant="outline"
               className="gap-2"
               onClick={onOpenImport}
@@ -1260,6 +1266,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                     <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                         <Button
+                          disabled={isSubmitted}
                           variant="link"
                           className="text-primary p-0 h-auto text-sm"
                           onClick={() => {
@@ -1270,6 +1277,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                           編輯
                         </Button>
                         <Button
+                          disabled={isSubmitted}
                           variant="link"
                           className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
                           onClick={() =>
@@ -1301,6 +1309,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
         </div>
           <div className="flex items-center gap-3 mt-0.5">
             <Button
+              disabled={isSubmitted}
               className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
               onClick={() => setShowAddNotAppliedDialog(true)}
             >
@@ -1308,6 +1317,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
               新增未申請醫院
             </Button>
             <Button
+              disabled={isSubmitted}
               variant="outline"
               className="gap-2"
               onClick={onOpenImport}
@@ -1557,6 +1567,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                       <td className="px-2 py-3 text-sm text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <Button
+                            disabled={isSubmitted}
                             variant="link"
                             className="text-primary p-0 h-auto text-sm"
                             onClick={() => {
@@ -1568,6 +1579,7 @@ function FilingPageQuotaTab({ variant }: { variant: string }) {
                             編輯
                           </Button>
                           <Button
+                            disabled={isSubmitted}
                             variant="link"
                             className="text-destructive p-0 h-auto hover:text-destructive/80 text-sm"
                             onClick={() =>
