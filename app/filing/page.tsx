@@ -47,6 +47,44 @@ import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital
 import { AVAILABLE_HOSPITALS } from "@/components/filing/quota-form"
 import { filingItemsConfig } from "@/lib/mock/review-outline"
 import { quotaNotesStore } from "@/lib/stores/quota-notes-store"
+import {
+  ReviewFeedbackBanner,
+  type ReviewFeedback,
+} from "@/components/filing/review-feedback-banner"
+
+// Mock 退回審查意見
+const MOCK_QUOTA_REVIEW_FEEDBACK: ReviewFeedback = {
+  reviewDate: "114/04/15",
+  meetingTitle: "114年度第一次訓練容額審查會議",
+  comments: [
+    "台大醫院申請容額 15 名，建議依前年度訓練成效調降至 12 名",
+    "高雄聯合訓練中心為合併機構，請補充各機構分配容額說明",
+    "三軍總醫院資格效期起始年度有誤，請重新確認並更正",
+  ],
+  fullContent: `一、會議時間：114年4月15日（星期二）上午10時
+
+二、會議地點：衛生福利部第三會議室
+
+三、主席：○○○司長
+    紀錄：○○○
+
+四、出席人員：（略）
+
+五、審查意見：
+
+（一）關於容額申請數量部分：
+    1. 台大醫院本次申請容額 15 名，惟依其前年度訓練成效評估，師資及設備量能評估建議調降為 12 名，請申請機構重新評估後再行送件。
+
+    2. 高雄聯合訓練中心係由高雄榮民總醫院及高雄醫學大學附設中和紀念醫院合併組成，本次申請總容額 18 名，請補充說明兩機構之間的容額分配方式及聯合訓練運作架構，以利審查。
+
+（二）關於資格效期部分：
+    1. 三軍總醫院所填資格效期起始年度為 113 年，惟依本部存檔資料，其資格認定係自 112 年起生效，請重新確認並更正後再行送件。
+
+（三）補件期限：
+    請於 114 年 5 月 15 日前完成修正並重新送件，逾期視同放棄本次申請資格。
+
+六、散會：上午12時`,
+}
 
 // 西元年轉民國年，格式 114/7/31
 function toRocDate(dateStr: string): string {
@@ -106,6 +144,7 @@ function FilingPageContent() {
   const variant = searchParams.get("variant") || ""
   const status = searchParams.get("status") || ""
   const isSubmitted = status === "submitted"
+  const isReturned = status === "returned"
   const [activeTab, setActiveTab] = useState<string>(
     tabParam === "quota" ? "quota" : "documents"
   )
@@ -228,7 +267,7 @@ function FilingPageContent() {
           </TabsContent>
 
           <TabsContent value="quota">
-            <FilingPageQuotaTab variant={variant} isSubmitted={isSubmitted} />
+            <FilingPageQuotaTab variant={variant} isSubmitted={isSubmitted} isReturned={isReturned} />
           </TabsContent>
         </Tabs>
 
@@ -343,7 +382,7 @@ function FilingPageContent() {
   )
 }
 
-function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmitted: boolean }) {
+function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: string; isSubmitted: boolean; isReturned: boolean }) {
   const router = useRouter()
   const availableHospitals = AVAILABLE_HOSPITALS
   const isInternalMedicine = variant === "internal-medicine"
@@ -673,6 +712,10 @@ function FilingPageQuotaTab({ variant, isSubmitted }: { variant: string; isSubmi
 
   return (
     <div className="space-y-8">
+      {/* 退回審查意見 Banner */}
+      {isReturned && (
+        <ReviewFeedbackBanner feedback={MOCK_QUOTA_REVIEW_FEEDBACK} />
+      )}
       {/* 訓練醫院申請家數統計 */}
       <div>
         <h3 className="text-lg font-bold text-foreground mb-4">訓練醫院申請家數</h3>
