@@ -43,7 +43,7 @@ export default function HospitalQuotaDetailPage({
     )
   }
 
-  const { society, hospitals, disqualifiedHospitals, groupReviewData } = detail
+  const { society, hospitals, disqualifiedHospitals, notAppliedHospitals, tuberculosisHospitals, groupReviewData, isInternalMedicine } = detail
   const isMainReview = society.stage === "main-review"
   const isUploadPending = society.stage === "upload-pending"
 
@@ -70,7 +70,7 @@ export default function HospitalQuotaDetailPage({
   const totalApplied = mainRows.length
   const disqualifiedCount = disqualifiedHospitals.length
   const qualifiedCount = totalApplied - disqualifiedCount
-  const notAppliedCount = 0 // 未申請家數（mock 資料暫無此欄位）
+  const notAppliedCount = notAppliedHospitals?.length ?? 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -338,6 +338,78 @@ export default function HospitalQuotaDetailPage({
                         <TableCell className="text-muted-foreground">{hospital.code}</TableCell>
                         <TableCell className="font-medium">{hospital.name}</TableCell>
                         <TableCell className="text-muted-foreground">{hospital.reason}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 未申請醫院名單 */}
+        {notAppliedHospitals && notAppliedHospitals.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-foreground mb-4">未申請醫院名單</h3>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-16">序號</TableHead>
+                      <TableHead>醫事機構代碼</TableHead>
+                      <TableHead>訓練醫院全銜</TableHead>
+                      <TableHead>所在地</TableHead>
+                      <TableHead>前年度資格</TableHead>
+                      <TableHead>未申請原因</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {notAppliedHospitals.map((hospital) => (
+                      <TableRow key={hospital.id}>
+                        <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
+                        <TableCell className="text-muted-foreground">{hospital.code}</TableCell>
+                        <TableCell className="font-medium">{hospital.name}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">{hospital.county}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{hospital.prevQualification}</TableCell>
+                        <TableCell className="text-muted-foreground">{hospital.reason}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 結核病計畫醫院名單（僅內科版型） */}
+        {isInternalMedicine && tuberculosisHospitals && tuberculosisHospitals.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-foreground mb-4">結核病計畫醫院名單</h3>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-16">序號</TableHead>
+                      <TableHead>醫事機構代碼</TableHead>
+                      <TableHead>訓練醫院全銜</TableHead>
+                      <TableHead>所在地</TableHead>
+                      <TableHead>資格效期</TableHead>
+                      <TableHead className="text-center">訓練容額</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tuberculosisHospitals.map((hospital) => (
+                      <TableRow key={hospital.id}>
+                        <TableCell className="text-muted-foreground">{hospital.id}</TableCell>
+                        <TableCell className="text-muted-foreground">{hospital.code}</TableCell>
+                        <TableCell className="font-medium">{hospital.name}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">{hospital.county}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">{hospital.expiry}</TableCell>
+                        <TableCell className="text-center font-medium text-primary">
+                          {hospital.quota !== null ? hospital.quota : "-"}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
