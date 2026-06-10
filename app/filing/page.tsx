@@ -1392,7 +1392,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-foreground">未申請醫院名單</h3>
-          <p className="text-sm text-muted-foreground mt-1">指前一年度為合格訓練醫院，惟本年度未提出申請之醫院。</p>
+          <p className="text-sm text-muted-foreground mt-1">係指前一年度為合格訓練醫院，惟本年度未提出申請之醫院。</p>
         </div>
           <div className="flex items-center gap-3 mt-0.5">
             <Button
