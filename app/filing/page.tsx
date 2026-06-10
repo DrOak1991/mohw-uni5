@@ -46,6 +46,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -243,7 +244,7 @@ function FilingPageContent() {
                             {doc.status === "通過" || doc.status === "審查中" ? (
                               <Button size="sm" variant="outline" className="gap-2">
                                 <FileText className="h-4 w-4" />
-                                {doc.status === "通過" ? "已通過" : "審查中"}
+                                {doc.status === "通過" ? "���通過" : "審查中"}
                               </Button>
                             ) : doc.status === "尚未送出" ? (
                               <Button size="sm" className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white">
@@ -1970,6 +1971,16 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
                 </div>
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="flex flex-col">
+                <span>全部下載</span>
+                <span className="text-xs text-muted-foreground">
+                  {isInternalMedicine ? "同時下載全部四份 PDF" : "同時下載全部三份 PDF"}
+                </span>
+              </div>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         {!isSubmitted && (
