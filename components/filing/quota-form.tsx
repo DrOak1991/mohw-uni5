@@ -175,12 +175,12 @@ export function QuotaForm({
           {/* ── 申請方式 ── */}
           <div className="mb-8">
             <Label className="text-sm font-medium mb-3 block">
-              申請方式 <span className="text-destructive">*</span>
+              認定方式 <span className="text-destructive">*</span>
             </Label>
             {isInternalMedicine ? (
               <div className="max-w-xs">
                 <div className="p-4 rounded-lg border-2 border-primary bg-primary/5 text-center">
-                  <div className="font-medium text-foreground">單一機構申請</div>
+                  <div className="font-medium text-foreground">單一機構認定</div>
                   <div className="text-sm text-muted-foreground mt-1">由單一機構獨立申請</div>
                 </div>
               </div>
@@ -195,7 +195,7 @@ export function QuotaForm({
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="font-medium text-foreground">單一機構申請</div>
+                  <div className="font-medium text-foreground">單一機構認定</div>
                   <div className="text-sm text-muted-foreground mt-1">由單一機構獨立申請</div>
                 </button>
                 <button
@@ -207,8 +207,8 @@ export function QuotaForm({
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="font-medium text-foreground">聯合申請</div>
-                  <div className="text-sm text-muted-foreground mt-1">主訓機構與合作機構聯合申請</div>
+                  <div className="font-medium text-foreground">聯合認定</div>
+                  <div className="text-sm text-muted-foreground mt-1">主訓機構與合作機構聯合認定</div>
                 </button>
               </div>
             )}
@@ -225,7 +225,7 @@ export function QuotaForm({
               triggerLabel="選擇主訓機構"
             />
             <p className="text-sm text-muted-foreground mt-2">
-              主訓機構可以是單一醫療機構，或由多個機構合併進行申請
+              主訓機構可以是單一醫療機構，或由多個機構合併進行認定
             </p>
           </div>
 
@@ -241,7 +241,7 @@ export function QuotaForm({
                 triggerLabel="新增合作機構"
               />
             <p className="text-sm text-muted-foreground mt-2">
-                可新增多個合作機構，每個合作機構可以是單一醫療機構，或由多個機構合併申請
+                可新增多個合作機構，每個合作機構可以是單一醫療機構，或由多個機構合併認定
             </p>
             </div>
           )}

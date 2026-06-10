@@ -46,6 +46,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -362,7 +363,7 @@ function FilingPageContent() {
           <div className="space-y-6 py-4">
             <div className="bg-muted/50 rounded-lg p-4">
               <p className="text-base text-muted-foreground mb-3">
-                請先下載���例文件，依照格式填寫後再上傳
+                請先下載範例文件，依照格式填寫後再上傳
               </p>
               <Button variant="outline" size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
@@ -950,7 +951,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
                 onClick={() => setShowAddTbProgramDialog(true)}
               >
                 <Plus className="h-4 w-4" />
-                新���醫院
+                新增醫院
               </Button>
               <Button
                 variant="outline"
@@ -1391,7 +1392,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-foreground">未申請醫院名單</h3>
-          <p className="text-sm text-muted-foreground mt-1">指前一年度為合格訓練醫院，惟本年度未提出申請之醫院。</p>
+          <p className="text-sm text-muted-foreground mt-1">係指前一年度為合格訓練醫院，惟本年度未提出申請之醫院。</p>
         </div>
           <div className="flex items-center gap-3 mt-0.5">
             <Button
@@ -1970,6 +1971,16 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
                 </div>
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <Download className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="flex flex-col">
+                <span>全部下載</span>
+                <span className="text-xs text-muted-foreground">
+                  {isInternalMedicine ? "同時下載全部四份 PDF" : "同時下載全部三份 PDF"}
+                </span>
+              </div>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         {!isSubmitted && (
