@@ -49,6 +49,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Link from "next/link"
 import { Textarea } from "@/components/ui/textarea"
 import { HospitalMultiSelect, type Hospital } from "@/components/filing/hospital-multi-select"
@@ -165,6 +166,11 @@ function FilingPageContent() {
   }
 
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importMode, setImportMode] = useState<"append" | "replace" | null>(null)
+  const onCloseImport = () => {
+    setShowImportDialog(false)
+    setImportMode(null)
+  }
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [selectedSubmitIds, setSelectedSubmitIds] = useState<string[]>([])
 
@@ -355,34 +361,69 @@ function FilingPageContent() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      <Dialog open={showImportDialog} onOpenChange={(open) => { if (!open) onCloseImport() }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>匯入檔案</DialogTitle>
+            <DialogTitle>匯入名單</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <p className="text-base text-muted-foreground mb-3">
-                請先下載範例文件，依照格式填寫後再上傳
-              </p>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
-                下載範例文件 (.xlsx)
-              </Button>
-            </div>
+          <div className="space-y-5 py-4">
+            {/* 步驟一：選擇匯入方式 */}
             <div>
-              <Label className="text-base font-medium mb-2 block">選擇檔案</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-base text-muted-foreground">點擊或拖曳檔案至此處上傳</p>
-                <p className="text-base text-muted-foreground mt-1">支援 .xlsx, .xls 格式</p>
-                <Input type="file" className="hidden" accept=".xlsx,.xls" />
-              </div>
+              <Label className="text-base font-medium mb-3 block">匯入方式</Label>
+              <RadioGroup
+                value={importMode ?? ""}
+                onValueChange={(v) => setImportMode(v as "append" | "replace")}
+                className="space-y-2.5"
+              >
+                <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${importMode === "append" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                  <RadioGroupItem value="append" id="import-append" className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-base font-medium">附加至現有資料</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">將檔案中的紀錄新增至目前名單末尾，現有資料不受影響</div>
+                  </div>
+                </label>
+                <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${importMode === "replace" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                  <RadioGroupItem value="replace" id="import-replace" className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-base font-medium">覆蓋現有資料</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">以檔案內容完整取代目前名單，現有資料將全部清除</div>
+                  </div>
+                </label>
+              </RadioGroup>
             </div>
+
+            {/* 步驟二：上傳區域（選擇匯入方式後才顯示） */}
+            {importMode && (
+              <div className="space-y-4 pt-1 border-t">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    請先下載範例文件，依照格式填寫後再上傳
+                  </p>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    下載範例文件 (.xlsx)
+                  </Button>
+                </div>
+                <div>
+                  <Label className="text-base font-medium mb-2 block">選擇檔案</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-base text-muted-foreground">點擊或拖曳檔案至此處上傳</p>
+                    <p className="text-sm text-muted-foreground mt-1">支援 .xlsx, .xls 格式</p>
+                    <Input type="file" className="hidden" accept=".xlsx,.xls" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImportDialog(false)}>取消</Button>
-            <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">上傳</Button>
+            <Button variant="outline" onClick={onCloseImport}>取消</Button>
+            <Button
+              disabled={!importMode}
+              className="bg-[#2d3a8c] hover:bg-[#252f73] text-white disabled:opacity-50"
+            >
+              上傳
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -397,7 +438,15 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
 
   // 匯入 Dialog state
   const [showImportDialog, setShowImportDialog] = useState(false)
-  const onOpenImport = () => setShowImportDialog(true)
+  const [importMode, setImportMode] = useState<"append" | "replace" | null>(null)
+  const onOpenImport = () => {
+    setImportMode(null)
+    setShowImportDialog(true)
+  }
+  const onCloseImport = () => {
+    setShowImportDialog(false)
+    setImportMode(null)
+  }
 
   // 新增不合格醫院 Dialog state
   const [showAddDisqualifiedDialog, setShowAddDisqualifiedDialog] = useState(false)
@@ -814,7 +863,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
             onClick={onOpenImport}
           >
             <Upload className="h-4 w-4" />
-            匯入檔案
+            匯入名單
           </Button>
         </div>
       </div>
@@ -1862,7 +1911,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
                     </div>
                   )}
 
-                  {/* 自動備註（來自各名單自動合併）
+                  {/* 自動備註（來自各名��自動合併）
                       序號基底 = 手動備註數，不計入 isAddingNote 佔位 */}
                   {autoNotes.length > 0 && (
                     <div className="px-6 py-2 bg-blue-50 border-t border-blue-100 flex items-center gap-2">
@@ -1985,7 +2034,7 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
         </DropdownMenu>
         {!isSubmitted && (
           <Button variant="outline" className="gap-2">
-            暫時儲存
+            ��時儲存
           </Button>
         )}
         {isSubmitted ? (
@@ -2047,35 +2096,70 @@ function FilingPageQuotaTab({ variant, isSubmitted, isReturned }: { variant: str
         </DialogContent>
       </Dialog>
 
-      {/* 匯入檔案 Dialog */}
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+      {/* 匯入名單 Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={(open) => { if (!open) onCloseImport() }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>匯入檔案</DialogTitle>
+            <DialogTitle>匯入名單</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-3">
-                請先下載範例文件，依照格式填寫後再上傳
-              </p>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
-                下載範例文件 (.xlsx)
-              </Button>
-            </div>
+          <div className="space-y-5 py-4">
+            {/* 步驟一：選擇匯入方式 */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">選擇檔案</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">點擊或拖曳檔案至此處上傳</p>
-                <p className="text-sm text-muted-foreground mt-1">支援 .xlsx, .xls 格式</p>
-                <Input type="file" className="hidden" accept=".xlsx,.xls" />
-              </div>
+              <Label className="text-base font-medium mb-3 block">匯入方式</Label>
+              <RadioGroup
+                value={importMode ?? ""}
+                onValueChange={(v) => setImportMode(v as "append" | "replace")}
+                className="space-y-2.5"
+              >
+                <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${importMode === "append" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                  <RadioGroupItem value="append" id="quota-import-append" className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-base font-medium">附加至現有資料</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">將檔案中的紀錄新增至目前名單末尾，現有資料不受影響</div>
+                  </div>
+                </label>
+                <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${importMode === "replace" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                  <RadioGroupItem value="replace" id="quota-import-replace" className="mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-base font-medium">覆蓋現有資料</div>
+                    <div className="text-sm text-muted-foreground mt-0.5">以檔案內容完整取代目前名單，現有資料將全部清除</div>
+                  </div>
+                </label>
+              </RadioGroup>
             </div>
+
+            {/* 步驟二：上傳區域（選擇匯入方式後才顯示） */}
+            {importMode && (
+              <div className="space-y-4 pt-1 border-t">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    請先下載範例文件，依照格式填寫後再上傳
+                  </p>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    下載範例文件 (.xlsx)
+                  </Button>
+                </div>
+                <div>
+                  <Label className="text-base font-medium mb-2 block">選擇檔案</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-base text-muted-foreground">點擊或拖曳檔案至此處上傳</p>
+                    <p className="text-sm text-muted-foreground mt-1">支援 .xlsx, .xls 格式</p>
+                    <Input type="file" className="hidden" accept=".xlsx,.xls" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImportDialog(false)}>取消</Button>
-            <Button className="bg-[#2d3a8c] hover:bg-[#252f73] text-white">上傳</Button>
+            <Button variant="outline" onClick={onCloseImport}>取消</Button>
+            <Button
+              disabled={!importMode}
+              className="bg-[#2d3a8c] hover:bg-[#252f73] text-white disabled:opacity-50"
+            >
+              上傳
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
