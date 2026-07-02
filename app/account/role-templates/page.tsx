@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Copy, Shield, Users, ArrowLeft } from "lucide-react"
+import { Plus, Edit, Trash2, Copy, Shield, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import {
   ROLE_TEMPLATES,
@@ -50,9 +50,7 @@ export default function RoleTemplatesPage() {
                   <TableRow>
                     <TableHead>角色名稱</TableHead>
                     <TableHead>說明</TableHead>
-                    <TableHead>層級</TableHead>
-                    <TableHead>類型</TableHead>
-                    <TableHead>使用人數</TableHead>
+                    <TableHead>適用層級</TableHead>
                     <TableHead>最後修改</TableHead>
                     <TableHead className="text-right">操作</TableHead>
                   </TableRow>
@@ -73,23 +71,6 @@ export default function RoleTemplatesPage() {
                         <Badge variant="outline" className={ROLE_TEMPLATE_LEVEL_BADGE_CLASS[template.level]}>
                           {ROLE_TEMPLATE_LEVEL_LABELS[template.level]}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {template.isSystem ? (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            系統預設
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                            自訂模板
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{template.userCount}</span>
-                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{template.lastModified}</TableCell>
                       <TableCell className="text-right">
