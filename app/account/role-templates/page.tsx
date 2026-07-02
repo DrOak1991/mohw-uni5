@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Copy, Shield, ArrowLeft } from "lucide-react"
+import { Plus, Edit, Shield, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import {
   ROLE_TEMPLATES,
@@ -80,16 +80,6 @@ export default function RoleTemplatesPage() {
                               <Edit className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Link href={`/account/role-templates/new?from=${template.id}`}>
-                            <Button size="sm" variant="ghost" title="複製模板">
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          {!template.isSystem && (
-                            <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" title="刪除">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>

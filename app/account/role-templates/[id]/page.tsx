@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Save, History } from "lucide-react"
+import { ArrowLeft, Save, History, Copy, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { RoleTemplateModules } from "@/components/account/role-template-modules"
 import {
@@ -65,11 +65,27 @@ export default function EditRoleTemplatePage() {
               最後修改：{template.lastModified} | 使用人數：{template.userCount}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button variant="outline">
               <History className="h-4 w-4 mr-2" />
               版本歷史
             </Button>
+            <Link href={`/account/role-templates/new?from=${template.id}`}>
+              <Button variant="outline">
+                <Copy className="h-4 w-4 mr-2" />
+                複製模板
+              </Button>
+            </Link>
+            {!template.isSystem && (
+              <Button
+                variant="outline"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                刪除模板
+              </Button>
+            )}
+            <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
             <Link href="/account/role-templates">
               <Button variant="outline">取消</Button>
             </Link>
