@@ -17,7 +17,8 @@ import { EvaluationUploadFiling } from "@/components/filing/variants/evaluation-
  */
 function FilingDetailContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
-  const status = searchParams.get("status") || "待審查"
+  // status URL param 使用英文 key（見 lib/mock/filing-documents.ts）；未帶參數時預設唯讀檢視
+  const status = searchParams.get("status") || "view"
 
   const doc = getFilingDocument(id)
   const documentTitle = doc?.title ?? id

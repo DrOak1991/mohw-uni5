@@ -18,7 +18,7 @@ const UPLOAD_SLOTS: FileUploadSlotConfig[] = [
 
 /** 版型 B：單主文件上傳（訓練課程基準、甄審原則）。目前為上傳區骨架。 */
 export function SingleUploadFiling({ documentTitle, status }: SingleUploadFilingProps) {
-  const isReadOnly = status === "通過" || status === "審查中"
+  const isReadOnly = status === "approved" || status === "under-review"
   const title = `內科專科醫師${documentTitle} - 114年度文件填報`
 
   return (

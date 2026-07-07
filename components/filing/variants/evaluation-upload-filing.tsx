@@ -38,7 +38,7 @@ const UPLOAD_GROUPS: UploadGroup[] = [
 
 /** 版型 C：評核標準與評核表（評核標準與評核表）。四份檔案上傳骨架。 */
 export function EvaluationUploadFiling({ documentTitle, status }: EvaluationUploadFilingProps) {
-  const isReadOnly = status === "通過" || status === "審查中"
+  const isReadOnly = status === "approved" || status === "under-review"
   const title = `內科專科醫師${documentTitle} - 114年度文件填報`
 
   return (

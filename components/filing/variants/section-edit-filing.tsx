@@ -144,7 +144,7 @@ interface SectionEditFilingProps {
 
 /** 版型 A：逐條編輯 + 差異對照 + 修訂說明（訓練計畫認定基準、容額分配原則、精進指南）。 */
 export function SectionEditFiling({ documentTitle, status }: SectionEditFilingProps) {
-  const isUnfilled = status === "尚未送出"
+  const isUnfilled = status === "not-submitted"
   const initialData = isUnfilled ? currentYearUnchanged : currentYearWithChanges
 
   const [documentMethod, setDocumentMethod] = useState<string>(isUnfilled ? "no-change" : "change")
@@ -164,11 +164,11 @@ export function SectionEditFiling({ documentTitle, status }: SectionEditFilingPr
 
   const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({})
 
-  const hasReviewComments = status === "需補件"
-  const isReadOnly = status === "通過" || status === "審查中"
-  const isReviewInProgress = status === "審查中"
+  const hasReviewComments = status === "needs-revision"
+  const isReadOnly = status === "approved" || status === "under-review"
+  const isReviewInProgress = status === "under-review"
   const isPreviousYearOnly = status === "view"
-  const showDocumentMethodChoice = status === "待送件" || status === "尚未送出"
+  const showDocumentMethodChoice = status === "pending" || status === "not-submitted"
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
