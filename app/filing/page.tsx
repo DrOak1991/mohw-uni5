@@ -62,6 +62,7 @@ import {
   ReviewFeedbackBanner,
   type ReviewFeedback,
 } from "@/components/filing/review-feedback-banner"
+import { FILING_DOCUMENTS } from "@/lib/mock/filing-documents"
 
 // Mock 退回審查意見
 const MOCK_QUOTA_REVIEW_FEEDBACK: ReviewFeedback = {
@@ -111,14 +112,8 @@ const filingStatusMap = Object.fromEntries(
   filingItemsConfig.map((item) => [item.id, item.status])
 )
 
-const documents = [
-  { id: "training-plan", title: "訓練計畫認定基準", status: "需補件", deadline: "114/03/31", latestAnnouncementDate: "114/09/03", latestAnnouncementNumber: "衛部醫字第1141660001號" },
-  { id: "training-curriculum", title: "訓練課程基準", status: "尚未送出", deadline: "114/04/30", latestAnnouncementDate: "114/09/03", latestAnnouncementNumber: "衛部醫字第1141660002號" },
-  { id: "evaluation-standards", title: "評核標準與評核表", status: "審查中", deadline: "114/04/15", latestAnnouncementDate: "113/10/01", latestAnnouncementNumber: "衛部醫字第1131660015號" },
-  { id: "quota-allocation", title: "容額分配原則", status: "通過", deadline: "114/03/15", latestAnnouncementDate: "114/09/03", latestAnnouncementNumber: "衛部醫字第1141660003號" },
-  { id: "improvement-guide", title: "精進指南", status: "待送件", deadline: "114/04/30", latestAnnouncementDate: "112/09/25", latestAnnouncementNumber: "衛部醫字第1121660008號" },
-  { id: "screening-principle", title: "甄審原則", status: "通過", deadline: "114/03/15", latestAnnouncementDate: "114/09/03", latestAnnouncementNumber: "衛部醫字第1141660004號" },
-]
+// 文件與版型完全耦合，統一由 lib/mock/filing-documents.ts 提供
+const documents = FILING_DOCUMENTS
 
 // 可送件的狀態（已有內容但尚未送出）
 const submittableStatuses = ["待送件", "需補件", "尚未送出"]
