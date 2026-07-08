@@ -1,9 +1,15 @@
 "use client"
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { FileText, GitCompare } from "lucide-react"
+import { ChevronDown, Download, FileText, GitCompare } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { DocumentPane, ComparisonPane } from "@/components/filing/document-pane"
 import type { DocContent, ComparisonContent } from "@/lib/mock/filing-upload-content"
 
@@ -185,14 +191,39 @@ export function DocumentSwitcherViewer({
           </Button>
         </div>
 
-        {/* 快捷鍵提示 */}
-        <p className="text-sm text-muted-foreground">
-          快捷鍵：
-          <kbd className="mx-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">T</kbd>
-          切換年度
-          <kbd className="mx-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">G</kbd>
-          開關對照表
-        </p>
+        <div className="flex items-center gap-3">
+          {/* 下載前次檔案：僅在檢視前年度且有前年度文件時提供 */}
+          {!showComparison && year === "previous" && activeFile.previous && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Download className="h-4 w-4" />
+                  下載前次檔案
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <FileText className="mr-2 h-4 w-4" />
+                  下載 Word 檔
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <FileText className="mr-2 h-4 w-4" />
+                  下載 PDF 檔
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* 快捷鍵提示 */}
+          <p className="text-sm text-muted-foreground">
+            快捷鍵：
+            <kbd className="mx-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">T</kbd>
+            切換年度
+            <kbd className="mx-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">G</kbd>
+            開關對照表
+          </p>
+        </div>
       </div>
 
       {/* 檢視區：三種檢視共用同一固定高度容器與比例 */}
