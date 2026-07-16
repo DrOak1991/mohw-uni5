@@ -80,6 +80,11 @@ export function GlobalNav() {
                       外加容額申請
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/filing/outcome-report" className="cursor-pointer">
+                      成果報告上傳
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 

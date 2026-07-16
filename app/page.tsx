@@ -29,6 +29,7 @@ export default function HomePage() {
         { name: "文件填報", href: "/filing", description: "管理年度文件填報作業" },
         { name: "容額填報", href: "/filing?tab=quota", description: "管理訓練醫院名單與容額分配" },
         { name: "外加容額申請", href: "/filing/additional-quota", description: "申請額外訓練容額" },
+        { name: "成果報告上傳", href: "/filing/outcome-report", description: "上傳各醫學會成果報告並初步審查" },
       ],
     },
     {
