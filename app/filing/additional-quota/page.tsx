@@ -13,10 +13,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   ADDITIONAL_QUOTA_APPLICATIONS,
   ADDITIONAL_QUOTA_STAGE_CONFIG,
   getClassificationPrinciples,
   getSpecialtyOptions,
+  type AdditionalQuotaStage,
 } from "@/lib/mock/additional-quota"
 
 type TextField = "hospitalName" | "incomingDocNumber" | "ministryDocNumber"
@@ -84,25 +91,48 @@ export default function FilingAdditionalQuotaPage() {
   const [textQuery, setTextQuery] = useState("")
   const [specialtyFilter, setSpecialtyFilter] = useState<string[]>([])
   const [principleFilter, setPrincipleFilter] = useState<string[]>([])
+  const [stageTab, setStageTab] = useState<AdditionalQuotaStage | "all">("all")
   const [sortAsc, setSortAsc] = useState(false)
 
   const specialtyOptions = getSpecialtyOptions()
   const principleOptions = getClassificationPrinciples()
 
-  const rows = useMemo(() => {
+  // 先套用文字與下拉篩選；狀態 tab 在其上再細分，故 tab 計數反映目前篩選結果
+  const baseFiltered = useMemo(() => {
     const q = textQuery.trim().toLowerCase()
-    const filtered = ADDITIONAL_QUOTA_APPLICATIONS.filter((a) => {
+    return ADDITIONAL_QUOTA_APPLICATIONS.filter((a) => {
       const matchesText = q === "" || a[textField].toLowerCase().includes(q)
       const matchesSpecialty = specialtyFilter.length === 0 || specialtyFilter.includes(a.specialty)
       const matchesPrinciple = principleFilter.length === 0 || principleFilter.includes(a.classificationPrinciple)
       return matchesText && matchesSpecialty && matchesPrinciple
     })
-    return [...filtered].sort((a, b) =>
+  }, [textField, textQuery, specialtyFilter, principleFilter])
+
+  const stageTabs = useMemo(() => {
+    const count = (s: AdditionalQuotaStage) => baseFiltered.filter((a) => a.stage === s).length
+    return [
+      { value: "all" as const, label: "全部", count: baseFiltered.length },
+      { value: "待審查" as const, label: "待審查", count: count("待審查") },
+      { value: "待公告" as const, label: "待公告", count: count("待公告") },
+      { value: "已公告" as const, label: "已公告", count: count("已公告") },
+    ]
+  }, [baseFiltered])
+
+  const rows = useMemo(() => {
+    const byStage = stageTab === "all" ? baseFiltered : baseFiltered.filter((a) => a.stage === stageTab)
+    return [...byStage].sort((a, b) =>
       sortAsc ? a.incomingDate.localeCompare(b.incomingDate) : b.incomingDate.localeCompare(a.incomingDate),
     )
-  }, [textField, textQuery, specialtyFilter, principleFilter, sortAsc])
+  }, [baseFiltered, stageTab, sortAsc])
 
-  const handleExport = () => toast.success(`已匯出 ${rows.length} 筆申請清單`)
+  // 審查結果清單：已登錄審查結果（待公告）與已公告的案件，供公告文書準備
+  const reviewedCount = useMemo(
+    () => baseFiltered.filter((a) => a.stage === "待公告" || a.stage === "已公告").length,
+    [baseFiltered],
+  )
+
+  const handleExportApplications = () => toast.success(`已匯出 ${rows.length} 筆申請清單`)
+  const handleExportReviewed = () => toast.success(`已匯出 ${reviewedCount} 筆審查結果清單（待公告、已公告）`)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,10 +148,29 @@ export default function FilingAdditionalQuotaPage() {
             <p className="mt-1 text-sm text-gray-500">登錄、審查各訓練醫院之外加容額申請，並辦理公告</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
-              <Download className="h-4 w-4" />
-              匯出申請清單
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Download className="h-4 w-4" />
+                  匯出
+                  <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuItem onClick={handleExportApplications} className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span>匯出申請清單</span>
+                    <span className="text-xs text-muted-foreground">目前檢視之案件，供會議審查</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportReviewed} className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span>匯出審查結果清單</span>
+                    <span className="text-xs text-muted-foreground">待公告與已公告案件，供公告文書準備</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button asChild className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73]">
               <Link href="/filing/additional-quota/new">
                 <Plus className="h-4 w-4" />
@@ -129,6 +178,26 @@ export default function FilingAdditionalQuotaPage() {
               </Link>
             </Button>
           </div>
+        </div>
+
+        {/* 狀態切換：醫事司的主要工作軸，故以 tab 呈現於篩選之上 */}
+        <div className="mb-4 flex items-center gap-6 border-b border-gray-200">
+          {stageTabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStageTab(tab.value)}
+              className={`relative -mb-px flex items-center border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
+                stageTab === tab.value
+                  ? "border-[#2d3a8c] text-[#2d3a8c]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab.label}
+              <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
+                {tab.count}
+              </Badge>
+            </button>
+          ))}
         </div>
 
         {/* 篩選工具列 */}

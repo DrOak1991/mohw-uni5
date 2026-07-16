@@ -54,7 +54,9 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
   const stage = application?.stage ?? "待審查"
   const contentEditable = isNew || isAdditionalQuotaEditable(stage)
   const canRegisterReview = !isNew && stage === "待審查"
-  const canAnnounce = !isNew && stage === "待公告"
+  // 公告為跨案件的彙整動作，於公告管理辦理，故案件頁不提供辦理公告，僅呈現狀態
+  const isPendingAnnouncement = !isNew && stage === "待公告"
+  const isAnnounced = stage === "已公告"
 
   // ── 申請內容 ────────────────────────────────
   const [hospitalName, setHospitalName] = useState(application?.hospitalName ?? "")
@@ -85,9 +87,6 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
   )
   const [reviewComment, setReviewComment] = useState(application?.reviewComment ?? "")
   const [reviewMinutes, setReviewMinutes] = useState<UploadedFile[]>(application?.reviewMinutes ?? [])
-
-  // ── 公告 ────────────────────────────────────
-  const [announcementNumber, setAnnouncementNumber] = useState(application?.announcementNumber ?? "")
 
   const quota = application?.currentYearQuota ?? NEW_QUOTA
   const requestedNumber = Number(requestedQuota) || 0
@@ -143,15 +142,6 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
       return
     }
     toast.success("已登錄審查結果，案件轉為待公告")
-    setTimeout(() => router.push("/filing/additional-quota"), 0)
-  }
-
-  const handleAnnounce = () => {
-    if (!announcementNumber.trim()) {
-      toast.error("請填寫公告文號")
-      return
-    }
-    toast.success("已完成公告")
     setTimeout(() => router.push("/filing/additional-quota"), 0)
   }
 
@@ -484,8 +474,27 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
             </Card>
           )}
 
-          {/* 公告：待公告可辦理，已公告顯示結果 */}
-          {(canAnnounce || stage === "已公告") && (
+          {/* 公告狀態：公告為跨案件的彙整動作，於公告管理辦理，此處僅呈現狀態 */}
+          {isPendingAnnouncement && (
+            <Card className="border-amber-200 bg-amber-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-amber-600" />
+                  公告
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-700">
+                  審查結果已登錄，本案待納入公告。公告作業涵蓋多間醫院，請至
+                  <Link href="/announcement-management" className="mx-1 text-blue-600 hover:underline">
+                    公告管理
+                  </Link>
+                  一併辦理。
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {isAnnounced && (
             <Card className="border-green-200 bg-green-50/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -493,28 +502,15 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
                   公告
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
+              <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">
-                    公告文號 {canAnnounce && <span className="text-destructive">*</span>}
-                  </Label>
-                  {canAnnounce ? (
-                    <Input
-                      value={announcementNumber}
-                      onChange={(e) => setAnnouncementNumber(e.target.value)}
-                      placeholder="例如：衛部醫字第115XXXX號"
-                      className="mt-1 bg-white"
-                    />
-                  ) : (
-                    <p className="mt-1 text-sm text-gray-900">{application?.announcementNumber ?? "—"}</p>
-                  )}
+                  <Label className="text-sm font-medium text-gray-700">公告文號</Label>
+                  <p className="mt-1 text-sm text-gray-900">{application?.announcementNumber ?? "—"}</p>
                 </div>
-                {stage === "已公告" && (
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">公告日期</Label>
-                    <p className="mt-1 text-sm text-gray-900">{application?.announcementDate ?? "—"}</p>
-                  </div>
-                )}
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">公告日期</Label>
+                  <p className="mt-1 text-sm text-gray-900">{application?.announcementDate ?? "—"}</p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -572,11 +568,6 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
           {canRegisterReview && (
             <Button className="bg-[#2d3a8c] text-white hover:bg-[#252f73]" onClick={handleRegisterReview}>
               登錄審查結果並轉待公告
-            </Button>
-          )}
-          {canAnnounce && (
-            <Button className="bg-green-600 text-white hover:bg-green-700" onClick={handleAnnounce}>
-              辦理公告
             </Button>
           )}
         </div>
