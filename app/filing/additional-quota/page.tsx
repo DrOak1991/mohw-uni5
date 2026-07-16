@@ -114,7 +114,7 @@ export default function FilingAdditionalQuotaPage() {
 
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">外加容額申請</h1>
+            <h1 className="text-2xl font-bold text-gray-900">外加容額管理</h1>
             <p className="mt-1 text-sm text-gray-500">登錄、審查各訓練醫院之外加容額申請，並辦理公告</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">

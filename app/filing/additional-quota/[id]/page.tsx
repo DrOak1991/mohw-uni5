@@ -25,7 +25,7 @@ export default function AdditionalQuotaDetailPage({ params }: { params: Promise<
             className="mb-4 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
           >
             <ArrowLeft className="h-4 w-4" />
-            返回外加容額申請
+            返回外加容額管理
           </Link>
           <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
             <p className="text-gray-500">找不到編號 {id} 的申請案件</p>

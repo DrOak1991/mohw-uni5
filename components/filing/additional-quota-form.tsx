@@ -165,7 +165,7 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
           className="mb-4 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
         >
           <ArrowLeft className="h-4 w-4" />
-          返回外加容額申請
+          返回外加容額管理
         </Link>
 
         <div className="mb-6 flex items-start justify-between gap-4">

@@ -77,7 +77,7 @@ export function GlobalNav() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/filing/additional-quota" className="cursor-pointer">
-                      外加容額申請
+                      外加容額管理
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
