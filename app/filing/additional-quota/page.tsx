@@ -1,65 +1,24 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Plus, ChevronRight, FileText, Upload } from "lucide-react"
+import { ArrowLeft, Plus, ChevronRight, FileText } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-// 模擬外加容額申請資料（醫學會視角）
-const mockApplications = [
-  {
-    id: "1",
-    hospitalName: "台大醫院",
-    year: "115 年度",
-    submittedDate: "2026/01/15",
-    requestedQuota: 5,
-    status: "審查中" as const,
-  },
-  {
-    id: "2",
-    hospitalName: "台北榮總",
-    year: "115 年度",
-    submittedDate: "2026/01/18",
-    requestedQuota: 3,
-    status: "審查中" as const,
-  },
-  {
-    id: "3",
-    hospitalName: "長庚醫院",
-    year: "115 年度",
-    submittedDate: "2026/01/20",
-    requestedQuota: 4,
-    status: "已核定" as const,
-    approvedQuota: 3,
-    approvedDate: "2026/02/15",
-  },
-  {
-    id: "4",
-    hospitalName: "馬偕醫院",
-    year: "114 年度",
-    submittedDate: "2025/01/10",
-    requestedQuota: 2,
-    status: "已核定" as const,
-    approvedQuota: 2,
-    approvedDate: "2025/02/20",
-  },
-]
-
-const statusConfig: Record<string, { color: string; label: string }> = {
-  "草稿": { color: "bg-gray-100 text-gray-700 border-gray-200", label: "草稿" },
-  "審查中": { color: "bg-blue-100 text-blue-700 border-blue-200", label: "審查中" },
-  "已核定": { color: "bg-green-100 text-green-700 border-green-200", label: "已核定" },
-  "退回修改": { color: "bg-red-100 text-red-700 border-red-200", label: "退回修改" },
-}
+import {
+  ADDITIONAL_QUOTA_STATUS_CONFIG,
+  FILING_ADDITIONAL_QUOTA_APPLICATIONS,
+  isAdditionalQuotaEditable,
+  type AdditionalQuotaApplication,
+} from "@/lib/mock/filing-additional-quota"
 
 export default function FilingAdditionalQuotaPage() {
-  const pendingApplications = mockApplications.filter((a) => a.status === "審查中" || a.status === "草稿" || a.status === "退回修改")
-  const approvedApplications = mockApplications.filter((a) => a.status === "已核定")
+  const applications = FILING_ADDITIONAL_QUOTA_APPLICATIONS
+  const pendingApplications = applications.filter((a) => a.status !== "已核定")
+  const approvedApplications = applications.filter((a) => a.status === "已核定")
 
-  const renderApplicationCard = (app: (typeof mockApplications)[0]) => (
+  const renderApplicationCard = (app: AdditionalQuotaApplication) => (
     <Card key={app.id} className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
@@ -69,8 +28,8 @@ export default function FilingAdditionalQuotaPage() {
               <Badge variant="outline" className="text-sm">
                 {app.year}
               </Badge>
-              <Badge variant="outline" className={statusConfig[app.status].color}>
-                {statusConfig[app.status].label}
+              <Badge variant="outline" className={ADDITIONAL_QUOTA_STATUS_CONFIG[app.status].color}>
+                {ADDITIONAL_QUOTA_STATUS_CONFIG[app.status].label}
               </Badge>
             </div>
             <div className="flex items-center gap-6 text-sm text-gray-500">
@@ -86,11 +45,11 @@ export default function FilingAdditionalQuotaPage() {
                 <>
                   <div>
                     <span className="font-medium">核定容額：</span>
-                    <span className="text-green-600 font-semibold">{(app as any).approvedQuota} 名</span>
+                    <span className="text-green-600 font-semibold">{app.approvedQuota} 名</span>
                   </div>
                   <div>
                     <span className="font-medium">核定日期：</span>
-                    {(app as any).approvedDate}
+                    {app.approvedDate}
                   </div>
                 </>
               )}
@@ -100,7 +59,7 @@ export default function FilingAdditionalQuotaPage() {
           <Button variant="outline" asChild>
             <Link href={`/filing/additional-quota/${app.id}`} className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              {app.status === "草稿" || app.status === "退回修改" ? "編輯申請" : "檢視詳情"}
+              {isAdditionalQuotaEditable(app.status) ? "編輯申請" : "檢視詳情"}
               <ChevronRight className="w-4 h-4" />
             </Link>
           </Button>
@@ -126,9 +85,11 @@ export default function FilingAdditionalQuotaPage() {
             <p className="text-sm text-gray-500 mt-1">管理訓練醫院的外加容額申請</p>
           </div>
 
-          <Button className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73]">
-            <Plus className="w-4 h-4" />
-            新增申請
+          <Button asChild className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73]">
+            <Link href="/filing/additional-quota/new">
+              <Plus className="w-4 h-4" />
+              新增申請
+            </Link>
           </Button>
         </div>
 
