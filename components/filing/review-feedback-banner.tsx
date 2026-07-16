@@ -14,7 +14,9 @@ import { AlertTriangle, FileText } from "lucide-react"
 export interface ReviewFeedback {
   reviewDate: string
   meetingTitle?: string
-  comments: string[]
+  /** 摘要條列。僅在未提供 fullContent 時顯示。 */
+  comments?: string[]
+  /** 審查會議紀錄全文。提供時優先於 comments 顯示。 */
   fullContent?: string
 }
 
@@ -79,7 +81,7 @@ export function ReviewFeedbackBanner({
                       {feedback.fullContent}
                     </div>
                   </div>
-                ) : (
+                ) : feedback.comments?.length ? (
                   <ol className="list-decimal list-inside space-y-3 bg-white rounded-lg border p-4">
                     {feedback.comments.map((comment, index) => (
                       <li key={index} className="text-sm text-foreground leading-relaxed pl-2">
@@ -87,6 +89,10 @@ export function ReviewFeedbackBanner({
                       </li>
                     ))}
                   </ol>
+                ) : (
+                  <p className="rounded-lg border bg-white p-4 text-sm text-muted-foreground">
+                    尚無審查意見內容。
+                  </p>
                 )}
               </div>
             </div>
