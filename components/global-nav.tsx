@@ -116,6 +116,11 @@ export function GlobalNav() {
                       外加容額審查
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/review/outcome-report" className="cursor-pointer">
+                      成果報告審查
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 

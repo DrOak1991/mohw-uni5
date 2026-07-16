@@ -1,6 +1,7 @@
 import { allSocieties } from "@/lib/data/societies"
 
-// 成果報告上傳（填報端／醫策會視角）的 mock 來源。
+// 成果報告的 mock 來源，填報端（醫策會）與審查端（醫事司）共用。
+// 同一個案件流經兩端 —— 醫事司要讀醫策會寫的初審意見 —— 故不拆成兩份資料。
 //
 // 業務流程：專科醫學會提交成果報告（系統外），醫策會代為上傳並進行初步審查，
 // 再交由醫事司審查核定。醫事司通過後系統自動歸檔，無公告步驟。
@@ -48,6 +49,10 @@ export interface OutcomeReportCase {
   preliminaryReview: PreliminaryReviewResult | null
   reviewComment: string
   reviewMinutes: OutcomeReportFile[]
+  // 醫事司審查：通過即歸檔，故僅已歸檔的案件有值
+  mohwReviewComment: string
+  mohwReviewMinutes: OutcomeReportFile[]
+  archivedDate: string | null
 }
 
 const REPORT_TYPE_LABEL: Record<OutcomeReportType, string> = {
@@ -73,6 +78,9 @@ function buildCase(societyId: string, societyName: string, type: OutcomeReportTy
       preliminaryReview: null,
       reviewComment: "",
       reviewMinutes: [],
+      mohwReviewComment: "",
+      mohwReviewMinutes: [],
+      archivedDate: null,
     }
   }
 
@@ -99,6 +107,9 @@ function buildCase(societyId: string, societyName: string, type: OutcomeReportTy
       preliminaryReview: null,
       reviewComment: "",
       reviewMinutes: [],
+      mohwReviewComment: "",
+      mohwReviewMinutes: [],
+      archivedDate: null,
     }
   }
 
@@ -115,6 +126,9 @@ function buildCase(societyId: string, societyName: string, type: OutcomeReportTy
       reviewMinutes: [
         { id: `${societyId}-${type}-m1`, name: `115年度第一次成果報告初審會議紀錄.pdf`, size: "1.4 MB" },
       ],
+      mohwReviewComment: "",
+      mohwReviewMinutes: [],
+      archivedDate: null,
     }
   }
 
@@ -131,6 +145,10 @@ function buildCase(societyId: string, societyName: string, type: OutcomeReportTy
       reviewMinutes: [
         { id: `${societyId}-${type}-m1`, name: `115年度第一次成果報告初審會議紀錄.pdf`, size: "1.4 MB" },
       ],
+      // 已提送但醫事司尚未審查
+      mohwReviewComment: "",
+      mohwReviewMinutes: [],
+      archivedDate: null,
     }
   }
 
@@ -144,6 +162,9 @@ function buildCase(societyId: string, societyName: string, type: OutcomeReportTy
     preliminaryReview: "通過",
     reviewComment: `經初步審查，${societyName}所提${label}內容完整，訓練品質指標達成情形良好，無須補正。建議提送醫事司審查。`,
     reviewMinutes: [{ id: `${societyId}-${type}-m1`, name: `114年度成果報告初審會議紀錄.pdf`, size: "1.2 MB" }],
+    mohwReviewComment: `本案${label}業經醫策會初步審查，內容完整。經本司複核，訓練成效指標與訓練醫院清冊相符，各項達成率均符合規定，同意備查並歸檔。`,
+    mohwReviewMinutes: [{ id: `${societyId}-${type}-mw1`, name: `114年度成果報告審查會議紀錄.pdf`, size: "1.6 MB" }],
+    archivedDate: "115/01/28",
   }
 }
 
@@ -167,9 +188,15 @@ export function getSocietyName(societyId: string): string {
   return allSocieties.find((s) => s.id === societyId)?.name ?? societyId
 }
 
+/**
+ * 醫事司可見的案件：待填寫代表醫策會尚未上傳，對醫事司無意義，故排除。
+ */
+export function getOutcomeReportReviewCases(type: OutcomeReportType): OutcomeReportCase[] {
+  return getOutcomeReportCases(type).filter((c) => c.stage !== "待填寫")
+}
+
 /** 各階段案件數，供列表頁的階段篩選使用。 */
-export function getOutcomeReportStageCounts(type: OutcomeReportType) {
-  const cases = getOutcomeReportCases(type)
+export function getOutcomeReportStageCounts(type: OutcomeReportType, cases = getOutcomeReportCases(type)) {
   return (Object.keys(OUTCOME_REPORT_STAGE_CONFIG) as OutcomeReportStage[])
     .map((stage) => ({ stage, count: cases.filter((c) => c.stage === stage).length }))
     .filter((s) => s.count > 0)

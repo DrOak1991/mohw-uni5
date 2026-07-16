@@ -20,7 +20,7 @@ import {
   getSocietyName,
   type OutcomeReportType,
   type PreliminaryReviewResult,
-} from "@/lib/mock/filing-outcome-report"
+} from "@/lib/mock/outcome-report"
 
 /**
  * 成果報告內容頁（醫策會視角）。

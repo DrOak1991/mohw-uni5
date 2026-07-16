@@ -2,34 +2,35 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, ChevronRight, FileText } from "lucide-react"
+import { ChevronRight, ClipboardCheck } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ReviewSimpleNav } from "@/components/review/simple-nav"
 import {
   OUTCOME_REPORT_STAGE_CONFIG,
   OUTCOME_REPORT_TYPES,
   PRELIMINARY_REVIEW_CONFIG,
-  getOutcomeReportCases,
+  getOutcomeReportReviewCases,
   getOutcomeReportStageCounts,
   getSocietyName,
   type OutcomeReportType,
 } from "@/lib/mock/outcome-report"
 
 /**
- * 成果報告上傳（醫策會視角）。
- * 兩種報告類型的列表與版型完全相同，僅上傳的報告不同，故以 Tabs 區分。
- * 階段推進發生在案件內容頁，列表不提供批次操作。
+ * 成果報告審查（醫事司視角）。
+ * 與填報端 /filing/outcome-report 共用同一份案件資料，差異在於：
+ * 醫事司不上傳成果報告，且看不到待填寫的案件 —— 醫策會尚未上傳者對醫事司無意義。
  */
-export default function OutcomeReportPage() {
+export default function OutcomeReportReviewPage() {
   const [activeType, setActiveType] = useState<OutcomeReportType>("quota")
   const [stageFilter, setStageFilter] = useState<string>("all")
 
-  const cases = useMemo(() => getOutcomeReportCases(activeType), [activeType])
-  const stageCounts = useMemo(() => getOutcomeReportStageCounts(activeType), [activeType])
+  const cases = useMemo(() => getOutcomeReportReviewCases(activeType), [activeType])
+  const stageCounts = useMemo(() => getOutcomeReportStageCounts(activeType, cases), [activeType, cases])
   const filtered = useMemo(
     () => (stageFilter === "all" ? cases : cases.filter((c) => c.stage === stageFilter)),
     [cases, stageFilter],
@@ -42,16 +43,12 @@ export default function OutcomeReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ReviewSimpleNav />
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-          <ArrowLeft className="h-4 w-4" />
-          返回首頁
-        </Link>
-
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">成果報告上傳</h1>
+          <h1 className="text-2xl font-bold text-gray-900">成果報告審查</h1>
           <p className="mt-1 text-base text-gray-500">
-            上傳各專科醫學會提交之成果報告並進行初步審查，初審完成後提送醫事司審查
+            審查醫策會提送之各專科醫學會成果報告，通過後由系統自動歸檔
           </p>
         </div>
 
@@ -71,11 +68,10 @@ export default function OutcomeReportPage() {
                   <div className="mb-5">
                     <h2 className="text-lg font-semibold text-gray-900">{t.name}</h2>
                     <p className="mt-0.5 text-sm text-muted-foreground">
-                      共 {cases.length} 個醫學會
+                      醫策會已提送 {cases.length} 件
                     </p>
                   </div>
 
-                  {/* 階段篩選 */}
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Button
                       variant={stageFilter === "all" ? "default" : "outline"}
@@ -102,7 +98,7 @@ export default function OutcomeReportPage() {
                         <TableRow>
                           <TableHead>專科醫學會</TableHead>
                           <TableHead className="w-32">階段</TableHead>
-                          <TableHead className="w-32">初審結果</TableHead>
+                          <TableHead className="w-32">醫策會初審</TableHead>
                           <TableHead className="w-28" />
                         </TableRow>
                       </TableHeader>
@@ -117,21 +113,24 @@ export default function OutcomeReportPage() {
                             </TableCell>
                             <TableCell>
                               {c.preliminaryReview ? (
-                                <Badge variant="outline" className={PRELIMINARY_REVIEW_CONFIG[c.preliminaryReview].color}>
+                                <Badge
+                                  variant="outline"
+                                  className={PRELIMINARY_REVIEW_CONFIG[c.preliminaryReview].color}
+                                >
                                   {PRELIMINARY_REVIEW_CONFIG[c.preliminaryReview].label}
                                 </Badge>
                               ) : (
-                                <span className="text-sm text-gray-400">—</span>
+                                <span className="text-sm text-gray-400">尚未初審</span>
                               )}
                             </TableCell>
                             <TableCell>
                               <Button variant="outline" size="sm" asChild>
                                 <Link
-                                  href={`/filing/outcome-report/${c.societyId}?type=${c.type}`}
+                                  href={`/review/outcome-report/${c.societyId}?type=${c.type}`}
                                   className="flex items-center gap-1"
                                 >
-                                  <FileText className="h-4 w-4" />
-                                  編輯
+                                  <ClipboardCheck className="h-4 w-4" />
+                                  審查
                                   <ChevronRight className="h-4 w-4" />
                                 </Link>
                               </Button>

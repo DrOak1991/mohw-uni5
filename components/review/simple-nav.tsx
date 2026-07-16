@@ -20,6 +20,9 @@ export function ReviewSimpleNav() {
           <Button variant={pathname.startsWith("/review/additional-quota") ? "default" : "ghost"} size="sm" asChild>
             <Link href="/review/additional-quota">外加容額審查</Link>
           </Button>
+          <Button variant={pathname.startsWith("/review/outcome-report") ? "default" : "ghost"} size="sm" asChild>
+            <Link href="/review/outcome-report">成果報告審查</Link>
+          </Button>
         </div>
       </div>
     </div>
