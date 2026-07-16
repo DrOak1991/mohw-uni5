@@ -101,7 +101,7 @@ export const FILING_ADDITIONAL_QUOTA_APPLICATIONS: AdditionalQuotaApplication[] 
       { id: "1", name: "內科住院人次統計.pdf", size: "1.5 MB" },
       { id: "2", name: "師資名單.pdf", size: "0.9 MB" },
     ],
-    currentYearQuota: { specialty: "內科", approved: 20, limit: 22, validFrom: "2025-08-01", validTo: "2026-07-31" },
+    currentYearQuota: { specialty: "內科", approved: 20, limit: 25, validFrom: "2025-08-01", validTo: "2026-07-31" },
     previousPeriod: buildPreviousPeriod("內科", 2),
   },
   {
@@ -140,12 +140,14 @@ export const FILING_ADDITIONAL_QUOTA_APPLICATIONS: AdditionalQuotaApplication[] 
     year: "115 年度",
     submittedDate: "2026/01/22",
     status: "退回修改",
-    requestedQuota: 6,
+    requestedQuota: 3,
     requestReason: "因應麻醉科業務擴展，申請外加容額。",
-    requestDescription: "本院麻醉科業務量成長，擬申請外加容額 6 名。",
+    requestDescription: "本院麻醉科業務量成長，擬申請外加容額 3 名。",
     attachments: [{ id: "1", name: "麻醉科業務統計.pdf", size: "1.1 MB" }],
     currentYearQuota: { specialty: "麻醉科", approved: 10, limit: 14, validFrom: "2025-08-01", validTo: "2026-07-31" },
     previousPeriod: buildPreviousPeriod("麻醉科", 2),
+    // 退回理由不涉及超過容額上限 —— 上限由前端硬性擋下，超額的申請送不出來，
+    // 因此不可能出現在審查階段
     reviewFeedback: {
       reviewDate: "115/02/06",
       meetingTitle: "115年度第一次外加容額審查會議",
@@ -160,14 +162,14 @@ export const FILING_ADDITIONAL_QUOTA_APPLICATIONS: AdditionalQuotaApplication[] 
 
 五、審查意見：
 
-（一）本案申請外加容額 6 名，核定後總容額將達 16 名，已超過該院麻醉科容額上限 14 名。
-    請重新評估申請數，或補充說明超過上限之必要性及配套之師資擴充計畫。
-
-（二）申請說明過於簡略，僅稱「業務量成長」而未提供具體數據。
+（一）申請說明過於簡略，僅稱「業務量成長」而未提供具體數據。
     請補充近三年麻醉科手術台數、麻醉人次之統計資料，並與現有容額對照說明。
 
-（三）未檢附師資名單與資格證明。依規定申請外加容額應具備對應之師資，
-    請補齊相關文件。
+（二）未檢附師資名單與資格證明。依規定申請外加容額應具備對應之師資，
+    請補齊相關文件，並敘明各師資之專科證書字號與指導年資。
+
+（三）申請緣由未說明現有 10 名容額之運用情形。
+    請補充近二年容額使用率與訓練完成率，以佐證增額之必要性。
 
 六、散會：上午11時20分`,
     },

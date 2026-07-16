@@ -61,14 +61,16 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
   const totalAfterApproval = quota.approved + requestedNumber
   const exceedsLimit = totalAfterApproval > quota.limit
 
+  // 超過容額上限即不得送出：上限為硬性限制，不是提醒
   const canSubmit = useMemo(
     () =>
       Boolean(hospitalName) &&
       requestedNumber > 0 &&
+      !exceedsLimit &&
       requestReason.trim() !== "" &&
       requestDescription.trim() !== "" &&
       attachments.length > 0,
-    [hospitalName, requestedNumber, requestReason, requestDescription, attachments],
+    [hospitalName, requestedNumber, exceedsLimit, requestReason, requestDescription, attachments],
   )
 
   const handleQuotaChange = (value: string) => {
@@ -196,8 +198,9 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
                         value={requestedQuota}
                         onChange={(e) => handleQuotaChange(e.target.value)}
                         placeholder="0"
-                        className="w-32"
                         inputMode="numeric"
+                        aria-invalid={exceedsLimit}
+                        className={`w-32 ${exceedsLimit ? "border-red-400 focus-visible:ring-red-400" : ""}`}
                       />
                       <span className="text-sm text-gray-500">名</span>
                     </div>
@@ -206,22 +209,22 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
                   )}
                 </div>
 
-                {/* 核定後總容額：隨輸入即時試算，讓填報者當下就知道是否超額 */}
+                {/* 核定後總容額：隨輸入即時試算。超過上限即為錯誤狀態，送出會被擋下。 */}
                 <div
                   className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-b-lg border px-4 py-3 ${
                     exceedsLimit ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"
                   }`}
                 >
                   <p className="text-sm text-gray-700">
-                    已核定 {quota.approved} ＋ 本次申請 {requestedNumber} ＝
+                    核定後總容額
                     <span className={`ml-1.5 text-base font-bold ${exceedsLimit ? "text-red-600" : "text-green-600"}`}>
-                      核定後總容額 {totalAfterApproval} 名
+                      {totalAfterApproval} 名
                     </span>
                   </p>
                   {exceedsLimit && (
                     <span className="flex items-center gap-1.5 text-sm font-medium text-red-600">
                       <AlertCircle className="h-4 w-4 shrink-0" />
-                      超過上限 {quota.limit} 名，請於申請說明補充必要性
+                      超過容額上限 {quota.limit} 名，請調整申請容額數
                     </span>
                   )}
                 </div>
