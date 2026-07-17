@@ -24,6 +24,7 @@ import {
   getSpecialtyOptions,
   isAdditionalQuotaEditable,
   type AdditionalQuotaApplication,
+  type ClassificationPrinciple,
   type QuotaAttachment,
 } from "@/lib/mock/additional-quota"
 
@@ -73,12 +74,12 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
   const [attachments, setAttachments] = useState<QuotaAttachment[]>(application?.attachments ?? [])
 
   // ── 分類原則選項維護 ────────────────────────
-  const [principleOptions, setPrincipleOptions] = useState<string[]>(getClassificationPrinciples())
+  const [principleOptions, setPrincipleOptions] = useState<ClassificationPrinciple[]>(getClassificationPrinciples())
   const [manageOpen, setManageOpen] = useState(false)
-  const handlePrincipleOptionsChange = (next: string[]) => {
+  const handlePrincipleOptionsChange = (next: ClassificationPrinciple[]) => {
     setPrincipleOptions(next)
     setClassificationPrinciples(next) // 寫回 store，維持 session 期間的變更
-    if (principle && !next.includes(principle)) setPrinciple("")
+    if (principle && !next.some((p) => p.name === principle)) setPrinciple("")
   }
 
   // ── 審查結果 ────────────────────────────────
@@ -292,8 +293,8 @@ export function AdditionalQuotaForm({ application }: AdditionalQuotaFormProps) {
                       </SelectTrigger>
                       <SelectContent>
                         {principleOptions.map((p) => (
-                          <SelectItem key={p} value={p}>
-                            {p}
+                          <SelectItem key={p.name} value={p.name}>
+                            {p.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

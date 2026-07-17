@@ -82,7 +82,7 @@ export function GlobalNav() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/filing/outcome-report" className="cursor-pointer">
-                      成果報告上傳
+                      外加容額成果報告
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -5,6 +5,7 @@ import { Plus, X, Pencil, Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog,
   DialogContent,
@@ -13,19 +14,19 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import type { ClassificationPrinciple } from "@/lib/mock/additional-quota"
 
 interface ClassificationPrincipleDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  options: string[]
-  onChange: (next: string[]) => void
+  options: ClassificationPrinciple[]
+  onChange: (next: ClassificationPrinciple[]) => void
 }
 
 /**
- * 分類原則選項的維護彈窗（新增／改名／刪除）。
- * 選項以字串存放，故增刪不涉及 key 對應問題。
- * 目前放在新增申請頁的下拉旁；若未來需要選項啟用狀態等更複雜的維護，
- * 再考慮移至管理專區。
+ * 分類原則選項的維護彈窗（新增／改名／刪除／切換「需成果報告」）。
+ * 「需成果報告」開關決定該分類原則的外加容額案件公告滿一年後是否需提交成果報告，
+ * 跟著原則走而非在程式硬比對名稱，避免改名導致成果報告追蹤失聯。
  */
 export function ClassificationPrincipleDialog({
   open,
@@ -39,25 +40,26 @@ export function ClassificationPrincipleDialog({
 
   const handleAdd = () => {
     const value = newValue.trim()
-    if (!value || options.includes(value)) return
-    onChange([...options, value])
+    if (!value || options.some((o) => o.name === value)) return
+    onChange([...options, { name: value, requiresOutcomeReport: false }])
     setNewValue("")
   }
 
-  const handleRemove = (index: number) => {
-    onChange(options.filter((_, i) => i !== index))
-  }
+  const handleRemove = (index: number) => onChange(options.filter((_, i) => i !== index))
+
+  const handleToggleReport = (index: number) =>
+    onChange(options.map((o, i) => (i === index ? { ...o, requiresOutcomeReport: !o.requiresOutcomeReport } : o)))
 
   const startEdit = (index: number) => {
     setEditingIndex(index)
-    setEditingValue(options[index])
+    setEditingValue(options[index].name)
   }
 
   const commitEdit = () => {
     const value = editingValue.trim()
     if (editingIndex === null) return
-    if (value && !options.some((o, i) => o === value && i !== editingIndex)) {
-      onChange(options.map((o, i) => (i === editingIndex ? value : o)))
+    if (value && !options.some((o, i) => o.name === value && i !== editingIndex)) {
+      onChange(options.map((o, i) => (i === editingIndex ? { ...o, name: value } : o)))
     }
     setEditingIndex(null)
     setEditingValue("")
@@ -65,17 +67,19 @@ export function ClassificationPrincipleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>管理分類原則選項</DialogTitle>
-          <DialogDescription>新增、修改或刪除分類原則。變更後即可於申請表單的下拉選單使用。</DialogDescription>
+          <DialogDescription>
+            新增、修改或刪除分類原則。「需成果報告」開啟時，該原則的案件公告滿一年後需提交外加容額成果報告。
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 py-2">
           {options.map((option, index) => (
             <div
               key={index}
-              className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
             >
               {editingIndex === index ? (
                 <>
@@ -95,7 +99,14 @@ export function ClassificationPrincipleDialog({
                 </>
               ) : (
                 <>
-                  <span className="truncate text-sm text-gray-900">{option}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-gray-900">{option.name}</span>
+                  <label className="flex shrink-0 items-center gap-1.5 text-xs text-gray-500">
+                    需成果報告
+                    <Switch
+                      checked={option.requiresOutcomeReport}
+                      onCheckedChange={() => handleToggleReport(index)}
+                    />
+                  </label>
                   <div className="flex shrink-0 items-center">
                     <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => startEdit(index)}>
                       <Pencil className="h-3.5 w-3.5 text-gray-500" />

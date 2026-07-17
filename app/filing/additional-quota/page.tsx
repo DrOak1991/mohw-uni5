@@ -21,7 +21,7 @@ import {
 import {
   ADDITIONAL_QUOTA_APPLICATIONS,
   ADDITIONAL_QUOTA_STAGE_CONFIG,
-  getClassificationPrinciples,
+  getClassificationPrincipleNames,
   getSpecialtyOptions,
   type AdditionalQuotaStage,
 } from "@/lib/mock/additional-quota"
@@ -95,7 +95,7 @@ export default function FilingAdditionalQuotaPage() {
   const [sortAsc, setSortAsc] = useState(false)
 
   const specialtyOptions = getSpecialtyOptions()
-  const principleOptions = getClassificationPrinciples()
+  const principleOptions = getClassificationPrincipleNames()
 
   // 先套用文字與下拉篩選；狀態 tab 在其上再細分，故 tab 計數反映目前篩選結果
   const baseFiltered = useMemo(() => {

@@ -64,15 +64,33 @@ export interface AdditionalQuotaApplication {
   announcementNumber: string | null
 }
 
-// 分類原則的預設選項。字串存放，使用者可自行增刪；以 module store 維持 session 期間的變更。
-const DEFAULT_CLASSIFICATION_PRINCIPLES = ["支援偏鄉", "健保 IDS 計畫", "醫中支援計畫"]
-let classificationPrinciples = [...DEFAULT_CLASSIFICATION_PRINCIPLES]
+// 分類原則的可維護選項。名稱以字串存放（申請案存名稱），另帶「需成果報告」開關：
+// 該案公告滿一年後是否需提交外加容額成果報告，跟著分類原則走而非硬比對名稱。
+export interface ClassificationPrinciple {
+  name: string
+  requiresOutcomeReport: boolean
+}
 
-export function getClassificationPrinciples(): string[] {
+const DEFAULT_CLASSIFICATION_PRINCIPLES: ClassificationPrinciple[] = [
+  { name: "支援偏鄉", requiresOutcomeReport: true },
+  { name: "健保 IDS 計畫", requiresOutcomeReport: false },
+  { name: "醫中支援計畫", requiresOutcomeReport: false },
+]
+let classificationPrinciples: ClassificationPrinciple[] = DEFAULT_CLASSIFICATION_PRINCIPLES.map((p) => ({ ...p }))
+
+export function getClassificationPrinciples(): ClassificationPrinciple[] {
   return classificationPrinciples
 }
-export function setClassificationPrinciples(next: string[]): void {
+export function setClassificationPrinciples(next: ClassificationPrinciple[]): void {
   classificationPrinciples = next
+}
+/** 下拉／篩選用的名稱清單。 */
+export function getClassificationPrincipleNames(): string[] {
+  return classificationPrinciples.map((p) => p.name)
+}
+/** 某分類原則（依名稱）是否需提交成果報告；找不到時視為否。 */
+export function principleRequiresReport(name: string): boolean {
+  return classificationPrinciples.find((p) => p.name === name)?.requiresOutcomeReport ?? false
 }
 
 const HOSPITALS = [
@@ -121,7 +139,9 @@ function generateApplications(): AdditionalQuotaApplication[] {
       const requested = 2 + (seq % 4)
       const approvedBase = 8 + (seq % 6)
       const limit = approvedBase + 6 + (seq % 4)
-      const principle = principles[seq % principles.length]
+      // 依醫院索引指派分類原則，與階段（依 seq）解耦，
+      // 使部分已公告案件落在「支援偏鄉」（需成果報告），供外加容額成果報告模組取用
+      const principle = principles[h % principles.length].name
       const month = 1 + (seq % 3)
       const day = 5 + (seq % 20)
       const mm = String(month).padStart(2, "0")
