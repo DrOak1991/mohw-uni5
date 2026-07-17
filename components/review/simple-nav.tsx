@@ -18,7 +18,7 @@ export function ReviewSimpleNav() {
             <Link href="/review/hospital-quota">醫院容額分配審查</Link>
           </Button>
           <Button variant={pathname.startsWith("/review/outcome-report") ? "default" : "ghost"} size="sm" asChild>
-            <Link href="/review/outcome-report">成果報告審查</Link>
+            <Link href="/review/outcome-report">容額成果報告審查</Link>
           </Button>
         </div>
       </div>

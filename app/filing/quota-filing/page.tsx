@@ -4,7 +4,12 @@ import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
 import { QuotaFilingView } from "@/components/filing/quota-filing-view"
-import { isValidQuotaFilingStage, type QuotaFilingStage } from "@/lib/mock/quota-filing-stage"
+import {
+  isValidOutcomeReportSubStatus,
+  isValidQuotaFilingStage,
+  type OutcomeReportSubStatus,
+  type QuotaFilingStage,
+} from "@/lib/mock/quota-filing-stage"
 
 /**
  * 容額填報（獨立路由）。單頁工作流，依階段決定可編輯範圍。
@@ -23,7 +28,12 @@ function QuotaFilingContent() {
   const returnedFromParam = searchParams.get("returnedFrom") || ""
   const returnedFrom = isValidQuotaFilingStage(returnedFromParam) ? returnedFromParam : null
 
-  return <QuotaFilingView variant={variant} stage={stage} returnedFrom={returnedFrom} />
+  const reportParam = searchParams.get("report") || ""
+  const reportStatus: OutcomeReportSubStatus = isValidOutcomeReportSubStatus(reportParam) ? reportParam : "待上傳"
+
+  return (
+    <QuotaFilingView variant={variant} stage={stage} returnedFrom={returnedFrom} reportStatus={reportStatus} />
+  )
 }
 
 export default function QuotaFilingPage() {

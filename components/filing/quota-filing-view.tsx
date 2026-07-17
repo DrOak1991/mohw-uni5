@@ -63,10 +63,14 @@ import {
   type ReviewFeedback,
 } from "@/components/filing/review-feedback-banner"
 import { FILING_DOCUMENTS, getFilingStatusLabel } from "@/lib/mock/filing-documents"
+import { toast } from "sonner"
+import { MultiFileUpload, type UploadedFile } from "@/components/filing/multi-file-upload"
 import {
+  OUTCOME_REPORT_SUB_CONFIG,
   QUOTA_FILING_STAGES,
   QUOTA_FILING_STAGE_UNIT,
   isQuotaFilingEditable,
+  type OutcomeReportSubStatus,
   type QuotaFilingStage,
 } from "@/lib/mock/quota-filing-stage"
 
@@ -118,14 +122,38 @@ export function QuotaFilingView({
   variant,
   stage,
   returnedFrom,
+  reportStatus,
 }: {
   variant: string
   stage: QuotaFilingStage
   returnedFrom: QuotaFilingStage | null
+  reportStatus: OutcomeReportSubStatus
 }) {
   const router = useRouter()
   const availableHospitals = AVAILABLE_HOSPITALS
   const isInternalMedicine = variant === "internal-medicine"
+
+  // 容額成果報告：案件進待公告後解鎖，醫學會上傳補件送醫事司
+  const showOutcomeReport = stage === "待公告" || stage === "已公告"
+  const reportEditable = reportStatus === "待上傳" || reportStatus === "退回補件"
+  const [reportFiles, setReportFiles] = useState<UploadedFile[]>(
+    reportStatus === "待上傳"
+      ? []
+      : [
+          { id: "or-1", name: "容額成果報告_審查細節.pdf", size: "2.6 MB" },
+          { id: "or-2", name: "容額成果報告_附件_訓練醫院明細.xlsx", size: "1.1 MB" },
+        ],
+  )
+  const handleUploadReport = () =>
+    setReportFiles((prev) => [
+      ...prev,
+      { id: `or-${Date.now()}`, name: `容額成果報告_附件${prev.length + 1}.pdf`, size: "1.8 MB" },
+    ])
+  const handleRemoveReport = (id: string) => setReportFiles((prev) => prev.filter((f) => f.id !== id))
+  const handleSubmitReport = () => {
+    if (reportFiles.length === 0) return
+    toast.success("容額成果報告已送出，待醫事司確認")
+  }
 
   // 由階段推導既有的唯讀／退件旗標，沿用元件內既有的 disabled={isSubmitted} plumbing：
   //   退件（returnedFrom 有值）→ 可編輯、顯示退件橫幅
@@ -517,6 +545,52 @@ export function QuotaFilingView({
           <ReviewFeedbackBanner feedback={MOCK_QUOTA_REVIEW_FEEDBACK} />
         </div>
       )}
+
+      {/* 容額成果報告：待公告後解鎖。RRC 審查後的審查細節補充，直接送醫事司確認歸檔 */}
+      {showOutcomeReport && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50/40 px-6 py-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-lg font-bold text-foreground">容額成果報告</h3>
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium ${OUTCOME_REPORT_SUB_CONFIG[reportStatus].color}`}
+            >
+              {OUTCOME_REPORT_SUB_CONFIG[reportStatus].label}
+            </span>
+          </div>
+          <p className="mb-4 text-sm text-muted-foreground">
+            本案已進入待公告，請上傳容額成果報告（RRC 審查後之審查細節補充資料），送出後由醫事司確認歸檔。
+            此作業不影響公告進度。
+          </p>
+
+          {reportStatus === "退回補件" && (
+            <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+              醫事司已退回本報告，請補齊後重新上傳送出。
+            </div>
+          )}
+
+          <MultiFileUpload
+            files={reportFiles}
+            onUpload={reportEditable ? handleUploadReport : undefined}
+            onRemove={reportEditable ? handleRemoveReport : undefined}
+            uploadLabel="選擇成果報告檔案"
+            emptyState="尚未上傳容額成果報告"
+          />
+
+          {reportEditable && (
+            <div className="mt-4 flex justify-end">
+              <Button
+                className="gap-2 bg-[#2d3a8c] hover:bg-[#252f73] text-white"
+                disabled={reportFiles.length === 0}
+                onClick={handleSubmitReport}
+              >
+                <Send className="h-4 w-4" />
+                {reportStatus === "退回補件" ? "重新送出" : "送出成果報告"}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 訓練醫院申請家數統計 */}
       <div>
         <h3 className="text-lg font-bold text-foreground mb-4">訓練醫院申請家數</h3>

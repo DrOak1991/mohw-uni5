@@ -113,7 +113,7 @@ export function GlobalNav() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/review/outcome-report" className="cursor-pointer">
-                      成果報告審查
+                      容額成果報告審查
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -40,7 +40,7 @@ export default function HomePage() {
       pages: [
         { name: "填報審查", href: "/review/submissions", description: "審查醫學會提交的五份填報文件" },
         { name: "醫院容額分配審查", href: "/review/hospital-quota", description: "審查醫院容額分配申請" },
-        { name: "成果報告審查", href: "/review/outcome-report", description: "審查醫策會提送之成果報告" },
+        { name: "容額成果報告審查", href: "/review/outcome-report", description: "確認醫學會上傳之容額成果報告" },
       ],
     },
     {
