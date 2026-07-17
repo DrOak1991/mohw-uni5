@@ -63,6 +63,12 @@ import {
   type ReviewFeedback,
 } from "@/components/filing/review-feedback-banner"
 import { FILING_DOCUMENTS, getFilingStatusLabel } from "@/lib/mock/filing-documents"
+import {
+  QUOTA_FILING_STAGES,
+  QUOTA_FILING_STAGE_UNIT,
+  isQuotaFilingEditable,
+  type QuotaFilingStage,
+} from "@/lib/mock/quota-filing-stage"
 
 // 容額填報檢視（由醫學會填報）。原為 app/filing 的容額 tab，拆分為獨立路由後移至此。
 // 階段感知與退件處理見後續重構；此檔為拆分階段的忠實搬移。
@@ -108,10 +114,25 @@ function toRocDate(dateStr: string): string {
   })
 }
 
-export function QuotaFilingView({ variant, isSubmitted, isReturned }: { variant: string; isSubmitted: boolean; isReturned: boolean }) {
+export function QuotaFilingView({
+  variant,
+  stage,
+  returnedFrom,
+}: {
+  variant: string
+  stage: QuotaFilingStage
+  returnedFrom: QuotaFilingStage | null
+}) {
   const router = useRouter()
   const availableHospitals = AVAILABLE_HOSPITALS
   const isInternalMedicine = variant === "internal-medicine"
+
+  // 由階段推導既有的唯讀／退件旗標，沿用元件內既有的 disabled={isSubmitted} plumbing：
+  //   退件（returnedFrom 有值）→ 可編輯、顯示退件橫幅
+  //   待送件 → 可編輯
+  //   其餘審查/待公告/已公告階段 → 唯讀
+  const isReturned = returnedFrom !== null
+  const isSubmitted = !isQuotaFilingEditable(stage, isReturned)
 
   // 匯入 Dialog state
   const [showImportDialog, setShowImportDialog] = useState(false)
@@ -452,9 +473,49 @@ export function QuotaFilingView({ variant, isSubmitted, isReturned }: { variant:
 
   return (
     <div className="space-y-8">
-      {/* 退回審查意見 Banner */}
-      {isReturned && (
-        <ReviewFeedbackBanner feedback={MOCK_QUOTA_REVIEW_FEEDBACK} />
+      {/* 階段進度指示器：呈現案件在容額填報生命週期的位置 */}
+      <div className="rounded-lg border bg-card px-6 py-4">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+          {QUOTA_FILING_STAGES.map((s, i) => {
+            const currentIndex = QUOTA_FILING_STAGES.indexOf(stage)
+            const isCurrent = !isReturned && s === stage
+            const isPast = !isReturned && i < currentIndex
+            return (
+              <div key={s} className="flex items-center gap-2">
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                    isCurrent
+                      ? "bg-[#2d3a8c] text-white"
+                      : isPast
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {s}
+                </span>
+                {i < QUOTA_FILING_STAGES.length - 1 && <span className="text-muted-foreground/50">→</span>}
+              </div>
+            )
+          })}
+          {isReturned && (
+            <span className="ml-1 inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
+              退件補正中
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* 退件橫幅：顯示退回來源與續審規則 */}
+      {isReturned && returnedFrom && (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
+            <p className="text-sm text-orange-800">
+              本案由<span className="mx-1 font-medium">{QUOTA_FILING_STAGE_UNIT[returnedFrom]}</span>
+              於「{returnedFrom}」階段退回。補正後重新送件，案件將回到該階段續審，不重走先前已通過的階段。
+            </p>
+          </div>
+          <ReviewFeedbackBanner feedback={MOCK_QUOTA_REVIEW_FEEDBACK} />
+        </div>
       )}
       {/* 訓練醫院申請家數統計 */}
       <div>
@@ -1801,7 +1862,7 @@ export function QuotaFilingView({ variant, isSubmitted, isReturned }: { variant:
         {isSubmitted ? (
           <Button disabled className="gap-2">
             <Send className="h-4 w-4" />
-            審查中
+            {stage === "待公告" ? "待公告" : stage === "已公告" ? "已公告" : "審查中"}
           </Button>
         ) : (
           <Button
@@ -1809,7 +1870,7 @@ export function QuotaFilingView({ variant, isSubmitted, isReturned }: { variant:
             onClick={() => setShowSubmitConfirmDialog(true)}
           >
             <Send className="h-4 w-4" />
-            儲存並送件
+            {isReturned ? "重新送件" : "儲存並送件"}
           </Button>
         )}
       </div>
