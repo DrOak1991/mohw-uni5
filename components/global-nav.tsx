@@ -71,7 +71,7 @@ export function GlobalNav() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/filing?tab=quota" className="cursor-pointer">
+                    <Link href="/filing/quota-filing" className="cursor-pointer">
                       容額填報
                     </Link>
                   </DropdownMenuItem>
