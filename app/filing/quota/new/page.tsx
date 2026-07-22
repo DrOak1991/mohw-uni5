@@ -24,7 +24,7 @@ function NewQuotaPageContent() {
   const searchParams = useSearchParams()
   const variant = searchParams.get("variant") || ""
 
-  const backUrl = variant ? `/filing?tab=quota&variant=${variant}` : "/filing?tab=quota"
+  const backUrl = variant ? `/filing/quota-filing?variant=${variant}` : "/filing/quota-filing"
 
   const handleSave = (values: QuotaFormValues) => {
     const newId = `new-${Date.now()}`

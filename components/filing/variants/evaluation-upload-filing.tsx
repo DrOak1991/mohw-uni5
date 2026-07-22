@@ -7,7 +7,8 @@ import { FilingDetailShell } from "@/components/filing/filing-detail-shell"
 import { FileUploadSlot, type FileUploadSlotConfig } from "@/components/filing/file-upload-slot"
 import { DocumentChangeChoice, type ChangeMethod } from "@/components/filing/document-change-choice"
 import { DocumentSwitcherViewer, type ViewerFile } from "@/components/filing/document-switcher-viewer"
-import { getUploadDocEntry, type UploadDocKey } from "@/lib/mock/filing-upload-content"
+import { ReviewFeedbackBanner } from "@/components/filing/review-feedback-banner"
+import { getUploadDocEntry, getUploadReviewFeedback, type UploadDocKey } from "@/lib/mock/filing-upload-content"
 
 interface EvaluationUploadFilingProps {
   documentId: string
@@ -43,11 +44,16 @@ export function EvaluationUploadFiling({ documentId, documentTitle, status }: Ev
   const isReadOnly = status === "approved" || status === "under-review"
   const isPreviousYearOnly = status === "view"
   const showChoice = status === "pending" || status === "not-submitted"
+  // 需補件：已送件後被退回，因此不出現「變更／不變更」選擇，且既有檔案已存在。
+  // 審查意見以單一份會議紀錄呈現，不區分評核標準／評核表 —— 實務上主管機關
+  // 一次審查會議即涵蓋兩份文件，回饋亦為同一份紀錄。
+  const needsRevision = status === "needs-revision"
+  const reviewFeedback = needsRevision ? getUploadReviewFeedback(documentId) : undefined
   const title = `內科專科醫師${documentTitle} - 114年度文件填報`
 
   const [method, setMethod] = useState<ChangeMethod>(status === "not-submitted" ? "no-change" : "change")
   const [files, setFiles] = useState<Record<string, string | undefined>>(
-    isReadOnly
+    isReadOnly || needsRevision
       ? {
           "standards-main": "評核標準_114年度.pdf",
           "standards-revision": "評核標準_修正對照表.pdf",
@@ -98,7 +104,18 @@ export function EvaluationUploadFiling({ documentId, documentTitle, status }: Ev
   })
 
   return (
-    <FilingDetailShell title={title}>
+    <FilingDetailShell
+      title={title}
+      banner={
+        reviewFeedback ? (
+          <div className="sticky top-16 z-40 bg-[#f5f7fa] pt-2 pb-4 shadow-sm">
+            <div className="container mx-auto px-6">
+              <ReviewFeedbackBanner feedback={reviewFeedback} />
+            </div>
+          </div>
+        ) : undefined
+      }
+    >
       <div className="flex flex-col gap-6">
         {isReadOnly && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -117,7 +134,9 @@ export function EvaluationUploadFiling({ documentId, documentTitle, status }: Ev
             <p className="mb-4 text-sm text-muted-foreground">
               {effectiveNoChange
                 ? "已選擇「不變更」，本年度沿用前年度文件，無須上傳。"
-                : "請分別上傳「評核標準」與「評核表」的主要文件及其修正對照表，共 4 份。"}
+                : needsRevision
+                  ? "以下為原送件檔案。請依審查意見修正後，重新上傳並送出。"
+                  : "請分別上傳「評核標準」與「評核表」的主要文件及其修正對照表，共 4 份。"}
             </p>
             <div className="flex flex-col gap-6">
               {UPLOAD_GROUPS.map((group) => (
@@ -151,7 +170,7 @@ export function EvaluationUploadFiling({ documentId, documentTitle, status }: Ev
           <Button variant="outline">返回</Button>
           {!isReadOnly && !isPreviousYearOnly && (
             <Button className="bg-[#2d3a8c] text-white hover:bg-[#252f73]" disabled={!canSubmit}>
-              儲存並送出
+              {needsRevision ? "重新送出" : "儲存並送出"}
             </Button>
           )}
         </div>

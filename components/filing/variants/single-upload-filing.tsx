@@ -7,7 +7,8 @@ import { FilingDetailShell } from "@/components/filing/filing-detail-shell"
 import { FileUploadSlot, type FileUploadSlotConfig } from "@/components/filing/file-upload-slot"
 import { DocumentChangeChoice, type ChangeMethod } from "@/components/filing/document-change-choice"
 import { DocumentSwitcherViewer, type ViewerFile } from "@/components/filing/document-switcher-viewer"
-import { getUploadDocEntry } from "@/lib/mock/filing-upload-content"
+import { ReviewFeedbackBanner } from "@/components/filing/review-feedback-banner"
+import { getUploadDocEntry, getUploadReviewFeedback } from "@/lib/mock/filing-upload-content"
 
 interface SingleUploadFilingProps {
   documentId: string
@@ -26,12 +27,15 @@ export function SingleUploadFiling({ documentId, documentTitle, status }: Single
   const isReadOnly = status === "approved" || status === "under-review"
   const isPreviousYearOnly = status === "view"
   const showChoice = status === "pending" || status === "not-submitted"
+  // 需補件：已送件後被退回，因此不出現「變更／不變更」選擇，且既有檔案已存在
+  const needsRevision = status === "needs-revision"
+  const reviewFeedback = needsRevision ? getUploadReviewFeedback(documentId) : undefined
   const title = `內科專科醫師${documentTitle} - 114年度文件填報`
 
   const [method, setMethod] = useState<ChangeMethod>(status === "not-submitted" ? "no-change" : "change")
-  // 已上傳檔名（原型以 mock 檔名模擬）；已送件狀態視為檔案已存在
+  // 已上傳檔名（原型以 mock 檔名模擬）；已送件與需補件狀態視為檔案已存在
   const [files, setFiles] = useState<Record<string, string | undefined>>(
-    isReadOnly
+    isReadOnly || needsRevision
       ? { main: `${documentTitle}_114年度.pdf`, "revision-table": `${documentTitle}_修正對照表.pdf` }
       : {},
   )
@@ -76,7 +80,18 @@ export function SingleUploadFiling({ documentId, documentTitle, status }: Single
   ]
 
   return (
-    <FilingDetailShell title={title}>
+    <FilingDetailShell
+      title={title}
+      banner={
+        reviewFeedback ? (
+          <div className="sticky top-16 z-40 bg-[#f5f7fa] pt-2 pb-4 shadow-sm">
+            <div className="container mx-auto px-6">
+              <ReviewFeedbackBanner feedback={reviewFeedback} />
+            </div>
+          </div>
+        ) : undefined
+      }
+    >
       <div className="flex flex-col gap-6">
         {isReadOnly && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -95,7 +110,9 @@ export function SingleUploadFiling({ documentId, documentTitle, status }: Single
             <p className="mb-4 text-sm text-muted-foreground">
               {effectiveNoChange
                 ? "已選擇「不變更」，本年度沿用前年度文件，無須上傳。"
-                : "請上傳本年度主要文件及其修正對照表，共 2 份。"}
+                : needsRevision
+                  ? "以下為原送件檔案。請依審查意見修正後，重新上傳並送出。"
+                  : "請上傳本年度主要文件及其修正對照表，共 2 份。"}
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               {UPLOAD_SLOTS.map((slot) => (
@@ -122,7 +139,7 @@ export function SingleUploadFiling({ documentId, documentTitle, status }: Single
           <Button variant="outline">返回</Button>
           {!isReadOnly && !isPreviousYearOnly && (
             <Button className="bg-[#2d3a8c] text-white hover:bg-[#252f73]" disabled={!canSubmit}>
-              儲存並送出
+              {needsRevision ? "重新送出" : "儲存並送出"}
             </Button>
           )}
         </div>

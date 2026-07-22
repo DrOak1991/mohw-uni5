@@ -27,8 +27,9 @@ export default function HomePage() {
       color: "bg-amber-500",
       pages: [
         { name: "文件填報", href: "/filing", description: "管理年度文件填報作業" },
-        { name: "容額填報", href: "/filing?tab=quota", description: "管理訓練醫院名單與容額分配" },
-        { name: "外加容額申請", href: "/filing/additional-quota", description: "申請額外訓練容額" },
+        { name: "容額填報", href: "/filing/quota-filing", description: "管理訓練醫院名單與容額分配" },
+        { name: "外加容額管理", href: "/filing/additional-quota", description: "登錄、審查外加容額申請並辦理公告" },
+        { name: "外加容額成果報告", href: "/filing/outcome-report", description: "醫事司與醫策會審查訓練醫院外加容額成果報告" },
       ],
     },
     {
@@ -39,7 +40,7 @@ export default function HomePage() {
       pages: [
         { name: "填報審查", href: "/review/submissions", description: "審查醫學會提交的五份填報文件" },
         { name: "醫院容額分配審查", href: "/review/hospital-quota", description: "審查醫院容額分配申請" },
-        { name: "外加容額審查", href: "/review/additional-quota", description: "審查外加容額申請" },
+        { name: "容額成果報告審查", href: "/review/outcome-report", description: "確認醫學會上傳之容額成果報告" },
       ],
     },
     {

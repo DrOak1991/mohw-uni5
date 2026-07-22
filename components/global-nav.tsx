@@ -71,13 +71,18 @@ export function GlobalNav() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/filing?tab=quota" className="cursor-pointer">
+                    <Link href="/filing/quota-filing" className="cursor-pointer">
                       容額填報
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/filing/additional-quota" className="cursor-pointer">
-                      外加容額申請
+                      外加容額管理
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/filing/outcome-report" className="cursor-pointer">
+                      外加容額成果報告
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -107,8 +112,8 @@ export function GlobalNav() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/review/additional-quota" className="cursor-pointer">
-                      外加容額審查
+                    <Link href="/review/outcome-report" className="cursor-pointer">
+                      容額成果報告審查
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
