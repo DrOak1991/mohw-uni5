@@ -83,7 +83,7 @@ const mockPendingAnnouncements = [
   {
     id: "pa-1",
     title: "台灣內科醫學會 - 甄審原則審查通過",
-    source: "填報審查",
+    source: "文件填報審查",
     sourceModule: "submissions",
     category: "training",
     caseId: "1",
@@ -103,7 +103,7 @@ const mockPendingAnnouncements = [
   {
     id: "pa-3",
     title: "台灣外科醫學會 - 訓練醫院認定基準審查通過",
-    source: "填報審查",
+    source: "文件填報審查",
     sourceModule: "submissions",
     category: "training",
     caseId: "2",
@@ -113,7 +113,7 @@ const mockPendingAnnouncements = [
   {
     id: "pa-4",
     title: "長庚醫院 - 醫院容額分配審查通過",
-    source: "醫院容額分配審查",
+    source: "容額填報審查",
     sourceModule: "hospital-quota",
     category: "review",
     caseId: "3",
@@ -123,7 +123,7 @@ const mockPendingAnnouncements = [
   {
     id: "pa-5",
     title: "台灣骨科醫學會 - 評核標準審查通過",
-    source: "填報審查",
+    source: "文件填報審查",
     sourceModule: "submissions",
     category: "training",
     caseId: "4",
